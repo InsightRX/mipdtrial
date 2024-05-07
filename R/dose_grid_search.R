@@ -4,7 +4,7 @@
 #' iteratively.
 #'
 #' @param est_model model used for estimation ("clinician facing")
-#' @param regimen regimen
+#' @param regimen PKPDsim regimen object
 #' @param target list with arguments `type`, `method`, and `value`. `type` = observation type, either "conc" or auc".
 #' @param t_obs vector of observation times
 #' @param obs_comp auc compartment (starting from 1, R-style not C-style!)

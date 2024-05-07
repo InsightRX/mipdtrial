@@ -30,7 +30,7 @@ dose_grid_search(
 \arguments{
 \item{est_model}{model used for estimation ("clinician facing")}
 
-\item{regimen}{regimen}
+\item{regimen}{PKPDsim regimen object}
 
 \item{t_obs}{vector of observation times}
 

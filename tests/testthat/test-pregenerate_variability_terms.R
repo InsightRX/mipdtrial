@@ -1,0 +1,65 @@
+suppressMessages( ## avoid message "the following objects are masked from ..."
+  require("pk1cmtivauc", character.only = TRUE)
+)
+mod <- get("model", asNamespace("pk1cmtivauc"))()
+par <- list(CL = 1, V = 10)
+omega <- c(0.1, 0.05, 0.1)
+
+pct_err <- function(test, true) (test-true)/true
+
+test_that("Generates IIV error for multiple individuals", {
+  out <- pregenerate_iiv(mod, omega, par, ids = letters[1:10], n_iter = 50)
+  expect_true(inherits(out, "data.frame"))
+  expect_equal(nrow(out), 10 * 50)
+  expect_true(all(names(par) %in% colnames(out)))
+  # test values are within 5% or so
+  expect_true(abs(pct_err(mean(out$CL), par$CL)) < 0.05)
+  expect_true(abs(pct_err(mean(out$V), par$V)) < 0.05)
+})
+
+test_that("Generates RUV error for multiple individuals", {
+  out <- pregenerate_ruv(
+    ids = 1:30,
+    n_iter = 40,
+    tdms_per_course = 50,
+    prop = 0.2,
+    add = 2.5
+  )
+  expect_true(inherits(out, "data.frame"))
+  expect_equal(nrow(out), 30 * 40 * 50)
+  # test values are within 1% or so (large data set, law of large numbers)
+  expect_true(abs(pct_err(mean(out$prop), 1)) < 0.01)
+  expect_true(abs(mean(out$add)) < 0.01)
+})
+
+test_that("Reproducible randomness: IIV", {
+  out1 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 1)
+  out2 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
+  expect_true(inherits(out1, "data.frame"))
+  expect_equal(nrow(out1), 1)
+  expect_false(out1$CL == out2$CL)
+  expect_false(out1$V == out2$V)
+})
+
+test_that("Reproducible randomness: RUV", {
+  out1 <- pregenerate_ruv(
+    ids = 1,
+    n_iter = 1,
+    tdms_per_course = 4,
+    seed = 1,
+    prop = 0.2,
+    add = 2.5
+  )
+  out2 <- pregenerate_ruv(
+    ids = 1,
+    n_iter = 1,
+    tdms_per_course = 4,
+    seed = 2,
+    prop = 0.2,
+    add = 2.5
+  )
+  expect_true(inherits(out1, "data.frame"))
+  expect_equal(nrow(out1), 1 * 1 * 4)
+  expect_true(all(out1$prop != out2$prop))
+  expect_true(all(out1$add != out2$add))
+})

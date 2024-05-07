@@ -24,7 +24,7 @@ simulate_dose(
 
 \item{dose_update}{update dose from which dose?}
 
-\item{regimen}{regimen}
+\item{regimen}{PKPDsim regimen object}
 
 \item{md}{metadata object (only needed if we have to use \code{get_quantity_from_variable()} to generate target value)}
 
