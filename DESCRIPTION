@@ -1,0 +1,20 @@
+Package: mipdtrial
+Title: Simulate MIPD trials
+Version: 0.0.0.1
+Authors@R: c(
+    person("Jasmine", "Hughes", email = "jasmine@insight-rx.com", role = c("aut", "cre")),
+    person("InsightRX", role = c("cph", "fnd")))
+Description: Functions for simulating dose adjustments given PKPD models, 
+    sampling times, covariate distributions, etc.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    mockery,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    PKPDmap,
+    PKPDsim
+Remotes: InsightRX/PKPDsim, InsightRX/PKPDmap
