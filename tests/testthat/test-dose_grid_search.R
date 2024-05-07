@@ -168,31 +168,22 @@ test_that("Probability: less than target", {
 
 
 test_that('nonlinear models have refining activated rather than defaulting to linear interpolation', {
-  suppressMessages( ## avoid message "the following objects are masked from ..."
-    require("pkvoriconazolefriberg", character.only = TRUE)
-  )
-  model <- get("model", asNamespace("pkvoriconazolefriberg"))()
 
-  regimen_new <- PKPDsim::new_regimen(
+  # mock a highly non-linear model: x ** 2
+  local_mocked_bindings(
+    simulate_dose = function(dose_grid, ...) dose_grid ** 2
+  )
+
+  # placeholder model + set-up
+  model <- list()
+  attr(model, "misc") <- list(linearity = "non-linear")
+
+  regimen <- PKPDsim::new_regimen(
     n = 16,
     amt = 1000,
     interval = 12,
     t_inf = 1,
     type = "infusion"
-  )
-
-  ind_est <- list(
-    KA = 1.19,
-    VMAX1 = 114L,
-    KM = 400,
-    CL = 0.01,
-    Q = 15.5,
-    V = 79L,
-    V2 = 103L,
-    F1 = 0.585,
-    T50 = 2.41,
-    TLAG = 0.949,
-    BCF = 0.367
   )
 
   target_def <- list(
@@ -201,24 +192,13 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     type = "conc"
   )
 
-  covs <- list(
-    WT = PKPDsim::new_covariate(value = 10),
-    AGE = PKPDsim::new_covariate(value = 4.5),
-    CYP2C19unknown = PKPDsim::new_covariate(value = 0),
-    CYP2C19a1a2 = PKPDsim::new_covariate(value = 0),
-    CYP2C19a2a2 = PKPDsim::new_covariate(value = 0),
-    CYP2C19a2a3 = PKPDsim::new_covariate(value = 0),
-    CYP2C19a1a3 = PKPDsim::new_covariate(value = 0),
-    CYP2C19a3a3 = PKPDsim::new_covariate(value = 1)
-  )
-
   no_refine <- dose_grid_search(
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 10000, by = (1000 - 0.5) / 10 ),
+    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
     refine = FALSE,
-    refine_range = c(0.85, 1.15),
-    regimen = regimen_new,
+    refine_range = c(0.2, 5),
+    regimen = regimen,
     interval = 12,
     dose_update = 1,
     parameters = ind_est,
@@ -226,17 +206,17 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     target = target_def,
     t_obs = 24,
     iov_bins = NULL,
-    dose_resolution = 1,
-    max_dose = 10000,
+    dose_resolution = 0.1,
+    max_dose = 1000,
     min_dose = 0.5,
     covariates = covs
   )
-  refine <- dose_grid_search(
+  refine <- dose_grid_search( # uses default `refine` argument (not specified)
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 10000, by = (1000 - 0.5) / 10 ),
+    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
-    refine_range = c(0.85, 1.15),
-    regimen = regimen_new,
+    refine_range = c(0.2, 5),
+    regimen = regimen,
     interval = 12,
     dose_update = 1,
     parameters = ind_est,
@@ -244,11 +224,15 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     target = target_def,
     t_obs = 24,
     iov_bins = NULL,
-    dose_resolution = 1,
-    max_dose = 10000,
+    dose_resolution = 0.1,
+    max_dose = 1000,
     min_dose = 0.5,
     covariates = covs
   )
-  expect_equal(no_refine, 54)
-  expect_equal(refine, 56)
+  # without refinement and with such a large search space to start, we are
+  # far from the target (2.7 ** 2 = 7.29)
+  expect_equal(no_refine, 2.7)
+
+  # with refinement, we are closer to the target: 15.1 ** 2 = 228 (target = 225)
+  expect_equal(refine, 15.1)
 })
