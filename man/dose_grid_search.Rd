@@ -21,7 +21,7 @@ dose_grid_search(
   check_boundaries = TRUE,
   max_dose = NULL,
   min_dose = NULL,
-  n_cores = NULL,
+  n_cores = 1,
   md = list(),
   covariates = NULL,
   ...

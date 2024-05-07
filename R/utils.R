@@ -12,3 +12,26 @@ round_to_multiple <- function(x, multiple) {
   }
   round(x / multiple) * multiple
 }
+
+#' Filter rows with values 0 or 100
+#'
+#' Remove all rows of 0 or 1 if there are at least 2 non-(0,1) rows, and
+#' otherwise keep all but the highest 0 row and the lowest 1 row.
+#'
+#' @param tab data frame with columns `dose` and `y`
+#' @details
+#' Taken from a proprietary package, written by Kara Woo.
+#'
+#' @md
+filter_rows_0_100 <- function(tab) {
+  if (sum(!tab$y %in% c(0, 100)) >= 2) {
+    return(tab[!tab$y %in% c(0, 100), ])
+  }
+
+  keep <- c(
+    suppressWarnings(max(which(tab$y == 0))),
+    which(!tab$y %in% c(0, 100)),
+    suppressWarnings(min(which(tab$y == 100)))
+  )
+  tab[keep[!keep %in% c(-Inf, Inf)], ]
+}

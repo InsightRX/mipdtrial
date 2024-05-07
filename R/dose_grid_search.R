@@ -44,7 +44,7 @@ dose_grid_search <- function(
     check_boundaries = TRUE,
     max_dose = NULL,
     min_dose = NULL,
-    n_cores = NULL,
+    n_cores = 1,
     md = list(),
     covariates = NULL,
     ...
@@ -111,13 +111,6 @@ dose_grid_search <- function(
     # time-based target methods also need to be refined since this target
     # is non-linear
     refine <- target$type %in% accepted_time_targets || refine
-  }
-  if(is.null(n_cores)) {
-    n_cores <- ifelse(
-      irxtools::str_detect(Sys.getenv("ENVIRONMENT"), "localhost"),
-      1,
-      max(c(1, parallel::detectCores() - 1))
-    )
   }
 
   y <- mclapply(
