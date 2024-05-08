@@ -16,7 +16,7 @@ pregenerate_iiv(
   ...
 )
 
-pregenerate_ruv(ids, n_iter, tdms_per_course, prop, add, seed = 2)
+pregenerate_ruv(ids, n_iter, tdm_sample_time, prop, add, seed = 2)
 }
 \arguments{
 \item{sim_model}{model used for simulated patient response ("truth").}
@@ -35,8 +35,10 @@ named list.}
 
 \item{...}{arguments passed on to PKPDsim::sim}
 
-\item{tdms_per_course}{number of tdms per treatment course. For example, for
-a 4-day course with 6 levels per day, enter 4 * 6 = 24.}
+\item{tdm_sample_time}{time of tdm, since start of treatment course (or
+other vector of identifiers to use for each tdm). For example, for three
+days of daily dosing and peak-trough sample collection,
+\code{c(1, 24, 25, 48, 49, 73)}.}
 
 \item{prop}{proportional error}
 

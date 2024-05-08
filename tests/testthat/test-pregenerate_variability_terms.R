@@ -21,7 +21,7 @@ test_that("Generates RUV error for multiple individuals", {
   out <- pregenerate_ruv(
     ids = 1:30,
     n_iter = 40,
-    tdms_per_course = 50,
+    tdm_sample_time = seq(2, 100, 2),
     prop = 0.2,
     add = 2.5
   )
@@ -35,17 +35,19 @@ test_that("Generates RUV error for multiple individuals", {
 test_that("Reproducible randomness: IIV", {
   out1 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 1)
   out2 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
+  out3 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
   expect_true(inherits(out1, "data.frame"))
   expect_equal(nrow(out1), 1)
   expect_false(out1$CL == out2$CL)
   expect_false(out1$V == out2$V)
+  expect_identical(out2, out3)
 })
 
 test_that("Reproducible randomness: RUV", {
   out1 <- pregenerate_ruv(
     ids = 1,
     n_iter = 1,
-    tdms_per_course = 4,
+    tdm_sample_time = 1:4,
     seed = 1,
     prop = 0.2,
     add = 2.5
@@ -53,7 +55,15 @@ test_that("Reproducible randomness: RUV", {
   out2 <- pregenerate_ruv(
     ids = 1,
     n_iter = 1,
-    tdms_per_course = 4,
+    tdm_sample_time = 1:4,
+    seed = 2,
+    prop = 0.2,
+    add = 2.5
+  )
+  out3 <- pregenerate_ruv(
+    ids = 1,
+    n_iter = 1,
+    tdm_sample_time = 1:4,
     seed = 2,
     prop = 0.2,
     add = 2.5
@@ -62,4 +72,5 @@ test_that("Reproducible randomness: RUV", {
   expect_equal(nrow(out1), 1 * 1 * 4)
   expect_true(all(out1$prop != out2$prop))
   expect_true(all(out1$add != out2$add))
+  expect_identical(out2, out3)
 })

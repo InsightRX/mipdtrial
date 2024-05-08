@@ -87,8 +87,10 @@ pregenerate_iiv <- function(
 #' `pregenerate_ruv` Assumes a normal distribution for proportional and
 #' additional error.
 #'
-#' @param tdms_per_course number of tdms per treatment course. For example, for
-#'   a 4-day course with 6 levels per day, enter 4 * 6 = 24.
+#' @param tdm_sample_time time of tdm, since start of treatment course (or
+#'   other vector of identifiers to use for each tdm). For example, for three
+#'   days of daily dosing and peak-trough sample collection,
+#'   `c(1, 24, 25, 48, 49, 73)`.
 #' @param prop proportional error
 #' @param add additive error
 #' @returns `pregenerate_ruv` returns a data frame with identifier columns of
@@ -97,10 +99,10 @@ pregenerate_iiv <- function(
 #' @rdname pregenerate_variability
 #' @export
 
-pregenerate_ruv <- function(ids, n_iter, tdms_per_course, prop, add, seed = 2) {
+pregenerate_ruv <- function(ids, n_iter, tdm_sample_time, prop, add, seed = 2) {
   # create output data.frame with placeholder NA
   ruv <- expand.grid(
-    tdm_number = seq_len(tdms_per_course),
+    tdm_number = tdm_sample_time,
     iteration = seq_len(n_iter),
     id = ids
   )
