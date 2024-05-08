@@ -1,0 +1,72 @@
+suppressMessages( ## avoid message "the following objects are masked from ..."
+  require("pkbusulfanmccune", character.only = TRUE)
+)
+# set up model info
+model <- pkbusulfanmccune::model()
+parameters <- pkbusulfanmccune::parameters()
+omega <- pkbusulfanmccune::omega_matrix()
+ruv <- pkbusulfanmccune::ruv()
+
+# set up patient info
+covs <- list(
+  AGE = PKPDsim::new_covariate(12),
+  WT = PKPDsim::new_covariate(40),
+  HT = PKPDsim::new_covariate(120),
+  SEX = PKPDsim::new_covariate(1),
+  T_CL_EFF = PKPDsim::new_covariate(0)
+)
+regimen <- PKPDsim::new_regimen(
+  amt = 120,
+  interval = 24,
+  n = 4,
+  t_inf = 3,
+  type = "infusion"
+)
+
+tdms <- data.frame(
+  t = c(3.5, 6, 10, 27.5, 30, 34), # two days of sampling
+  y = c(3000, 500, 100, 3000, 700, 200) # slower clearance day 2
+)
+
+
+test_that("MAP fit works, with and without iov", {
+  # with iov
+  res_iov <- simulate_fit(model, parameters, omega, ruv, tdms, covs, regimen)
+
+  # convert to non-IOV model
+  add_fixed <- names(parameters)[grepl("kappa", names(parameters))]
+  attr(model, "iov") <- list(n_bins = 1)
+  attr(model, "fixed") <- c(attr(model, "fixed"), add_fixed)
+  res_no_iov <- simulate_fit(model, parameters, omega, ruv, tdms, covs, regimen)
+
+  # correct structure
+  expect_equal(sort(names(res_iov)), sort(names(parameters)))
+  expect_equal(sort(names(res_no_iov)), sort(names(parameters)))
+
+  # not the same as population parameters
+  expect_false(
+    any(
+      unlist(res_iov[c("CL", "V", "Q", "V2")]) ==
+        unlist(parameters[c("CL", "V", "Q", "V2")]))
+  )
+  expect_false(
+    any(
+      unlist(res_no_iov[c("CL", "V", "Q", "V2")]) ==
+        unlist(parameters[c("CL", "V", "Q", "V2")]))
+  )
+  # not the same as each other
+  expect_false(
+    any(
+      unlist(res_iov[c("CL", "V", "Q", "V2")]) ==
+        unlist(res_no_iov[c("CL", "V", "Q", "V2")]))
+  )
+
+  # only when iov are kappa parameters non-zero
+  kappa_days1_2 <- c("kappa_CL_1", "kappa_CL_2", "kappa_V_1", "kappa_V_2")
+  expect_true(all(unlist(res_iov[kappa_days1_2]) != 0))
+  expect_true(all(unlist(res_no_iov[kappa_days1_2]) == 0))
+  # no TDMs on days 3+, so IOV estimates should be zero for both cases
+  other_kappa <- setdiff(add_fixed, kappa_days1_2)
+  expect_true(all(unlist(res_iov[other_kappa]) == 0))
+  expect_true(all(unlist(res_no_iov[other_kappa]) == 0))
+})
