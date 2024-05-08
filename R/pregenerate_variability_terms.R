@@ -49,8 +49,7 @@ pregenerate_iiv <- function(
 
   # create output data.frame with placeholder NA
   iiv <- expand.grid(iteration = seq_len(n_iter), id = ids)
-  pars <- setdiff(names(parameters), attr(sim_model, "fixed"))
-  iiv[pars] <- NA_real_
+  iiv[names(parameters)] <- NA_real_
 
   # create arbitrary objects for PKPDsim call
   req_covs <- attr(sim_model, "covariates")
@@ -72,9 +71,10 @@ pregenerate_iiv <- function(
       return_design = TRUE,
       ...
     )$p
-    pars_i <- as.data.frame(pars_i[pars])
-    iiv[i,pars] <- pars_i
+    pars_i <- as.data.frame(pars_i[names(parameters)])
+    iiv[i,names(parameters)] <- pars_i
   }
+
   iiv
 }
 

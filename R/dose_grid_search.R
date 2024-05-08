@@ -5,22 +5,38 @@
 #'
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
-#' @param target list with arguments `type`, `method`, and `value`. `type` = observation type, either "conc" or auc".
+#' @param target list with arguments `type`, `method`, and `value`.
+#'   `type` = observation type, either "conc" or auc".
 #' @param t_obs vector of observation times
 #' @param obs_comp auc compartment (starting from 1, R-style not C-style!)
-#' @param pta probability of target attainment, list with arguments `type` and `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for specific conc or auc.
-#' @param omega IIV matrix, for estimation model
-#' @param ruv list specifying residual error for estimation model: `list(prop = 0.1, add = 1.5)`
+#' @param pta probability of target attainment, list with arguments `type` and
+#'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
+#'   specific conc or auc.
+#' @param omega IIV matrix, for estimation model, for probability of target
+#'   attainment target types.
+#' @param ruv list specifying residual error for estimation model:
+#'   `list(prop = 0.1, add = 1.5)`, for probability of target attainment target
+#'   types.
 #' @param dose_update update dose from which dose?
-#' @param dose_grid vector specifying doses to use as test grid, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 )
-#' @param dose_resolution to which precision should the output be rounded (e.g. 50), useful when in practice only a specific set of dose units. Can of course also be controlled by altering the grid.
-#' @param refine should the found optimal dose be refined more? If not specified, will refine if the model linearity (in `attr(model, "misc")`) is not described as `"linear"`
-#' @param refine_range after initial optimization, should a second refinement step be implemented? If `refine_range` is specified e.g. as `c(0.9, 1.1)` then it will implement a second optimization using a grid spanning from 90% to 110% of the initial optimal dose. Useful only for non-linear models.
-#' @param check_boundaries if optimal dose is at lower/upper boundary of grid, should grid be expanded?
+#' @param dose_grid vector specifying doses to use as test grid, Example:
+#'   seq(from = 50, to = 500, by = (500 - 50) / 10 )
+#' @param dose_resolution to which precision should the output be rounded
+#'   (e.g. 50), useful when in practice only a specific set of dose units.
+#'   Can of course also be controlled by altering the grid.
+#' @param refine should the found optimal dose be refined more? If not
+#'   specified, will refine if the model linearity (in `attr(model, "misc")`) is
+#'   not described as `"linear"`
+#' @param refine_range after initial optimization, should a second refinement
+#'   step be implemented? If `refine_range` is specified e.g. as `c(0.9, 1.1)`
+#'   then it will implement a second optimization using a grid spanning from 90%
+#'   to 110% of the initial optimal dose. Useful only for non-linear models.
+#' @param check_boundaries if optimal dose is at lower/upper boundary of grid,
+#' should grid be expanded?
 #' @param max_dose maximum dose cap
 #' @param min_dose minimum dose cap
 #' @param n_cores Number of cores over which to simulate doses
-#' @param md metadata object (only needed if we have to use `get_quantity_from_variable()` to generate target value)
+#' @param md metadata object (only needed if we have to use
+#'   `get_quantity_from_variable()` to generate target value)
 #' @param covariates covariates object
 #' @param ... passed on to PKPDsim function
 #'

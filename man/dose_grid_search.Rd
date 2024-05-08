@@ -34,27 +34,42 @@ dose_grid_search(
 
 \item{t_obs}{vector of observation times}
 
-\item{target}{list with arguments \code{type}, \code{method}, and \code{value}. \code{type} = observation type, either "conc" or auc".}
+\item{target}{list with arguments \code{type}, \code{method}, and \code{value}.
+\code{type} = observation type, either "conc" or auc".}
 
 \item{obs_comp}{auc compartment (starting from 1, R-style not C-style!)}
 
-\item{pta}{probability of target attainment, list with arguments \code{type} and \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for specific conc or auc.}
+\item{pta}{probability of target attainment, list with arguments \code{type} and
+\code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
+specific conc or auc.}
 
-\item{omega}{IIV matrix, for estimation model}
+\item{omega}{IIV matrix, for estimation model, for probability of target
+attainment target types.}
 
-\item{ruv}{list specifying residual error for estimation model: \code{list(prop = 0.1, add = 1.5)}}
+\item{ruv}{list specifying residual error for estimation model:
+\code{list(prop = 0.1, add = 1.5)}, for probability of target attainment target
+types.}
 
 \item{dose_update}{update dose from which dose?}
 
-\item{dose_grid}{vector specifying doses to use as test grid, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 )}
+\item{dose_grid}{vector specifying doses to use as test grid, Example:
+seq(from = 50, to = 500, by = (500 - 50) / 10 )}
 
-\item{dose_resolution}{to which precision should the output be rounded (e.g. 50), useful when in practice only a specific set of dose units. Can of course also be controlled by altering the grid.}
+\item{dose_resolution}{to which precision should the output be rounded
+(e.g. 50), useful when in practice only a specific set of dose units.
+Can of course also be controlled by altering the grid.}
 
-\item{refine}{should the found optimal dose be refined more? If not specified, will refine if the model linearity (in \code{attr(model, "misc")}) is not described as \code{"linear"}}
+\item{refine}{should the found optimal dose be refined more? If not
+specified, will refine if the model linearity (in \code{attr(model, "misc")}) is
+not described as \code{"linear"}}
 
-\item{refine_range}{after initial optimization, should a second refinement step be implemented? If \code{refine_range} is specified e.g. as \code{c(0.9, 1.1)} then it will implement a second optimization using a grid spanning from 90\% to 110\% of the initial optimal dose. Useful only for non-linear models.}
+\item{refine_range}{after initial optimization, should a second refinement
+step be implemented? If \code{refine_range} is specified e.g. as \code{c(0.9, 1.1)}
+then it will implement a second optimization using a grid spanning from 90\%
+to 110\% of the initial optimal dose. Useful only for non-linear models.}
 
-\item{check_boundaries}{if optimal dose is at lower/upper boundary of grid, should grid be expanded?}
+\item{check_boundaries}{if optimal dose is at lower/upper boundary of grid,
+should grid be expanded?}
 
 \item{max_dose}{maximum dose cap}
 
@@ -62,7 +77,8 @@ dose_grid_search(
 
 \item{n_cores}{Number of cores over which to simulate doses}
 
-\item{md}{metadata object (only needed if we have to use \code{get_quantity_from_variable()} to generate target value)}
+\item{md}{metadata object (only needed if we have to use
+\code{get_quantity_from_variable()} to generate target value)}
 
 \item{covariates}{covariates object}
 

@@ -26,21 +26,28 @@ simulate_dose(
 
 \item{regimen}{PKPDsim regimen object}
 
-\item{md}{metadata object (only needed if we have to use \code{get_quantity_from_variable()} to generate target value)}
+\item{md}{metadata object (only needed if we have to use
+\code{get_quantity_from_variable()} to generate target value)}
 
-\item{pta}{probability of target attainment, list with arguments \code{type} and \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for specific conc or auc.}
+\item{pta}{probability of target attainment, list with arguments \code{type} and
+\code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
+specific conc or auc.}
 
-\item{target}{list with arguments \code{type}, \code{method}, and \code{value}. \code{type} = observation type, either "conc" or auc".}
+\item{target}{list with arguments \code{type}, \code{method}, and \code{value}.
+\code{type} = observation type, either "conc" or auc".}
 
 \item{model}{model for simulating dose (estimation model)}
 
 \item{t_obs}{vector of observation times}
 
-\item{omega}{IIV matrix, for estimation model}
+\item{omega}{IIV matrix, for estimation model, for probability of target
+attainment target types.}
 
 \item{obs}{Value of \code{obs} as determined by \code{\link[=dose_grid_search]{dose_grid_search()}} (i.e. either "obs" or AUC compartment)}
 
-\item{ruv}{list specifying residual error for estimation model: \code{list(prop = 0.1, add = 1.5)}}
+\item{ruv}{list specifying residual error for estimation model:
+\code{list(prop = 0.1, add = 1.5)}, for probability of target attainment target
+types.}
 
 \item{...}{passed on to PKPDsim function}
 }
