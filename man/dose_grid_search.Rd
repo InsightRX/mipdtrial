@@ -6,7 +6,7 @@
 \usage{
 dose_grid_search(
   est_model = NULL,
-  regimen = NULL,
+  regimen,
   t_obs = 24,
   target = list(type = "conc", value = 10),
   obs_comp = NULL,
@@ -34,8 +34,8 @@ dose_grid_search(
 
 \item{t_obs}{vector of observation times}
 
-\item{target}{list with arguments \code{type}, \code{method}, and \code{value}.
-\code{type} = observation type, either "conc" or auc".}
+\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
+type, either "conc" or auc".}
 
 \item{obs_comp}{auc compartment (starting from 1, R-style not C-style!)}
 

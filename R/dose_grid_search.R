@@ -5,8 +5,8 @@
 #'
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
-#' @param target list with arguments `type`, `method`, and `value`.
-#'   `type` = observation type, either "conc" or auc".
+#' @param target list with arguments `type`, and `value`. `type` = observation
+#'   type, either "conc" or auc".
 #' @param t_obs vector of observation times
 #' @param obs_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
@@ -44,7 +44,7 @@
 #'
 dose_grid_search <- function(
     est_model = NULL,
-    regimen = NULL,
+    regimen,
     t_obs = 24,
     target = list(
       type = "conc",
@@ -68,9 +68,6 @@ dose_grid_search <- function(
     ...
 ) {
 
-  if(is.null(regimen)) {
-    stop("No regimen specified")
-  }
   target$type <- tolower(target$type)
   accepted_conc_targets <- c(
     "cmax", "cmax_1hr", "cmax_true",
