@@ -153,51 +153,7 @@ cov_mapping <- c(
 
 ```
 
-## 4. Pre-generate variability terms
-
-Reproducible analyses are crucial. Pre-generating residual error terms and
-inter-individual variability terms allow you to easily return to an analysis
-without worrying about seed position.
-
-For residual error terms, we will use the residual error of our "true" model,
-since this is supposed to reflect the "true" unexplained error (assay error, 
-etc.). This function creates a data frame of error to add to each "true"
-simulated concentration to produced a measured therapeutic drug monitoring 
-sample.
-
-```{r}
-res_var <- pregenerate_ruv(
-  ids = ids,
-  n_iter = 1, # just one copy of each patient for now
-  tdm_sample_time = tdm_times,
-  prop = ruv_sim$prop,
-  add = ruv_sim$add,
-  seed = 60
-)
-
-```
-
-For inter-individual variability terms, we will use the inter-individual
-variability described by our "true" model, since this should reflect the
-"true" distribution in patient pharmacokinetics. Later, we will estimate
-the individual PK parameters using our estimation model and the measured
-TDMs we "collect".
-
-```{r}
-pkpar <- pregenerate_iiv(
-  ids = ids,
-  n_iter = 1, # just one copy of each patient for now
-  sim_model = model_sim,
-  omega = omega_sim,
-  parameters = parameters_sim,
-  seed = 60
-)
-```
-
-For an extended analysis, it would be prudent to save these data frames as
-CSV or RDS files for easier accessibility.
-
-## 5. Initialize output metrics of interest
+## 4. Initialize output metrics of interest
 
 We want to record both "true" cumulative AUC and estimated cumulative AUC, 
 along with patient identifiers (i.e., id). We will pre-populate a data frame
@@ -212,12 +168,26 @@ results <- data.frame(
 )
 ```
 
-## 6. Simulate a trial!
+## 5. Simulate a trial!
 
 Each patient will start at a dose of 3.2 mg/kg body weight. We will then use
 `mipdtrial::dose_grid_search` to optimize doses to attain a target of 90 mg*h/L.
 
+For inter-individual variability terms, we will use the inter-individual
+variability described by our "true" model, since this should reflect the
+"true" distribution in patient pharmacokinetics. Later, we will estimate
+the individual PK parameters using our estimation model and the measured
+TDMs we "collect".
+
+For residual error terms, we will use the residual error of our "true" model,
+since this is supposed to reflect the "true" unexplained error (assay error, 
+etc.). This function creates a data frame of error to add to each "true"
+simulated concentration to produced a measured therapeutic drug monitoring 
+sample.
+
 ```{r}
+set.seed(1) # important for reproducibility
+
 for (i in ids) {
   # get patient covariates
   covs <- create_cov_object(
@@ -232,8 +202,18 @@ for (i in ids) {
     t_inf = 3,
     type = "infusion"
   )
-  ruv_i <- res_var[res_var$id == i,]
-  par_true_i <- as.list(pkpar[pkpar$id == i,])
+  # randomly draw individual PK parameters
+  par_true_i <- as.list(generate_iiv(
+    sim_model = model_sim,
+    omega = omega_sim,
+    parameters = parameters_sim
+  ))
+  # randomly draw error terms
+  ruv_i <- generate_ruv(
+    tdm_sample_time = tdm_times,
+    prop = ruv_sim$prop,
+    add = ruv_sim$add
+  )
   # initialize objects for loop
   tdms_i <- data.frame()
   
@@ -312,7 +292,7 @@ Here are the first few rows of our simulation results:
 head(results)
 ```
 
-## 7. Analyze results
+## 6. Analyze results
 
 How well did our patients get to target? It looks like we estimated that
 target attainment would be very high (all patients have an AUC very close to 
