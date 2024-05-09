@@ -101,7 +101,14 @@ generate_iiv <- function(
 #' @rdname generate_variability
 #' @export
 
-generate_ruv <- function(ids, n_iter, tdm_sample_time, prop, add, seed = NULL) {
+generate_ruv <- function(
+  tdm_sample_time,
+  prop,
+  add,
+  ids = 1,
+  n_iter = 1,
+  seed = NULL
+) {
   # create output data.frame with placeholder NA
   ruv <- expand.grid(
     tdm_number = tdm_sample_time,
