@@ -80,6 +80,12 @@ dat$T_CL_EFF <- 0
 dat$REGI <- 0
 ```
 
+Here are the first few rows of our data set:
+
+```{r}
+head(dat)
+```
+
 ## 2. Define simulation parameters
 
 In this simple trial, patients will be dosed once per day, with 4 levels
@@ -294,6 +300,12 @@ for (i in ids) {
   results$est_auc[results$id == i] <- auc_est
 }
 
+```
+
+Here are the first few rows of our simulation results:
+
+```{r}
+head(results)
 ```
 
 ## 7. Analyze results
