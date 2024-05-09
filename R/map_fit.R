@@ -29,17 +29,7 @@ simulate_fit <- function(
     regimen,
     ...
 ){
-  iov_specs <- attr(est_model, "iov")
-  if (!isTRUE(iov_specs$n_bins > 1)) iov_specs$bins <- c(0, 99999)
-  iov_obj <- PKPDmap::create_iov_object(
-    cv = iov_specs[["cv"]],
-    omega = omega,
-    bins = iov_specs$bins,
-    parameters = parameters,
-    fixed = attr(est_model, "fixed"),
-    estimate_init_level = FALSE,
-    verbose = FALSE
-  )
+  iov_obj <- get_iov_specification(est_model, parameters, omega)
 
   x <- tryCatch({
     get_map_estimates(
@@ -62,4 +52,40 @@ simulate_fit <- function(
   )
   if (is.atomic(x) || !"parameters" %in% names(x)) return(NULL)
   x[["parameters"]]
+}
+
+#' Get inter-occasion variability specifications
+#'
+#' This function is intended to be called from other functions. Using
+#' specifications encoded within the model, reshapes IOV and IIV into a single
+#' omega matrix, extracts the correct IOV bins, determines the appropriate eta
+#' distributions, etc, ready for use in PKPDmap and PKPDsim functions.
+#'
+#' @param model PKPDsim model
+#' @param parameters model parameters, a named list
+#' @param iiv lower triangle of IIV matrix, supplied as a vector
+#' @returns a named list, with at least fields for `n_bins` and `bins`, and
+#'   (for models with IOV) optionally also a fully omega matrix and omega type.
+#' @noRd
+
+get_iov_specification <- function(model, parameters, iiv) {
+  iov_specs <- attr(model, "iov")
+  if (!isTRUE(iov_specs$n_bins > 1)) iov_specs$bins <- c(0, 99999)
+
+  iov <- PKPDmap::create_iov_object(
+    cv = iov_specs[["cv"]],
+    omega = iiv,
+    bins = iov_specs$bins,
+    parameters = parameters,
+    fixed = attr(model, "fixed"),
+    estimate_init_level = FALSE,
+    verbose = FALSE
+  )
+  iiv_par <- setdiff(names(iov$parameters), c(iov$kappa, iov$fixed))
+
+  iov$omega_type <- c(
+    rep("exponential", length(iiv_par)),
+    rep("normal", length(iov$kappa))
+  )
+  iov
 }

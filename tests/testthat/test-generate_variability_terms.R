@@ -24,6 +24,31 @@ test_that("Generates IIV error for multiple individuals", {
   expect_true(abs(pct_err(mean(out$V), par$V)) < 0.05)
 })
 
+test_that("Generates IIV and IOV error", {
+  mod1 <- mod
+  attr(mod1, "iov") <- list(
+    n_bins = 2,
+    bins = c(0, 48, 9999),
+    cv = list(CL = 0.2)
+  )
+  new_par <- c(par, list(kappa_CL_1 = 0, kappa_CL_2 = 0))
+  attr(mod1, "parameters") <- names(new_par)
+  out <- generate_iiv(
+    mod1,
+    omega,
+    new_par,
+    ids = letters[1:10],
+    n_iter = 50,
+    seed = 1
+  )
+  expect_true(inherits(out, "data.frame"))
+  expect_equal(nrow(out), 10 * 50)
+  expect_true(all(names(new_par) %in% colnames(out)))
+  # IOV terms are non-zero
+  expect_true(all(out$kappa_CL_1 != 0))
+  expect_true(all(out$kappa_CL_2 != 0))
+})
+
 test_that("Generates RUV error for multiple individuals", {
   out <- generate_ruv(
     ids = 1:30,

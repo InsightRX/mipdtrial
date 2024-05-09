@@ -70,3 +70,48 @@ test_that("MAP fit works, with and without iov", {
   expect_true(all(unlist(res_iov[other_kappa]) == 0))
   expect_true(all(unlist(res_no_iov[other_kappa]) == 0))
 })
+
+test_that("iov specifications for model with IOV are correct", {
+  with_iov <- get_iov_specification(model, parameters, omega)
+  expect_names <- c(
+    "parameters", "kappa", "omega", "fixed", "bins", "omega_type"
+  )
+  expect_true(all(expect_names %in% names(with_iov)))
+  expect_equal(with_iov$fixed, attr(model, "fixed"))
+  expect_equal(with_iov$bins, attr(model, "iov")$bins)
+  expect_equal(sort(names(with_iov$parameters)), sort(names(parameters)))
+
+  omega_type_counts <- table(with_iov$omega_type)
+  expect_equal(
+    omega_type_counts[["exponential"]],
+    length(parameters) - length(with_iov$kappa) - length(with_iov$fixed)
+  )
+  expect_equal(
+    omega_type_counts[["normal"]],
+    length(with_iov$kappa)
+  )
+})
+
+test_that("iov specifications for model without IOV are correct", {
+
+  # convert to non-IOV model
+  add_fixed <- names(parameters)[grepl("kappa", names(parameters))]
+  attr(model, "iov") <- list(n_bins = 1)
+  attr(model, "fixed") <- c(attr(model, "fixed"), add_fixed)
+
+  no_iov <- get_iov_specification(model, parameters, omega)
+  expect_names <- c(
+    "parameters", "kappa", "omega", "fixed", "bins", "omega_type"
+  )
+  expect_true(all(expect_names %in% names(no_iov)))
+  expect_equal(no_iov$fixed, attr(model, "fixed"))
+  expect_equal(no_iov$bins, c(0, 99999))
+  expect_equal(sort(names(no_iov$parameters)), sort(names(parameters)))
+
+  omega_type_counts <- table(no_iov$omega_type)
+  expect_equal(
+    omega_type_counts[["exponential"]],
+    length(parameters) - length(no_iov$kappa) - length(no_iov$fixed)
+  )
+  expect_false("normal" %in% names(omega_type_counts))
+})

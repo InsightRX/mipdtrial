@@ -59,6 +59,9 @@ generate_iiv <- function(
   )
   reg <- PKPDsim::new_regimen(amt = 100, interval = 12, n = 3, type = "oral")
 
+  # format IIV/IOV distributions
+  iov_specs <- get_iov_specification(sim_model, parameters, omega)
+
   # generate parameters for each row of output data frame
   if (!is.null(seed)) {
     set.seed(seed)
@@ -66,8 +69,10 @@ generate_iiv <- function(
   for (i in seq_len(nrow(iiv))) {
     pars_i <- PKPDsim::sim(
       sim_model,
-      omega = omega,
-      parameters = parameters,
+      omega = iov_specs$omega,
+      omega_type = iov_specs$omega_type,
+      parameters = iov_specs$parameters,
+      iov_bins = iov_specs$bins,
       regimen = reg,
       covariates = covs,
       return_design = TRUE,
@@ -123,3 +128,5 @@ generate_ruv <- function(
   ruv$add <- rnorm(nrow(ruv), 0, add)
   ruv
 }
+
+
