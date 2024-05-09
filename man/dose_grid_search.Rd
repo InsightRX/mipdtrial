@@ -84,6 +84,9 @@ should grid be expanded?}
 
 \item{...}{passed on to PKPDsim function}
 }
+\value{
+A numeric value indicating the recommended dose
+}
 \description{
 Set refine = TRUE if the model is nonlinear so that the grid search happens
 iteratively.

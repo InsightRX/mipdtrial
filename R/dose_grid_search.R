@@ -39,6 +39,8 @@
 #'   `get_quantity_from_variable()` to generate target value)
 #' @param covariates covariates object
 #' @param ... passed on to PKPDsim function
+#' @returns A numeric value indicating the recommended dose
+#' @export
 #'
 dose_grid_search <- function(
     est_model = NULL,
