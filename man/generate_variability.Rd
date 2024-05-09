@@ -16,7 +16,7 @@ generate_iiv(
   ...
 )
 
-generate_ruv(ids, n_iter, tdm_sample_time, prop, add, seed = NULL)
+generate_ruv(tdm_sample_time, prop, add, ids = 1, n_iter = 1, seed = NULL)
 }
 \arguments{
 \item{sim_model}{model used for simulated patient response ("truth").}
