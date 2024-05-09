@@ -8,7 +8,14 @@ omega <- c(0.1, 0.05, 0.1)
 pct_err <- function(test, true) (test-true)/true
 
 test_that("Generates IIV error for multiple individuals", {
-  out <- pregenerate_iiv(mod, omega, par, ids = letters[1:10], n_iter = 50)
+  out <- generate_iiv(
+    mod,
+    omega,
+    par,
+    ids = letters[1:10],
+    n_iter = 50,
+    seed = 1
+  )
   expect_true(inherits(out, "data.frame"))
   expect_equal(nrow(out), 10 * 50)
   expect_true(all(names(par) %in% colnames(out)))
@@ -18,12 +25,13 @@ test_that("Generates IIV error for multiple individuals", {
 })
 
 test_that("Generates RUV error for multiple individuals", {
-  out <- pregenerate_ruv(
+  out <- generate_ruv(
     ids = 1:30,
     n_iter = 40,
     tdm_sample_time = seq(2, 100, 2),
     prop = 0.2,
-    add = 2.5
+    add = 2.5,
+    seed = 2
   )
   expect_true(inherits(out, "data.frame"))
   expect_equal(nrow(out), 30 * 40 * 50)
@@ -33,9 +41,9 @@ test_that("Generates RUV error for multiple individuals", {
 })
 
 test_that("Reproducible randomness: IIV", {
-  out1 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 1)
-  out2 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
-  out3 <- pregenerate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
+  out1 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 1)
+  out2 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
+  out3 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)
   expect_true(inherits(out1, "data.frame"))
   expect_equal(nrow(out1), 1)
   expect_false(out1$CL == out2$CL)
@@ -43,8 +51,15 @@ test_that("Reproducible randomness: IIV", {
   expect_identical(out2, out3)
 })
 
+test_that("No seed by default: IIV", {
+  out1 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1)
+  out2 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1)
+  expect_false(out1$CL == out2$CL)
+  expect_false(out1$V == out2$V)
+})
+
 test_that("Reproducible randomness: RUV", {
-  out1 <- pregenerate_ruv(
+  out1 <- generate_ruv(
     ids = 1,
     n_iter = 1,
     tdm_sample_time = 1:4,
@@ -52,7 +67,7 @@ test_that("Reproducible randomness: RUV", {
     prop = 0.2,
     add = 2.5
   )
-  out2 <- pregenerate_ruv(
+  out2 <- generate_ruv(
     ids = 1,
     n_iter = 1,
     tdm_sample_time = 1:4,
@@ -60,7 +75,7 @@ test_that("Reproducible randomness: RUV", {
     prop = 0.2,
     add = 2.5
   )
-  out3 <- pregenerate_ruv(
+  out3 <- generate_ruv(
     ids = 1,
     n_iter = 1,
     tdm_sample_time = 1:4,
@@ -73,4 +88,23 @@ test_that("Reproducible randomness: RUV", {
   expect_true(all(out1$prop != out2$prop))
   expect_true(all(out1$add != out2$add))
   expect_identical(out2, out3)
+})
+
+test_that("No seed by default: RUV", {
+  out1 <- generate_ruv(
+    ids = 1,
+    n_iter = 1,
+    tdm_sample_time = 1:4,
+    prop = 0.2,
+    add = 2.5
+  )
+  out2 <- generate_ruv(
+    ids = 1,
+    n_iter = 1,
+    tdm_sample_time = 1:4,
+    prop = 0.2,
+    add = 2.5
+  )
+  expect_true(all(out1$prop != out2$prop))
+  expect_true(all(out1$add != out2$add))
 })

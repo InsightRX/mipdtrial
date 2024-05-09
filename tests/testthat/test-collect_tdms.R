@@ -1,5 +1,5 @@
 mod <- PKPDsim::new_ode_model("pk_2cmt_iv")
-res_var <- pregenerate_ruv(1, 1, 1:5, 0.2, 1)
+res_var <- generate_ruv(1, 1, 1:5, 0.2, 1, seed = 2)
 t_obs <- res_var$tdm_number
 pars_i <- list(CL = 5, Q = 1, V = 25, V2 = 20)
 reg <- PKPDsim::new_regimen(amt = 1000, interval = 12, n = 3)

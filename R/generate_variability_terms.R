@@ -1,4 +1,4 @@
-#' Pre-generate variability terms
+#' Generate variability terms
 #'
 #' To enable comparison of multiple treatment conditions in a reproducible
 #' manner, it is recommended that interindividual variability terms and residual
@@ -6,19 +6,19 @@
 #' for resuming a simulation part-way through, when the random seed position
 #' may not be known.
 #'
-#' This family of functions pregenerates variability terms to allow for
+#' This family of functions generates variability terms to allow for
 #' reproducible analyses. Using multiple iterations per individual ID allows for
 #' PK variability within one set of covariates.
-#' @name pregenerate_variability
+#' @name generate_variability
 NULL
 
 
-#' Pre-generate inter-individual variability for a given model.
+#' Generate inter-individual variability for a given model.
 #'
-#' Pre-generate IIV for one or more individuals and one or more iterations per
+#' Generate IIV for one or more individuals and one or more iterations per
 #' individual according to the supplied omega matrix.
 #'
-#' By default, `pregenerate_iiv`assumes a log-normal (exponential) distribution.
+#' By default, `generate_iiv`assumes a log-normal (exponential) distribution.
 #' See `PKPDsim::sim` documentation for the `omega_type` argument to provide
 #' finer grain control.
 #'
@@ -31,19 +31,19 @@ NULL
 #' @param n_iter number of sets of individual parameters to generate per id
 #' @param seed set random seed
 #' @param ... arguments passed on to PKPDsim::sim
-#' @returns `pregenerate_iiv` a data frame with columns `id` (corresponding to
+#' @returns `generate_iiv` a data frame with columns `id` (corresponding to
 #'   `ids`), `iter` ( numbers 1 to n_iter) and columns for each individual
 #'   parameter value.
-#' @rdname pregenerate_variability
+#' @rdname generate_variability
 #' @export
 
-pregenerate_iiv <- function(
+generate_iiv <- function(
   sim_model,
   omega,
   parameters,
   ids = 1,
   n_iter = 1,
-  seed = 1,
+  seed = NULL,
   ...
 ) {
 
@@ -60,7 +60,9 @@ pregenerate_iiv <- function(
   reg <- PKPDsim::new_regimen(amt = 100, interval = 12, n = 3, type = "oral")
 
   # generate parameters for each row of output data frame
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   for (i in seq_len(nrow(iiv))) {
     pars_i <- PKPDsim::sim(
       sim_model,
@@ -78,13 +80,13 @@ pregenerate_iiv <- function(
   iiv
 }
 
-#' Pre-generate residual variability for a given model.
+#' Generate residual variability for a given model.
 #'
-#' Pre-generate unexplained variability for one or more individuals and one or
+#' Generate unexplained variability for one or more individuals and one or
 #' more iterations per individual according to the supplied proportional and
 #' additive error.
 #'
-#' `pregenerate_ruv` Assumes a normal distribution for proportional and
+#' `generate_ruv` Assumes a normal distribution for proportional and
 #' additional error.
 #'
 #' @param tdm_sample_time time of tdm, since start of treatment course (or
@@ -93,13 +95,13 @@ pregenerate_iiv <- function(
 #'   `c(1, 24, 25, 48, 49, 73)`.
 #' @param prop proportional error
 #' @param add additive error
-#' @returns `pregenerate_ruv` returns a data frame with identifier columns of
+#' @returns `generate_ruv` returns a data frame with identifier columns of
 #'   `tdm_number`, `iteration`, `id`, plus columns for proportional (`prop`) and
 #'   additive (`add`) error.
-#' @rdname pregenerate_variability
+#' @rdname generate_variability
 #' @export
 
-pregenerate_ruv <- function(ids, n_iter, tdm_sample_time, prop, add, seed = 2) {
+generate_ruv <- function(ids, n_iter, tdm_sample_time, prop, add, seed = NULL) {
   # create output data.frame with placeholder NA
   ruv <- expand.grid(
     tdm_number = tdm_sample_time,
@@ -107,7 +109,9 @@ pregenerate_ruv <- function(ids, n_iter, tdm_sample_time, prop, add, seed = 2) {
     id = ids
   )
   # sample from normal distribution
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   ruv$prop <- 1 + rnorm(nrow(ruv), 0, prop)
   ruv$add <- rnorm(nrow(ruv), 0, add)
   ruv
