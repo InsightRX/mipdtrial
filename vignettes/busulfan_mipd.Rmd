@@ -16,21 +16,25 @@ knitr::opts_chunk$set(
 
 In this example script, we will estimate target attainment for busulfan.
 
-To account for model misspecification, we will use one model to simulate 
-(McCune, 2014) and one model to estimate (Shukla, 2020).
+To account for model misspecification, we will use one model to simulate
+(McCune, 2014) and one model to estimate (Shukla, 2020). This is a simplified
+version of a [published
+study](https://link.springer.com/article/10.1007/s10928-024-09915-w) in which we
+compared non-compartmental analysis (NCA) with MAP Bayesian estimation for
+AUC-guided busulfan dosing.
 
 ```{r setup}
 library(mipdtrial)
-require(pkbusulfanmccune)
-require(pkbusulfanshukla)
+require(pkbusulfanmccune, warn.conflicts = FALSE)
+require(pkbusulfanshukla, warn.conflicts = FALSE)
 
 # For example data
 library(NHANES)
 
 # For data handling/plotting
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
 
 ```
 
@@ -334,4 +338,23 @@ results %>%
   )
 
 ```
+
+Even with some model misspecification, target attainment (with 20% of target 
+AUC) was still high:
+
+```{r}
+target_attainment <- results %>%
+  mutate(
+    ontarget = true_auc > 0.8 * target$value & true_auc < 1.2 * target$value
+  ) %>%
+  summarize(proportion_ontarget = mean(ontarget)) %>%
+  pull(proportion_ontarget)
+
+target_attainment <- paste0(round(100 * target_attainment), "%")
+```
+
+Overall, `r target_attainment` of patients had a "true" AUC of 90 mg*h/L.
+
+For an in-depth analysis of how differences between these two models impact
+target attainment, see [Hughes et al., *J PKPD* (2024)](https://link.springer.com/article/10.1007/s10928-024-09915-w)
 
