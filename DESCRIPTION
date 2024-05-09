@@ -11,9 +11,16 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
-    testthat (>= 3.2.0)
+    dplyr,
+    ggplot2,
+    knitr,
+    NHANES,
+    rmarkdown,
+    testthat (>= 3.2.0),
+    tidyr
 Config/testthat/edition: 3
 Imports: 
     PKPDmap,
     PKPDsim
 Remotes: InsightRX/PKPDsim, InsightRX/PKPDmap
+VignetteBuilder: knitr

@@ -1,0 +1,325 @@
+---
+title: "Busulfan MIPD"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Busulfan MIPD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this example script, we will estimate target attainment for busulfan.
+
+To account for model misspecification, we will use one model to simulate 
+(McCune, 2014) and one model to estimate (Shukla, 2020).
+
+```{r setup}
+library(mipdtrial)
+require(pkbusulfanmccune)
+require(pkbusulfanshukla)
+
+# For example data
+library(NHANES)
+
+# For data handling/plotting
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+```
+
+
+## 1. Create a set of digital patient covariates
+
+We will use the NHANES data set for covariate distributions. This is a data set
+of five thousand individuals collected by the US National Center for Health
+Statistics. See package documentation for more details.
+
+We will also use the `dplyr` package for some basic data processing. Since every
+data set is un-tidy in its own way (“Tidy datasets are all alike, but every 
+messy dataset is messy in its own way.” 
+–– [Hadley Wickham](https://r4ds.had.co.nz/tidy-data.html)), data cleaning 
+should be handled outside of the `mipdtrial` tools. The functions expect all
+patient covariates to be numeric.
+
+```{r}
+dat <- NHANES::NHANES %>%
+  # take just the first record per patient
+  group_by(ID) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # convert columns to numeric
+  mutate(Gender = ifelse(Gender == "male", 1, 0)) %>% # as defined in models
+  select(ID, Gender, Age, Weight, Height) %>%
+  # include only patients with all information available
+  filter(!is.na(Gender), !is.na(Weight), !is.na(Height), !is.na(Age))
+```
+
+The next step is to make sure we have all the covariates we need. Busulfan has a
+known time-dependent relationship with clearance, and so the McCune model takes
+a covariate that indicates at what time this relationship should start
+(T_CL_EFF; useful for test doses that should not impact busulfan clearance). We
+will set this to zero for all patients. The Shukla model also takes conditioning
+regimen as a covariate, since co-medication with Clofarabine and Fludarabine was
+associated with a change in clearance (REGI). We will also set this to zero for
+all patients.
+
+Other models might require fat-free mass or other calculated covariates. This 
+would be a good time to do that sort of processing on your data set!
+
+You may also need to convert between units (height in m to cm, for example.)
+
+```{r}
+dat$T_CL_EFF <- 0
+dat$REGI <- 0
+```
+
+## 2. Define simulation parameters
+
+In this simple trial, patients will be dosed once per day, with 4 levels
+collected per day, at 3.5, 4, 6 and 8 hours post-dose. We are aiming for a
+target cumulative AUC of 90 over the course of t = 0 hours to t = 192 hours.
+
+```{r}
+tdm_times <- rep(c(3.5, 4, 6, 8), 4) + rep(c(0, 24, 48, 72), each = 4)
+
+target <- list(
+  type = "cum_auc",
+  value = 90 * 1000 # unit conversion
+)
+auc_times <- c(0, 192)
+
+```
+
+We will also only look at the first 10 patients in our data set, in the 
+interest of speed.
+
+```{r}
+ids <- dat$ID[1:10]
+
+```
+
+## 3. Load model definitions
+
+We need to define the model parameters and variability terms for our simulation.
+For this study, we will use the ones defined in the models.
+
+```{r}
+# Set up simulation model ("true")
+model_sim <- pkbusulfanmccune::model()
+parameters_sim <- pkbusulfanmccune::parameters()
+omega_sim <- pkbusulfanmccune::omega_matrix()
+ruv_sim <- pkbusulfanmccune::ruv()
+
+# Set up estimation model (model for MIPD)
+model_est <- pkbusulfanshukla::model()
+parameters_est <- pkbusulfanshukla::parameters()
+omega_est <- pkbusulfanshukla::omega_matrix()
+ruv_est <- pkbusulfanshukla::ruv()
+```
+
+We also need to link the covariates in our data set to the covariates expected
+in the model.
+
+```{r}
+# check which covariates are required for your model using 
+# `attr(model_sim, "covariates")`
+
+# check which covariates are in your data set using `colnames(dat)`
+cov_mapping <- c(
+  AGE = "Age", 
+  WT = "Weight", 
+  HT = "Height", 
+  SEX = "Gender",
+  T_CL_EFF = "T_CL_EFF",
+  REGI = "REGI"
+)
+
+```
+
+## 4. Pre-generate variability terms
+
+Reproducible analyses are crucial. Pre-generating residual error terms and
+inter-individual variability terms allow you to easily return to an analysis
+without worrying about seed position.
+
+For residual error terms, we will use the residual error of our "true" model,
+since this is supposed to reflect the "true" unexplained error (assay error, 
+etc.). This function creates a data frame of error to add to each "true"
+simulated concentration to produced a measured therapeutic drug monitoring 
+sample.
+
+```{r}
+res_var <- pregenerate_ruv(
+  ids = ids,
+  n_iter = 1, # just one copy of each patient for now
+  tdm_sample_time = tdm_times,
+  prop = ruv_sim$prop,
+  add = ruv_sim$add,
+  seed = 60
+)
+
+```
+
+For inter-individual variability terms, we will use the inter-individual
+variability described by our "true" model, since this should reflect the
+"true" distribution in patient pharmacokinetics. Later, we will estimate
+the individual PK parameters using our estimation model and the measured
+TDMs we "collect".
+
+```{r}
+pkpar <- pregenerate_iiv(
+  ids = ids,
+  n_iter = 1, # just one copy of each patient for now
+  sim_model = model_sim,
+  omega = omega_sim,
+  parameters = parameters_sim,
+  seed = 60
+)
+```
+
+For an extended analysis, it would be prudent to save these data frames as
+CSV or RDS files for easier accessibility.
+
+## 5. Initialize output metrics of interest
+
+We want to record both "true" cumulative AUC and estimated cumulative AUC, 
+along with patient identifiers (i.e., id). We will pre-populate a data frame
+rather than iteratively binding rows, since that is more performent.
+
+```{r}
+results <- data.frame(
+  id = ids,
+  iter = 1,
+  true_auc = NA_real_,
+  est_auc = NA_real_
+)
+```
+
+## 6. Simulate a trial!
+
+Each patient will start at a dose of 3.2 mg/kg body weight. We will then use
+`mipdtrial::dose_grid_search` to optimize doses to attain a target of 90 mg*h/L.
+
+```{r}
+for (i in ids) {
+  # get patient covariates
+  covs <- create_cov_object(
+    dat[dat$ID == i,],
+    mapping = cov_mapping
+  )
+  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
+  reg <- PKPDsim::new_regimen(
+    amt = 3.2 * covs$WT$value, # we will update this each "day" of the trial.
+    interval = 24,
+    n = 4,
+    t_inf = 3,
+    type = "infusion"
+  )
+  ruv_i <- res_var[res_var$id == i,]
+  par_true_i <- as.list(pkpar[pkpar$id == i,])
+  # initialize objects for loop
+  tdms_i <- data.frame()
+  
+  # MIPD trial
+  for (day in 1:4) {
+    # collect TDMs from today (use model for simulation!)
+    today <- (tdm_times >= (day - 1) * 24 & tdm_times < day * 24)
+    new_tdms <- collect_tdms(
+      sim_model = model_sim,
+      t_obs = tdm_times[today],
+      res_var = ruv_i[today,],
+      pars_i = par_true_i,
+      regimen = reg,
+      covariates = covs
+    )
+    tdms_i <- bind_rows(tdms_i, new_tdms)
+    
+    # get MAP fit, using model for estimation
+    est_par <- simulate_fit(
+      est_model = model_est,
+      parameters = parameters_est,
+      omega = omega_est,
+      ruv = ruv_est,
+      tdms = tdms_i,
+      covariates = covs,
+      regimen = reg
+    )
+    
+    # calculate new dose, using the estimation model, if we aren't on last day
+    if (day < 4) {
+      new_dose <- dose_grid_search(
+        est_model = model_est,
+        regimen = reg,
+        parameters = est_par, # we want to use our "best guess" to get the dose
+        t_obs = auc_times[2],
+        target = target,
+        obs_comp = attr(model_est, "size"), # last compartment is AUC
+        dose_update = day + 1, # update dose starting from next day
+        dose_grid = seq(from = 1, to = 400, by = (400 - 1) / 10),
+        covariates = covs,
+        iov_bins = attr(model_est, "iov")$bins
+      )
+      reg <- update_regimen(reg, new_dose, dose_update_number = day + 1)
+    }
+  }
+    
+  # get final "true" and "estimated" cumulative AUC at end
+  sim_true <- PKPDsim::sim(
+    model_sim,
+    parameters = par_true_i, # true patient parameters
+    regimen = reg,
+    covariates = covs,
+    t_obs = auc_times,
+    iov_bins = attr(model_sim, "iov")$bins
+  )
+  auc_true <- calc_auc_from_sim(sim_true, attr(model_sim, "size"))
+  sim_est <- PKPDsim::sim(
+    model_est,
+    parameters = est_par, # best guess at patient parameter
+    regimen = reg,
+    covariates = covs,
+    t_obs = auc_times,
+    iov_bins = attr(model_est, "iov")$bins
+  )
+  auc_est <- calc_auc_from_sim(sim_est, attr(model_est, "size"))
+  
+  results$true_auc[results$id == i] <- auc_true
+  results$est_auc[results$id == i] <- auc_est
+}
+
+```
+
+## 7. Analyze results
+
+How well did our patients get to target? It looks like we estimated that
+target attainment would be very high (all patients have an AUC very close to 
+90 mg*h/L), but "true" AUC was higher than that due to some model 
+misspecification!
+
+```{r fig.width = 2, fig.height = 3}
+results %>%
+  pivot_longer(
+    c(true_auc, est_auc),
+    names_to = "auc_type",
+    values_to = "auc"
+  ) %>%
+  ggplot() +
+  aes(x = auc_type, y = auc/1000) +
+  geom_boxplot() +
+  geom_hline(yintercept = 90, color = "navyblue", linetype = "dashed") +
+  scale_y_continuous(limit = c(0, NA)) +
+  theme_minimal() +
+  labs(
+    y = "Cumulative AUC (mg\u00B7h/L)",
+    x = "AUC type"
+  )
+
+```
+
