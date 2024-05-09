@@ -9,5 +9,9 @@
 
 calc_auc_from_sim <- function(sim_output, auc_comp) {
   aucs <- sim_output$y[sim_output$comp == auc_comp]
-  diff(aucs)
+  if (length(aucs) == 1) {
+    aucs # i.e., cumulative
+  } else {
+    diff(aucs)
+  }
 }

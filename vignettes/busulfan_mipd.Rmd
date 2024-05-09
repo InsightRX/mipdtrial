@@ -38,8 +38,25 @@ library(ggplot2, warn.conflicts = FALSE)
 
 ```
 
+## 1. Define simulation parameters
 
-## 1. Create a set of digital patient covariates
+In this simple trial, patients will be dosed once per day for four days, with 4
+levels collected per day, at 3.5, 4, 6 and 8 hours post-dose. We will adjust
+doses 2, 3, and 4 to achieve a target cumulative AUC of 90 by t = 192 hours.
+
+```{r}
+tdm_times <- rep(c(3.5, 4, 6, 8), 4) + rep(c(0, 24, 48, 72), each = 4)
+adjust_at_dose <- c(2, 3, 4)
+
+target <- list(
+  type = "cum_auc",
+  value = 90 * 1000 # unit conversion
+)
+auc_times <- 192
+
+```
+
+## 2. Create a set of digital patient covariates
 
 We will use the NHANES data set for covariate distributions. This is a data set
 of five thousand individuals collected by the US National Center for Health
@@ -88,23 +105,6 @@ Here are the first few rows of our data set:
 
 ```{r}
 head(dat)
-```
-
-## 2. Define simulation parameters
-
-In this simple trial, patients will be dosed once per day, with 4 levels
-collected per day, at 3.5, 4, 6 and 8 hours post-dose. We are aiming for a
-target cumulative AUC of 90 over the course of t = 0 hours to t = 192 hours.
-
-```{r}
-tdm_times <- rep(c(3.5, 4, 6, 8), 4) + rep(c(0, 24, 48, 72), each = 4)
-
-target <- list(
-  type = "cum_auc",
-  value = 90 * 1000 # unit conversion
-)
-auc_times <- c(0, 192)
-
 ```
 
 We will also only look at the first 10 patients in our data set, in the 
@@ -203,68 +203,33 @@ for (i in ids) {
     type = "infusion"
   )
   # randomly draw individual PK parameters
-  par_true_i <- as.list(generate_iiv(
+  pars_true_i <- generate_iiv(
     sim_model = model_sim,
     omega = omega_sim,
     parameters = parameters_sim
-  ))
-  # randomly draw error terms
-  ruv_i <- generate_ruv(
-    tdm_sample_time = tdm_times,
-    prop = ruv_sim$prop,
-    add = ruv_sim$add
   )
-  # initialize objects for loop
-  tdms_i <- data.frame()
   
-  # MIPD trial
-  for (day in 1:4) {
-    # collect TDMs from today (use model for simulation!)
-    today <- (tdm_times >= (day - 1) * 24 & tdm_times < day * 24)
-    new_tdms <- collect_tdms(
-      sim_model = model_sim,
-      t_obs = tdm_times[today],
-      res_var = ruv_i[today,],
-      pars_i = par_true_i,
-      regimen = reg,
-      covariates = covs
-    )
-    tdms_i <- bind_rows(tdms_i, new_tdms)
-    
-    # get MAP fit, using model for estimation
-    est_par <- simulate_fit(
-      est_model = model_est,
-      parameters = parameters_est,
-      omega = omega_est,
-      ruv = ruv_est,
-      tdms = tdms_i,
-      covariates = covs,
-      regimen = reg
-    )
-    
-    # calculate new dose, using the estimation model, if we aren't on last day
-    if (day < 4) {
-      new_dose <- dose_grid_search(
-        est_model = model_est,
-        regimen = reg,
-        parameters = est_par, # we want to use our "best guess" to get the dose
-        t_obs = auc_times[2],
-        target = target,
-        obs_comp = attr(model_est, "size"), # last compartment is AUC
-        dose_update = day + 1, # update dose starting from next day
-        dose_grid = seq(from = 1, to = 400, by = (400 - 1) / 10),
-        covariates = covs,
-        iov_bins = attr(model_est, "iov")$bins
-      )
-      reg <- update_regimen(reg, new_dose, dose_update_number = day + 1)
-    }
-  }
+  treatment_summary <- sample_and_adjust_by_dose(
+    adjust_at_dose = adjust_at_dose, 
+    tdm_times = tdm_times,
+    regimen = reg,
+    covariates = covs,
+    pars_true_i = pars_true_i,
+    sim_model = model_sim,
+    sim_ruv = ruv_sim,
+    est_model = model_est,
+    est_parameters = parameters_est,
+    est_omega = omega_est,
+    est_ruv = ruv_est,
+    target_time = auc_times,
+    target = target
+  )
     
   # get final "true" and "estimated" cumulative AUC at end
   sim_true <- PKPDsim::sim(
     model_sim,
-    parameters = par_true_i, # true patient parameters
-    regimen = reg,
+    parameters = as.list(pars_true_i), # true patient parameters
+    regimen = treatment_summary$final_regimen,
     covariates = covs,
     t_obs = auc_times,
     iov_bins = attr(model_sim, "iov")$bins
@@ -272,8 +237,8 @@ for (i in ids) {
   auc_true <- calc_auc_from_sim(sim_true, attr(model_sim, "size"))
   sim_est <- PKPDsim::sim(
     model_est,
-    parameters = est_par, # best guess at patient parameter
-    regimen = reg,
+    parameters = treatment_summary$final_estimates, # best guess
+    regimen = treatment_summary$final_regimen,
     covariates = covs,
     t_obs = auc_times,
     iov_bins = attr(model_est, "iov")$bins
