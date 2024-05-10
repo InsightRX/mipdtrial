@@ -3,7 +3,10 @@
 #' Doses are iteratively adjusted for the specified dose numbers. Estimation is
 #' performed by MAP Bayesian estimation, and simulation is used to identify the
 #' dose most likely to reach the specified target. See `dose_grid_search` for
-#' dose-finding logic.
+#' dose-finding logic. Optionally, disparate models can be used for simulation
+#' and estimation, to allow for intentional model misspecification. Covariates
+#' supplied must support both models. True patient parameters (`pars_true_i`)
+#' must match the model used for simulation.
 #'
 #' Trial design or MIPD protocol can vary considerably in complexity. This
 #' function is intended to cover a broad range of relatively straight forward
@@ -15,14 +18,15 @@
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
-#' @param sim_model model to use for simulating "true" patient response.
-#' @param sim_ruv residual variability for `sim_model`. Named list for
-#'   proportional (`prop`) and additive (`add`) error.
 #' @param est_model model to use for estimating patient response.
 #' @param est_parameters parameters for `est_model`.
 #' @param est_omega omega matrix for `est_model`
 #' @param est_ruv residual variability for `est_model`. Named list for
 #'   proportional (`prop`) and additive (`add`) error.
+#' @param sim_model model to use for simulating "true" patient response. If
+#'   NULL, uses `est_model`.
+#' @param sim_ruv residual variability for `sim_model`. Named list for
+#'   proportional (`prop`) and additive (`add`) error. If NULL, uses `est_ruv`.
 #' @param dose_grid vector specifying doses to use as test grid for dose
 #'   finding, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 ). If
 #'   NULL, draws from around the initial dose provided in `regimen`.
@@ -43,12 +47,12 @@ sample_and_adjust_by_dose <- function(
   regimen,
   covariates = NULL,
   pars_true_i,
-  sim_model,
-  sim_ruv,
   est_model,
   est_parameters,
   est_omega,
   est_ruv,
+  sim_model = NULL,
+  sim_ruv = NULL,
   dose_grid = NULL,
   target = list(
     type = "conc",
@@ -57,12 +61,7 @@ sample_and_adjust_by_dose <- function(
   target_time = 24,
   ...
 ) {
-  # randomly draw error terms
-  ruv_i <- generate_ruv(
-    tdm_sample_time = tdm_times,
-    prop = sim_ruv$prop,
-    add = sim_ruv$add
-  )
+
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
 
   # base dose finding grid on initial regimen
@@ -83,6 +82,16 @@ sample_and_adjust_by_dose <- function(
   if (!any(tdm_times < first_dose_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }
+
+  if (is.null(sim_model)) sim_model <- est_model
+  if (is.null(sim_ruv)) sim_ruv <- est_ruv
+
+  # randomly draw error terms
+  ruv_i <- generate_ruv(
+    tdm_sample_time = tdm_times,
+    prop = sim_ruv$prop,
+    add = sim_ruv$add
+  )
 
   # initialize objects for loop
   tdms_i <- data.frame(
