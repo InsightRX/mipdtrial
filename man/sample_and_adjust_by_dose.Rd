@@ -10,11 +10,12 @@ sample_and_adjust_by_dose(
   regimen,
   covariates = NULL,
   pars_true_i,
-  sim_model,
   est_model,
   est_parameters,
   est_omega,
   est_ruv,
+  sim_model = NULL,
+  sim_ruv = NULL,
   dose_grid = NULL,
   target = list(type = "conc", value = 10),
   target_time = 24,
@@ -33,8 +34,6 @@ time of first dose.}
 
 \item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
 
-\item{sim_model}{model to use for simulating "true" patient response.}
-
 \item{est_model}{model to use for estimating patient response.}
 
 \item{est_parameters}{parameters for \code{est_model}.}
@@ -43,6 +42,12 @@ time of first dose.}
 
 \item{est_ruv}{residual variability for \code{est_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
+
+\item{sim_model}{model to use for simulating "true" patient response. If
+NULL, uses \code{est_model}.}
+
+\item{sim_ruv}{residual variability for \code{sim_model}. Named list for
+proportional (\code{prop}) and additive (\code{add}) error. If NULL, uses \code{est_ruv}.}
 
 \item{dose_grid}{vector specifying doses to use as test grid for dose
 finding, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 ). If
@@ -66,7 +71,10 @@ that is, both with and without residual variability).
 Doses are iteratively adjusted for the specified dose numbers. Estimation is
 performed by MAP Bayesian estimation, and simulation is used to identify the
 dose most likely to reach the specified target. See \code{dose_grid_search} for
-dose-finding logic.
+dose-finding logic. Optionally, disparate models can be used for simulation
+and estimation, to allow for intentional model misspecification. Covariates
+supplied must support both models. True patient parameters (\code{pars_true_i})
+must match the model used for simulation.
 }
 \details{
 Trial design or MIPD protocol can vary considerably in complexity. This
