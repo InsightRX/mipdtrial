@@ -54,9 +54,9 @@ doses 2, 3, and 4 to achieve a target cumulative AUC of 90 by t = 192 hours.
 tdm_times <- rep(c(3.5, 4, 6, 8), 4) + rep(c(0, 24, 48, 72), each = 4)
 adjust_at_dose <- c(2, 3, 4)
 
-target <- list(
-  type = "cum_auc",
-  value = 90 * 1000 # unit conversion
+target <- create_target_object(
+  targettype = "cum_auc", 
+  targetvalue = 90 * 1000       # unit conversion
 )
 auc_times <- 192
 

@@ -68,15 +68,7 @@ dose_grid_search <- function(
     ...
 ) {
 
-  target$type <- tolower(target$type)
-  accepted_conc_targets <- c(
-    "cmax", "cmax_1hr", "cmax_true",
-    "ctrough", "conc_continuous", "cmin", "conc"
-  )
-  accepted_auc_targets <- c("cum_auc", "auc")
-  accepted_time_targets <- c("t_gt_mic", "t_gt_4mic", "t_gt_mic_free", "t_gt_4mic_free")
-
-  if(target$type %in% accepted_time_targets) { #
+  if(target$type %in% target_types_time) { #
     if(min(target$range) >= 100) {
       target$variable <- ifelse(
         grepl("_free", target$type),
@@ -89,13 +81,13 @@ dose_grid_search <- function(
     }
   }
 
-  if(length(t_obs) > 1 && !target$type %in% c("auc", accepted_time_targets)) {
+  if(length(t_obs) > 1 && !target$type %in% c("auc", target_types_time)) {
     t_obs <- t_obs[1]
   }
 
-  if(target$type %in% c(accepted_conc_targets, accepted_time_targets)) {
+  if(target$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
-  } else if(target$type %in% accepted_auc_targets) {
+  } else if(target$type %in% target_types_auc) {
     if(is.null(obs_comp)) {
       stop("AUC compartment not specified")
     }
@@ -104,7 +96,7 @@ dose_grid_search <- function(
     stop("Target type not recognized!")
   }
 
-  if(target$type %in% c("auc", accepted_time_targets)) {
+  if(target$type %in% c("auc", target_types_time)) {
     if(length(t_obs) != 2) {
       stop("Need start and end of observation interval as vector t_obs.")
     }
@@ -125,7 +117,7 @@ dose_grid_search <- function(
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
     # time-based target methods also need to be refined since this target
     # is non-linear
-    refine <- target$type %in% accepted_time_targets || refine
+    refine <- target$type %in% target_types_time || refine
   }
 
   y <- mclapply(
@@ -148,7 +140,7 @@ dose_grid_search <- function(
   tab <- data.frame(dose = dose_grid, y = unlist(y))
 
   ## get best dose:
-  if (target$type %in% accepted_time_targets) {
+  if (target$type %in% target_types_time) {
     tab <- filter_rows_0_100(tab)
   }
 
@@ -259,8 +251,8 @@ simulate_dose <- function(dose_grid,
     dose_grid,
     length(reg$dose_amts[dose_update:length(reg$dose_amts)])
   )
-  accepted_time_targets <- c("t_gt_mic", "t_gt_4mic", "t_gt_mic_free", "t_gt_4mic_free")
-  if (target$type %in% accepted_time_targets) {
+  target_types_time <- c("t_gt_mic", "t_gt_4mic", "t_gt_mic_free", "t_gt_4mic_free")
+  if (target$type %in% target_types_time) {
     # need two time points for time-based targets
     t_obs <- c(t_obs - regimen$interval, t_obs)
   }
@@ -281,7 +273,7 @@ simulate_dose <- function(dose_grid,
       } else {
         return(diff(tmp[tmp$comp == obs, ]$y))
       }
-    } else if (target$type %in% accepted_time_targets) {
+    } else if (target$type %in% target_types_time) {
       return(
         tail(
           get_quantity_from_variable(

@@ -69,3 +69,33 @@ test_that("works if you have 0 and not 100 or vice versa", {
   expect_equal(res2$y, c(93, 100))
   expect_equal(res2$dose, c(3620, 4810))
 })
+
+test_that("is_single_valid_number returns TRUE for valid numbers", {
+  expect_true(is_single_valid_number(1))
+  expect_true(is_single_valid_number(-1))
+  expect_true(is_single_valid_number(0))
+  expect_true(is_single_valid_number(1.5))
+})
+
+test_that("is_single_valid_number returns FALSE for non-numeric values", {
+  expect_false(is_single_valid_number("a"))
+  expect_false(is_single_valid_number(TRUE))
+  expect_false(is_single_valid_number(NULL))
+  expect_false(is_single_valid_number(list(1)))
+})
+
+test_that("is_single_valid_number returns FALSE if length not equal to 1", {
+  expect_false(is_single_valid_number(c(1, 2)))
+  expect_false(is_single_valid_number(c()))
+})
+
+test_that("is_single_valid_number returns FALSE for NA, Inf, and NaN values", {
+  expect_false(is_single_valid_number(NA))
+  expect_false(is_single_valid_number(Inf))
+  expect_false(is_single_valid_number(-Inf))
+  expect_false(is_single_valid_number(NaN))
+})
+
+test_that("is_single_valid_number returns FALSE for non-atomic types", {
+  expect_false(is_single_valid_number(data.frame(a = 1)))
+})
