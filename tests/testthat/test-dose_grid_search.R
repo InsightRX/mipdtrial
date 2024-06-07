@@ -1,6 +1,9 @@
-suppressMessages( ## avoid message "the following objects are masked from ..."
-  require("pk1cmtivauc", character.only = TRUE)
-)
+suppressMessages({ ## avoid message "the following objects are masked from ..."
+  if (!require("pk1cmtivauc", character.only = TRUE)) {
+    PKPDsim::new_ode_model("pk_1cmt_iv_auc", install = TRUE)
+    library(pk1cmtivauc)
+  }
+})
 mod <- get("model", asNamespace("pk1cmtivauc"))()
 par <- list(CL = 1, V = 10)
 omega <- c(0.1, 0.05, 0.1)

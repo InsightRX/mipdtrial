@@ -1,6 +1,12 @@
 suppressMessages({ ## avoid message "the following objects are masked from ..."
-  require("pk1cmtivauc", character.only = TRUE)
-  require("pkbusulfanmccune", character.only = TRUE)
+  if (!require("pk1cmtivauc", character.only = TRUE)) {
+    PKPDsim::new_ode_model("pk_1cmt_iv_auc", install = TRUE)
+    library(pk1cmtivauc)
+  }
+  if (!require("pkbusulfanmccune", character.only = TRUE)) {
+    PKPDsim::install_default_literature_model("pk_busulfan_mccune")
+    library(pkbusulfanmccune)
+  }
 })
 mod <- get("model", asNamespace("pk1cmtivauc"))()
 par <- list(CL = 1, V = 10)

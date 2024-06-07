@@ -25,8 +25,14 @@ AUC-guided busulfan dosing.
 
 ```{r setup}
 library(mipdtrial)
-require(pkbusulfanmccune, warn.conflicts = FALSE)
-require(pkbusulfanshukla, warn.conflicts = FALSE)
+if(!require(pkbusulfanmccune, warn.conflicts = FALSE)) {
+  PKPDsim::install_default_literature_model("pk_busulfan_mccune")
+  library(pkbusulfanmccune)
+}
+if (!require(pkbusulfanshukla, warn.conflicts = FALSE)) {
+  PKPDsim::install_default_literature_model("pk_busulfan_shukla")
+  library(pkbusulfanshukla)
+}
 
 # For example data
 library(NHANES)
@@ -284,7 +290,7 @@ results %>%
 
 ```
 
-Even with some model misspecification, target attainment (with 20% of target 
+Even with some model misspecification, target attainment (within 20% of target 
 AUC) was still high:
 
 ```{r}
