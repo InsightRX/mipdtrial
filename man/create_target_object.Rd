@@ -8,7 +8,8 @@ create_target_object(
   targettype = mipd_target_types(),
   targetmin = NULL,
   targetmax = NULL,
-  targetvalue = NULL
+  targetvalue = NULL,
+  single_point_variation = 0.2
 )
 }
 \arguments{
@@ -20,6 +21,10 @@ create_target_object(
 \item{targetmax}{maximum value acceptable, must be specified with \code{targetmin}}
 
 \item{targetvalue}{single value for a target, overrides min and max values.}
+
+\item{single_point_variation}{acceptable variation from targetvalue. By
+default 20\%. Considered for assessment of target attainment a posteriori,
+not used for dose-finding logic.}
 }
 \description{
 This function helps the user define the PKPD target for a simulation. When a

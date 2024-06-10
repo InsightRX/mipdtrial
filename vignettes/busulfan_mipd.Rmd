@@ -230,29 +230,23 @@ for (i in ids) {
     target_time = auc_times,
     target = target
   )
-    
-  # get final "true" and "estimated" cumulative AUC at end
-  sim_true <- PKPDsim::sim(
-    model_sim,
-    parameters = as.list(pars_true_i), # true patient parameters
+  # extract metrics of interest
+  results$true_auc[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary$final_regimen,
-    covariates = covs,
+    parameters = pars_true_i, # true patient parameters
+    model = model_sim,
     t_obs = auc_times,
+    covariates = covs,
     iov_bins = attr(model_sim, "iov")$bins
   )
-  auc_true <- calc_auc_from_sim(sim_true, attr(model_sim, "size"))
-  sim_est <- PKPDsim::sim(
-    model_est,
-    parameters = treatment_summary$final_estimates, # best guess
+  results$est_auc[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary$final_regimen,
-    covariates = covs,
+    parameters = treatment_summary$final_estimates, # estimated patient PK
+    model = model_est,
     t_obs = auc_times,
+    covariates = covs,
     iov_bins = attr(model_est, "iov")$bins
   )
-  auc_est <- calc_auc_from_sim(sim_est, attr(model_est, "size"))
-  
-  results$true_auc[results$id == i] <- auc_true
-  results$est_auc[results$id == i] <- auc_est
 }
 
 ```
@@ -296,8 +290,7 @@ AUC) was still high:
 ```{r}
 target_attainment <- results %>%
   mutate(
-    ontarget = true_auc > 0.8 * target$value & true_auc < 1.2 * target$value
-  ) %>%
+    ontarget = is_on_target(true_auc,  target)) %>%
   summarize(proportion_ontarget = mean(ontarget)) %>%
   pull(proportion_ontarget)
 
