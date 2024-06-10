@@ -55,7 +55,7 @@ dose_grid_search <- function(
     omega = NULL,
     ruv = NULL,
     dose_update = 1,
-    dose_grid = NULL,
+    dose_grid = seq(1, 6000, by = 10),
     dose_resolution = 1,
     refine = NULL,
     refine_range = c(0.7, 1.4),
@@ -108,6 +108,9 @@ dose_grid_search <- function(
     if(is.null(omega)) {
       stop("PTA method requires specification of omega!")
     }
+  }
+  if (is.null(dose_grid) || any(is.na(dose_grid)) || length(dose_grid) < 2) {
+    stop("Must supply grid search space in `dose_grid`")
   }
   if(is.null(target$value) || length(target$value) == 0) {
     stop("Target not specified!")
@@ -251,10 +254,13 @@ simulate_dose <- function(dose_grid,
     dose_grid,
     length(reg$dose_amts[dose_update:length(reg$dose_amts)])
   )
-  target_types_time <- c("t_gt_mic", "t_gt_4mic", "t_gt_mic_free", "t_gt_4mic_free")
-  if (target$type %in% target_types_time) {
+
+  if (target$type %in% target_types_time || target$type == "auc") {
     # need two time points for time-based targets
     t_obs <- c(t_obs - regimen$interval, t_obs)
+  } else if (target$type == "auc24") {
+    # need 24 hours of dosing
+    t_obs <- c(t_obs - 24, t_obs)
   }
 
   tmp <- PKPDsim::sim(
@@ -267,7 +273,7 @@ simulate_dose <- function(dose_grid,
     ...
   )
   if (is.null(pta)) {
-    if (target$type == "auc") {
+    if (target$type %in% c("auc", "auc24")) {
       if(!is.null(target$variable)) {
         return(diff(tmp[[target$variable]][tmp$comp == obs]))
       } else {
@@ -312,4 +318,41 @@ simulate_dose <- function(dose_grid,
     }
     return(conc_bnd)
   }
+}
+
+
+#' Model-based starting dose
+#'
+#' A light wrapper for [dose_grid_search] for finding model-based starting doses
+#' and returning an appropriate regimen object.
+#'
+#' @param n number of doses
+#' @param interval dosing interval
+#' @param type dose type, e.g.: "infusion", "oral".
+#'   (see [PKPDsim::new_regimen()])
+#' @param t_inf infusion time
+#' ... arguments passed on to `dose_grid_search`
+#' @export
+#' @returns Returns a PKPDsim regimen populated with the model-predicted dose
+
+model_based_starting_dose <- function(
+  n,
+  interval,
+  type = "infusion",
+  t_inf = 1,
+  ...
+) {
+  reg <- PKPDsim::new_regimen(
+    amt = 1,
+    n = n,
+    type = type,
+    t_inf = t_inf,
+    interval = interval
+  )
+  starting_dose <- dose_grid_search(
+    regimen = reg,
+    ...
+  )
+  reg$dose_amts <- rep(starting_dose, length(reg$dose_amts))
+  reg
 }

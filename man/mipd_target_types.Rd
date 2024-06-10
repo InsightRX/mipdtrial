@@ -16,6 +16,7 @@ types:
 \item cmax: Peak concentration
 \item cmax_1hr: Peak concentration 1hr after dose
 \item ctrough, cmin: Trough concentration
+\item conc: generic concentration
 \item cum_auc: Cumulative AUC
 \item auc: auc over a dosing interval
 \item auc24: auc normalized to a 24-hour period

@@ -14,7 +14,7 @@ dose_grid_search(
   omega = NULL,
   ruv = NULL,
   dose_update = 1,
-  dose_grid = NULL,
+  dose_grid = seq(1, 6000, by = 10),
   dose_resolution = 1,
   refine = NULL,
   refine_range = c(0.7, 1.4),

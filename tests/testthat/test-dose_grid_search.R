@@ -239,3 +239,46 @@ test_that('nonlinear models have refining activated rather than defaulting to li
   # with refinement, we are closer to the target: 15.1 ** 2 = 228 (target = 225)
   expect_equal(refine, 15.1)
 })
+
+test_that("user-friendly error if no dose_grid", {
+  dose_grid_error <- "Must supply grid search space in `dose_grid`"
+  expect_error(
+    dose_grid_search(
+      est_model = mod,
+      dose_grid = NULL,
+      parameters = par,
+      regimen = reg,
+      refine = FALSE,
+      t_obs = intv * (n-1) + t_inf,
+      return_obj = FALSE,
+      target = list(value = 10, type = "conc", method = "nearest_value")
+    ),
+    dose_grid_error
+  )
+  expect_error(
+    dose_grid_search(
+      est_model = mod,
+      dose_grid = c(1000),
+      parameters = par,
+      regimen = reg,
+      refine = FALSE,
+      t_obs = intv * (n-1) + t_inf,
+      return_obj = FALSE,
+      target = list(value = 10, type = "conc", method = "nearest_value")
+    ),
+    dose_grid_error
+  )
+  expect_error(
+    dose_grid_search(
+      est_model = mod,
+      dose_grid = c(1000, NA),
+      parameters = par,
+      regimen = reg,
+      refine = FALSE,
+      t_obs = intv * (n-1) + t_inf,
+      return_obj = FALSE,
+      target = list(value = 10, type = "conc", method = "nearest_value")
+    ),
+    dose_grid_error
+  )
+})

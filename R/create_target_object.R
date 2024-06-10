@@ -50,6 +50,7 @@ create_target_object <- function(
 #' - cmax: Peak concentration
 #' - cmax_1hr: Peak concentration 1hr after dose
 #' - ctrough, cmin: Trough concentration
+#' - conc: generic concentration
 #' - cum_auc: Cumulative AUC
 #' - auc: auc over a dosing interval
 #' - auc24: auc normalized to a 24-hour period
@@ -64,6 +65,6 @@ mipd_target_types <- function() {
 
 target_types_auc <- c("cum_auc", "auc", "auc24")
 target_types_time <- c("t_gt_mic","t_gt_4mic","t_gt_mic_free","t_gt_4mic_free")
-target_types_conc <- c("cmax", "cmax_1hr", "ctrough", "cmin")
+target_types_conc <- c("cmax", "cmax_1hr", "ctrough", "cmin", "conc")
 
 

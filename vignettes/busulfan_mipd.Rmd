@@ -163,7 +163,7 @@ cov_mapping <- c(
 
 We want to record both "true" cumulative AUC and estimated cumulative AUC, 
 along with patient identifiers (i.e., id). We will pre-populate a data frame
-rather than iteratively binding rows, since that is more performent.
+rather than iteratively binding rows, since that is more performant.
 
 ```{r}
 results <- data.frame(
