@@ -136,3 +136,18 @@ test_that("No seed by default: RUV", {
   expect_true(all(out1$prop != out2$prop))
   expect_true(all(out1$add != out2$add))
 })
+
+test_that("Reasonable dummy regimen option selected", {
+  attr(mod, "cmt_mapping") <- list(drug1 = 1, drug2 = 1)
+  out <- generate_iiv(
+    mod,
+    omega,
+    par,
+    ids = "a",
+    n_iter = 1,
+    seed = 1
+  )
+  expect_true(inherits(out, "data.frame"))
+  expect_equal(nrow(out), 1)
+  expect_true(all(names(par) %in% colnames(out)))
+})

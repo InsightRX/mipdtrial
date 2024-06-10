@@ -57,7 +57,14 @@ generate_iiv <- function(
     lapply(req_covs, \(x) PKPDsim::new_covariate(value = 1)),
     req_covs
   )
-  reg <- PKPDsim::new_regimen(amt = 100, interval = 12, n = 3, type = "oral")
+  cmt_types <- attr(sim_model, "cmt_mapping")
+  reg <- PKPDsim::new_regimen(
+    amt = 100,
+    interval = 12,
+    n = 3,
+    t_inf = 1,
+    type = ifelse(is.null(cmt_types), "infusion", names(cmt_types)[1])
+  )
 
   # format IIV/IOV distributions
   iov_specs <- get_iov_specification(sim_model, parameters, omega)
