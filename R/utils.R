@@ -39,9 +39,9 @@ filter_rows_0_100 <- function(tab) {
 #' Checks that an object represents a single finite number
 #' @param n an object to check
 #' @examples
-#' is_single_valid_number(9)
-#' is_single_valid_number(mtcars)
-#' is_single_valid_number(c(1, 2))
+#' mipdtrial:::is_single_valid_number(9)
+#' mipdtrial:::is_single_valid_number(mtcars)
+#' mipdtrial:::is_single_valid_number(c(1, 2))
 
 is_single_valid_number <- function(n) {
   length(n) == 1 && is.atomic(n) && is.numeric(n) && !is.na(n) && is.finite(n)

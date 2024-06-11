@@ -1,6 +1,3 @@
-suppressMessages( ## avoid message "the following objects are masked from ..."
-  require("pkbusulfanmccune", character.only = TRUE)
-)
 # set up model info
 model <- pkbusulfanmccune::model()
 parameters <- pkbusulfanmccune::parameters()

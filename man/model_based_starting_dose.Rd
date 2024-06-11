@@ -14,8 +14,9 @@ model_based_starting_dose(n, interval, type = "infusion", t_inf = 1, ...)
 \item{type}{dose type, e.g.: "infusion", "oral".
 (see \code{\link[PKPDsim:new_regimen]{PKPDsim::new_regimen()}})}
 
-\item{t_inf}{infusion time
-... arguments passed on to \code{dose_grid_search}}
+\item{t_inf}{infusion time}
+
+\item{...}{arguments passed on to \code{dose_grid_search}}
 }
 \value{
 Returns a PKPDsim regimen populated with the model-predicted dose

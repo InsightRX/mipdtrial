@@ -1,14 +1,3 @@
-suppressMessages({ ## avoid message "the following objects are masked from ..."
-  if (!require("pk1cmtivauc", character.only = TRUE)) {
-    PKPDsim::new_ode_model("pk_1cmt_iv_auc", install = TRUE)
-    library(pk1cmtivauc)
-  }
-  if (!require("pkbusulfanmccune", character.only = TRUE)) {
-    PKPDsim::install_default_literature_model("pk_busulfan_mccune")
-    library(pkbusulfanmccune)
-  }
-})
-
 test_that("calc_auc_from_sim gets AUC", {
   sim_output <- data.frame(
     t = rep(c(0, 24, 48), 4),
@@ -33,7 +22,7 @@ test_that("calc_auc_from_sim: parameter mismatch raises error", {
   expect_error(
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
-      parameters = pk1cmtivauc::parameters(), # missing V2, Q
+      parameters = list(CL = 5, V = 50), # missing V2, Q
       model = pkbusulfanmccune::model(),
       t_obs = c(48, 72)
     ),
@@ -46,8 +35,8 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
   expect_equal(
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
-      parameters = pk1cmtivauc::parameters(),
-      model = pk1cmtivauc::model(),
+      parameters = list(CL = 5, V = 50),
+      model = mod_1cmt_iv,
       t_obs = c(48, 72)
     ),
     19.984296
@@ -57,7 +46,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = data.frame(ID = 1, CL = 5, V = 50),
-      model = pk1cmtivauc::model(),
+      model = mod_1cmt_iv, # defined in setup
       t_obs = c(48, 72)
     ),
     19.984296
@@ -67,7 +56,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = c(CL = 5, V = 50),
-      model = pk1cmtivauc::model(),
+      model = mod_1cmt_iv, # defined in setup
       t_obs = c(48, 72)
     ),
     19.984296

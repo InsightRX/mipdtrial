@@ -331,7 +331,7 @@ simulate_dose <- function(dose_grid,
 #' @param type dose type, e.g.: "infusion", "oral".
 #'   (see [PKPDsim::new_regimen()])
 #' @param t_inf infusion time
-#' ... arguments passed on to `dose_grid_search`
+#' @param ... arguments passed on to `dose_grid_search`
 #' @export
 #' @returns Returns a PKPDsim regimen populated with the model-predicted dose
 

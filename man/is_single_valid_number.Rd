@@ -13,7 +13,7 @@ is_single_valid_number(n)
 Checks that an object represents a single finite number
 }
 \examples{
-is_single_valid_number(9)
-is_single_valid_number(mtcars)
-is_single_valid_number(c(1, 2))
+mipdtrial:::is_single_valid_number(9)
+mipdtrial:::is_single_valid_number(mtcars)
+mipdtrial:::is_single_valid_number(c(1, 2))
 }
