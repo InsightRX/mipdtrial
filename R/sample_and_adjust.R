@@ -18,23 +18,11 @@
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
-#' @param est_model model to use for estimating patient response.
-#' @param est_parameters parameters for `est_model`.
-#' @param est_omega omega matrix for `est_model`
-#' @param est_ruv residual variability for `est_model`. Named list for
-#'   proportional (`prop`) and additive (`add`) error.
-#' @param sim_model model to use for simulating "true" patient response. If
-#'   NULL, uses `est_model`.
+#' @param sim_model model to use for simulating "true" patient response.
 #' @param sim_ruv residual variability for `sim_model`. Named list for
-#'   proportional (`prop`) and additive (`add`) error. If NULL, uses `est_ruv`.
-#' @param dose_grid vector specifying doses to use as test grid for dose
-#'   finding, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 ). If
-#'   NULL, draws from around the initial dose provided in `regimen`.
-#' @param target target for dose optimization. Named list with `type` (e.g.,
-#'   "conc", "auc") and `value` (e.g., 10).
-#' @param target_time time (in hours since first dose) at which target should be
-#'   estimated for dose finding.
-#' @param ... arguments passed on to `simulate_fit` or `dose_grid_search`
+#'   proportional (`prop`) and additive (`add`) error.
+#' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
+#'   function.
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `final_estimates` (MAP Bayesian estimation made with all
 #' available levels) and `tdms` (all collected levels, both true and measured,
@@ -47,18 +35,9 @@ sample_and_adjust_by_dose <- function(
   regimen,
   covariates = NULL,
   pars_true_i,
-  est_model,
-  est_parameters,
-  est_omega,
-  est_ruv,
-  sim_model = NULL,
+  sim_model,
   sim_ruv = NULL,
-  dose_grid = NULL,
-  target = list(
-    type = "conc",
-    value = 10
-  ),
-  target_time = 24,
+  dose_optimization_method = dose_adjust_map,
   ...
 ) {
 
@@ -82,9 +61,6 @@ sample_and_adjust_by_dose <- function(
   if (!any(tdm_times < first_dose_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }
-
-  if (is.null(sim_model)) sim_model <- est_model
-  if (is.null(sim_ruv)) sim_ruv <- est_ruv
 
   # randomly draw error terms
   ruv_i <- generate_ruv(
@@ -117,37 +93,70 @@ sample_and_adjust_by_dose <- function(
     )
     tdms_i <- rbind(tdms_i, new_tdms)
 
-    # get MAP fit, using model for estimation
-    est_par <- simulate_fit(
-      est_model = est_model,
-      parameters = est_parameters,
-      omega = est_omega,
-      ruv = est_ruv,
-      tdms = tdms_i,
-      covariates = covariates,
-      regimen = regimen,
-      ...
-    )
-
-    # calculate new dose, using the estimation model
-    new_dose <- dose_grid_search(
-      est_model = est_model,
-      regimen = regimen,
-      parameters = est_par, # we want to use our "best guess" to get the dose
-      t_obs = target_time,
-      target = target,
-      obs_comp = attr(est_model, "size"), # last compartment is AUC
-      dose_update = j,
-      dose_grid = dose_grid,
-      covariates = covariates,
-      iov_bins = attr(est_model, "iov")$bins,
-      ...
-    )
-    regimen <- update_regimen(regimen, new_dose, dose_update_number = j)
+    # update regimen based on specified algorithm
+    regimen <- dose_optimization_method(tdms = tdms, dose_update = j, ...)
   }
   list(
     final_regimen = regimen,
     final_estimates = est_par,
     tdms = tdms_i
   )
+}
+
+#' Adjust doses to achieve a target metric using MAP Bayesian estimation.
+#'
+#' Given a set of levels and a model definition, performs MAP Bayesian
+#' estimation of individual PK/PD parameters, then finds the appropriate dose
+#' to achieve the specified PK/PD target and updates the individual's regimen
+#' accordingly.
+#'
+#' @inheritParams simulate_fit
+#' @inheritParams dose_grid_search
+#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
+#'   PKPDsim::sim
+#' @returns
+
+dose_adjust_map <- function(
+  tdms,
+  est_model,
+  parameters,
+  omega,
+  ruv,
+  regimen,
+  covariates,
+  t_obs,
+  target,
+  dose_update,
+  dose_grid,
+  ...
+) {
+  # get MAP fit, using model for estimation
+  est_par <- simulate_fit(
+    est_model = est_model,
+    parameters = parameters,
+    omega = omega,
+    ruv = ruv,
+    tdms = tdms,
+    covariates = covariates,
+    regimen = regimen,
+    ...
+  )
+
+  # calculate new dose, using the estimation model
+  new_dose <- dose_grid_search(
+    est_model = est_model,
+    regimen = regimen,
+    parameters = est_par, # we want to use our "best guess" to get the dose
+    t_obs = target_time,
+    target = target,
+    obs_comp = PKPDsim::get_model_auc_compartment(est_model),
+    dose_update = dose_update,
+    dose_grid = dose_grid,
+    covariates = covariates,
+    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
+    ...
+  )
+  # return new regimen
+  regimen <- update_regimen(regimen, new_dose, dose_update)
+  list(regimen = regimen, additional_info = est_par)
 }
