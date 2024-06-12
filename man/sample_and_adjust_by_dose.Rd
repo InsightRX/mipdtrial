@@ -38,9 +38,9 @@ function.}
 }
 \value{
 a named list containing \code{final_regimen} (all doses after
-adjustment), \code{final_estimates} (MAP Bayesian estimation made with all
-available levels) and \code{tdms} (all collected levels, both true and measured,
-that is, both with and without residual variability).
+adjustment), \code{tdms} (all collected levels, both true and measured, that is,
+both with and without residual variability), and \code{additional_info}, which
+varies by \code{dose_optimization_method}. See selected function for details.
 }
 \description{
 Doses are iteratively adjusted for the specified dose numbers. Estimation is

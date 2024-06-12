@@ -24,9 +24,9 @@
 #' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
 #'   function.
 #' @returns a named list containing `final_regimen` (all doses after
-#' adjustment), `final_estimates` (MAP Bayesian estimation made with all
-#' available levels) and `tdms` (all collected levels, both true and measured,
-#' that is, both with and without residual variability).
+#' adjustment), `tdms` (all collected levels, both true and measured, that is,
+#' both with and without residual variability), and `additional_info`, which
+#' varies by `dose_optimization_method`. See selected function for details.
 #' @export
 
 sample_and_adjust_by_dose <- function(
@@ -42,12 +42,6 @@ sample_and_adjust_by_dose <- function(
 ) {
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
-
-  # base dose finding grid on initial regimen
-  if (is.null(dose_grid)) {
-    d1 <- regimen$dose_amts[1]
-    dose_grid <- seq(d1/5, d1 * 5, length.out = 10)
-  }
 
   if (max(adjust_at_dose) > length(regimen$dose_times)) {
     stop("Insufficient doses in `regimen` for all dose adjustments specified.")
@@ -78,6 +72,8 @@ sample_and_adjust_by_dose <- function(
   )
   last_adjust_time <- 0
 
+  additional_info <- c()
+
   for (j in adjust_at_dose) {
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[j]
@@ -94,12 +90,22 @@ sample_and_adjust_by_dose <- function(
     tdms_i <- rbind(tdms_i, new_tdms)
 
     # update regimen based on specified algorithm
-    regimen <- dose_optimization_method(tdms = tdms, dose_update = j, ...)
+    out <- dose_optimization_method(
+      tdms = tdms_i,
+      dose_update = j,
+      regimen = regimen,
+      ...
+    )
+    regimen <- out$regimen
+    additional_info <- c(
+      additional_info,
+      setNames(list(out$additional_info), paste0("dose_", j))
+    )
   }
   list(
     final_regimen = regimen,
-    final_estimates = est_par,
-    tdms = tdms_i
+    tdms = tdms_i,
+    additional_info = additional_info
   )
 }
 
@@ -114,7 +120,9 @@ sample_and_adjust_by_dose <- function(
 #' @inheritParams dose_grid_search
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
-#' @returns
+#' @returns Returns a named list: `regimen`: the updated regimen;
+#'   `additional_info`: the MAP parameter estimates
+#' @export
 
 dose_adjust_map <- function(
   tdms,
@@ -123,11 +131,11 @@ dose_adjust_map <- function(
   omega,
   ruv,
   regimen,
-  covariates,
-  t_obs,
+  covariates = NULL,
+  target_time,
   target,
   dose_update,
-  dose_grid,
+  dose_grid = NULL,
   ...
 ) {
   # get MAP fit, using model for estimation
@@ -143,11 +151,16 @@ dose_adjust_map <- function(
   )
 
   # calculate new dose, using the estimation model
+  if (is.null(dose_grid)) {
+    # base dose finding grid on initial regimen
+    d1 <- regimen$dose_amts[1]
+    dose_grid <- seq(d1/5, d1 * 5, length.out = 10)
+  }
   new_dose <- dose_grid_search(
     est_model = est_model,
     regimen = regimen,
     parameters = est_par, # we want to use our "best guess" to get the dose
-    t_obs = target_time,
+    target_time = target_time,
     target = target,
     obs_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,

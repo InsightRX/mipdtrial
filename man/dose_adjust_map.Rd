@@ -11,11 +11,11 @@ dose_adjust_map(
   omega,
   ruv,
   regimen,
-  covariates,
-  t_obs,
+  covariates = NULL,
+  target_time,
   target,
   dose_update,
-  dose_grid,
+  dose_grid = NULL,
   ...
 )
 }
@@ -35,7 +35,8 @@ elements for \code{prop} (proportional) and \code{add} (additive).}
 
 \item{covariates}{named list of PKPDsim covariates}
 
-\item{t_obs}{vector of observation times}
+\item{target_time}{vector of observation times at which to evaluate the
+target exposure.}
 
 \item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
 type, either "conc" or auc".}
@@ -47,6 +48,10 @@ seq(from = 50, to = 500, by = (500 - 50) / 10 )}
 
 \item{...}{arguments passed on to PKPDmap::get_map_estimates and/or
 PKPDsim::sim}
+}
+\value{
+Returns a named list: \code{regimen}: the updated regimen;
+\code{additional_info}: the MAP parameter estimates
 }
 \description{
 Given a set of levels and a model definition, performs MAP Bayesian

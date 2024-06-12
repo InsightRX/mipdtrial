@@ -24,7 +24,7 @@ test_that("calc_auc_from_sim: parameter mismatch raises error", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = list(CL = 5, V = 50), # missing V2, Q
       model = pkbusulfanmccune::model(),
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     "Model/parameter mismatch"
   )
@@ -37,7 +37,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = list(CL = 5, V = 50),
       model = mod_1cmt_iv,
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )
@@ -47,7 +47,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = data.frame(ID = 1, CL = 5, V = 50),
       model = mod_1cmt_iv, # defined in setup
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )
@@ -57,7 +57,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = c(CL = 5, V = 50),
       model = mod_1cmt_iv, # defined in setup
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )

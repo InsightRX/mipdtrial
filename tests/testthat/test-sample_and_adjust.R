@@ -18,17 +18,18 @@ test_that("trial by dose change works", {
     sim_model = mod,
     sim_ruv = list(prop = 0.1, add = 1),
     est_model = mod,
-    est_parameters = par,
-    est_omega = omega,
-    est_ruv = list(prop = 0.1, add = 1),
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
     target_time = 4 * 24,
-    target = list(type = "conc", value = 15)
+    target = list(type = "conc", value = 15),
+    dose_optimization_method = dose_adjust_map
   )
 
   # expected structure
   expect_true(inherits(out, "list"))
   expect_true(
-    all(c("final_regimen", "final_estimates", "tdms") %in% names(out))
+    all(c("final_regimen", "tdms", "additional_info") %in% names(out))
   )
 
   # expected doses are changed
@@ -46,13 +47,15 @@ test_that("trial by dose change works", {
   expect_false(any(tdms$true_y == tdms$y))
 
   # expected estimate structure
-  ests <- out$final_estimates
-  expect_equal(sort(names(ests)), sort(names(par)))
+  additional_info <- out$additional_info
+  expect_equal(names(additional_info), c("dose_2", "dose_4"))
+  expect_equal(sort(names(additional_info[[1]])), sort(names(par)))
+  expect_equal(sort(names(additional_info[[2]])), sort(names(par)))
 
   # reasonable output
   tmp <- PKPDsim::sim(
     mod,
-    parameters = ests, # best guess
+    parameters = additional_info[[2]], # best guess
     regimen = final_doses, # final regimen
     t_obs = 4 * 24,
     only_obs = TRUE
@@ -71,68 +74,36 @@ test_that("Supplying true pars as list also works", {
     sim_model = mod,
     sim_ruv = list(prop = 0.1, add = 1),
     est_model = mod,
-    est_parameters = par,
-    est_omega = omega,
-    est_ruv = list(prop = 0.1, add = 1),
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
     target_time = 4 * 24,
-    target = list(type = "conc", value = 10)
+    target = list(type = "conc", value = 10),
+    dose_optimization_method = dose_adjust_map
   )
 
   # expected structure
   expect_true(inherits(out, "list"))
   expect_true(
-    all(c("final_regimen", "final_estimates", "tdms") %in% names(out))
+    all(c("final_regimen", "tdms", "additional_info") %in% names(out))
   )
 
   # expected estimate structure
-  ests <- out$final_estimates
-  expect_equal(sort(names(ests)), sort(names(par)))
+  additional_info <- out$additional_info
+  expect_equal(names(additional_info), c("dose_2", "dose_4"))
+  expect_equal(sort(names(additional_info[[1]])), sort(names(par)))
+  expect_equal(sort(names(additional_info[[2]])), sort(names(par)))
 
   # reasonable output
   tmp <- PKPDsim::sim(
     mod,
-    parameters = ests, # best guess
+    parameters = additional_info[[2]], # best guess
     regimen = out$final_regimen, # final regimen
     t_obs = 4 * 24,
     only_obs = TRUE
   )
   # allow up to 5% error from goal of 10 mg/L
   expect_true(abs((tmp$y - 10)/10) < 0.05)
-})
-
-test_that("Can supply just one model (for both est and sim)", {
-
-  set.seed(1)
-  out1 <- sample_and_adjust_by_dose( #specify est and sim model
-    adjust_at_dose = c(2, 4),
-    tdm_times = c(12, 64),
-    regimen = regimen,
-    pars_true_i = list(CL = 1.5, V = 15),
-    sim_model = mod,
-    sim_ruv = list(prop = 0.1, add = 1),
-    est_model = mod,
-    est_parameters = par,
-    est_omega = omega,
-    est_ruv = list(prop = 0.1, add = 1),
-    target_time = 4 * 24,
-    target = list(type = "conc", value = 10)
-  )
-  set.seed(1)
-  out2 <- sample_and_adjust_by_dose( # specify just est_model
-    adjust_at_dose = c(2, 4),
-    tdm_times = c(12, 64),
-    regimen = regimen,
-    pars_true_i = list(CL = 1.5, V = 15),
-    est_model = mod,
-    est_parameters = par,
-    est_omega = omega,
-    est_ruv = list(prop = 0.1, add = 1),
-    target_time = 4 * 24,
-    target = list(type = "conc", value = 10)
-  )
-
-  # expected structure
-  expect_identical(out1, out2)
 })
 
 test_that("Can use separate models for sim and est", {
@@ -163,18 +134,19 @@ test_that("Can use separate models for sim and est", {
     sim_model = mod2,
     sim_ruv = list(prop = 0.05, add = 1),
     est_model = mod,
-    est_parameters = par,
-    est_omega = omega,
-    est_ruv = list(prop = 0.1, add = 1),
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
     target_time = 192,
-    target = list(type = "cum_auc", value = 90000)
+    target = list(type = "cum_auc", value = 90000),
+    dose_optimization_method = dose_adjust_map
   )
 
 
   # expected structure
   expect_true(inherits(out, "list"))
   expect_true(
-    all(c("final_regimen", "final_estimates", "tdms") %in% names(out))
+    all(c("final_regimen", "tdms", "additional_info") %in% names(out))
   )
 
   # expected doses are changed
@@ -192,13 +164,15 @@ test_that("Can use separate models for sim and est", {
   expect_false(any(tdms$true_y == tdms$y))
 
   # estimates correspond to estimation parameters and not simulation parameters
-  ests <- out$final_estimates
-  expect_equal(sort(names(ests)), sort(names(par)))
+  additional_info <- out$additional_info
+  expect_equal(names(additional_info), c("dose_2", "dose_4"))
+  expect_equal(sort(names(additional_info[[1]])), sort(names(par)))
+  expect_equal(sort(names(additional_info[[2]])), sort(names(par)))
 
   # reasonable output
   tmp <- PKPDsim::sim(
     mod,
-    parameters = ests, # best guess
+    parameters = additional_info[[2]], # best guess
     regimen = final_doses, # final regimen
     t_obs = 192,
     only_obs = FALSE

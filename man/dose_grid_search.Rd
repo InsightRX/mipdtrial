@@ -7,7 +7,7 @@
 dose_grid_search(
   est_model = NULL,
   regimen,
-  t_obs = 24,
+  target_time = 24,
   target = list(type = "conc", value = 10),
   obs_comp = NULL,
   pta = NULL,
@@ -32,7 +32,8 @@ dose_grid_search(
 
 \item{regimen}{PKPDsim regimen object}
 
-\item{t_obs}{vector of observation times}
+\item{target_time}{vector of observation times at which to evaluate the
+target exposure.}
 
 \item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
 type, either "conc" or auc".}

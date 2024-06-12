@@ -21,7 +21,7 @@ test_that("trough concentration search works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    t_obs = intv * n,
+    target_time = intv * n,
     return_obj = FALSE,
     target = list(value = 5, type = "conc", method = "nearest_value")
   )
@@ -33,7 +33,7 @@ test_that("trough concentration search works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .5, type="gt"),
-    t_obs = intv * n,
+    target_time = intv * n,
     return_obj = FALSE,
     target = list(value = 5, type = "conc", method = "nearest_value")
   )
@@ -45,7 +45,7 @@ test_that("trough concentration search works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .9, type="gt"),
-    t_obs = intv * n,
+    target_time = intv * n,
     return_obj = FALSE,
     target = list(value = 5, type = "conc", method = "nearest_value")
   )
@@ -58,7 +58,7 @@ test_that("trough concentration search works", {
     omega = omega, # needs omega now!
     pta = list(prob = .9, type="gt"),
     ruv = list(prop = .1, add = .5),
-    t_obs = intv * n,
+    target_time = intv * n,
     return_obj = FALSE,
     target = list(value = 5, type = "conc", method = "nearest_value")
   )
@@ -79,7 +79,7 @@ test_that("peak concentration search works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    t_obs = intv * (n-1) + t_inf,
+    target_time = intv * (n-1) + t_inf,
     return_obj = FALSE,
     target = list(value = 10, type = "conc", method = "nearest_value")
   )
@@ -94,7 +94,7 @@ test_that("AUC search works", {
     regimen = reg,
     obs_comp = 2,
     refine = FALSE,
-    t_obs = 5*intv,
+    target_time = 5*intv,
     target = list(
       value = 1500,
       type = "cum_auc",
@@ -111,7 +111,7 @@ test_that("AUC search works", {
     obs_comp = 2,  # take AUC, not conc!
     omega = omega,
     ruv = list(prop = .1, add = .5),
-    t_obs = intv * n,
+    target_time = intv * n,
     target = list(
       value = 1500,
       type = "cum_auc",
@@ -127,7 +127,7 @@ test_that("AUC search works", {
     pta = list(prob = .9, type="gt"),
     obs_comp = 2,  # take AUC, not conc!
     omega = omega,
-    t_obs = intv * n,
+    target_time = intv * n,
     target = list(
       value = 1500,
       type = "cum_auc",
@@ -152,7 +152,7 @@ test_that("Probability: less than target", {
     obs_comp = 2,  # take AUC, not conc!
     omega = omega,
     dose_resolution = 5,
-    t_obs = intv * n,
+    target_time = intv * n,
     return_obj = FALSE,
     target = list(
       value = 1500,
@@ -201,7 +201,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     parameters = ind_est,
     obs_comp = 2,
     target = target_def,
-    t_obs = 24,
+    target_time = 24,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -219,7 +219,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     parameters = ind_est,
     obs_comp = 2,
     target = target_def,
-    t_obs = 24,
+    target_time = 24,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -243,7 +243,7 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      t_obs = intv * (n-1) + t_inf,
+      target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
       target = list(value = 10, type = "conc", method = "nearest_value")
     ),
@@ -256,7 +256,7 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      t_obs = intv * (n-1) + t_inf,
+      target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
       target = list(value = 10, type = "conc", method = "nearest_value")
     ),
@@ -269,7 +269,7 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      t_obs = intv * (n-1) + t_inf,
+      target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
       target = list(value = 10, type = "conc", method = "nearest_value")
     ),

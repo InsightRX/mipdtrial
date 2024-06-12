@@ -38,8 +38,6 @@ type, either "conc" or auc".}
 
 \item{model}{model for simulating dose (estimation model)}
 
-\item{t_obs}{vector of observation times}
-
 \item{omega}{IIV matrix, for estimation model, for probability of target
 attainment target types.}
 
