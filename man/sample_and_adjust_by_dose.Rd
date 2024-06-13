@@ -33,6 +33,12 @@ time of first dose.}
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
 
+\item{dose_optimization_method}{A function that determines how doses should
+be adjusted given the collected drug levels. The function must return a
+named list of the structure \code{list(regimen = reg, additional_info = x)},
+where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
+another other information useful for post-processing of trial results.}
+
 \item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
 function.}
 }

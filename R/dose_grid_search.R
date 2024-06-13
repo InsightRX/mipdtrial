@@ -236,6 +236,7 @@ dose_grid_search <- function(
 #' @inheritParams dose_grid_search
 #' @param model model for simulating dose (estimation model)
 #' @param dose_grid element of the dose grid
+#' @param t_obs time at which observation should be calculated
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)
 #' @md
 simulate_dose <- function(dose_grid,

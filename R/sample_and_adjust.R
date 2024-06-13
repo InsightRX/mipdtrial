@@ -21,6 +21,11 @@
 #' @param sim_model model to use for simulating "true" patient response.
 #' @param sim_ruv residual variability for `sim_model`. Named list for
 #'   proportional (`prop`) and additive (`add`) error.
+#' @param dose_optimization_method A function that determines how doses should
+#'   be adjusted given the collected drug levels. The function must return a
+#'   named list of the structure `list(regimen = reg, additional_info = x)`,
+#'   where `reg` is the updated PKPDsim regimen for the patient and `x` can be
+#'   another other information useful for post-processing of trial results.
 #' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
 #'   function.
 #' @returns a named list containing `final_regimen` (all doses after
