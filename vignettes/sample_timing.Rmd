@@ -21,7 +21,7 @@ they were to switch to collecting a single sample at 5 hours post-dose.
 
 Here is how we could answer that problem using simulation!
 
-```{r setup}
+```{r setup,message=FALSE}
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
@@ -95,7 +95,16 @@ head(dat)
 We need to define the model parameters and variability terms for our simulation.
 For this study, we will use the ones defined in the models.
 
+
 ```{r echo=FALSE}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+  }
+```
+
+```{r message=FALSE}
 # Set up simulation model
 if (!require(pkvancothomson)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
