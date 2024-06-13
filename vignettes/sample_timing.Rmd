@@ -170,7 +170,7 @@ for (i in dat$ID) {
     covariates = covs,
     obs_comp = attr(model, "size"),
     # define PK target
-    t_obs = auc_time,
+    target_time = auc_time,
     target = target
   )
 
@@ -188,12 +188,15 @@ for (i in dat$ID) {
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
     est_model = model,
-    est_parameters = pop_parameters,
-    est_omega = omega,
-    est_ruv = ruv,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
     target_time = auc_time,
-    target = target
+    target = target,
+    dose_optimization_method = dose_adjust_map
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
     adjust_at_dose = adjust_at_dose, 
@@ -201,12 +204,15 @@ for (i in dat$ID) {
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
     est_model = model,
-    est_parameters = pop_parameters,
-    est_omega = omega,
-    est_ruv = ruv,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
     target_time = auc_time,
-    target = target
+    target = target,
+    dose_optimization_method = dose_adjust_map
   )
   
   # get steady-state AUC at end of treatment course
@@ -214,14 +220,14 @@ for (i in dat$ID) {
     regimen = treatment_summary1$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    t_obs = c(auc_time - 24, auc_time),
+    target_time = c(auc_time - 24, auc_time),
     covariates = covs
   )
   results$random[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary2$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    t_obs = c(auc_time - 24, auc_time),
+    target_time = c(auc_time - 24, auc_time),
     covariates = covs
   )
 }

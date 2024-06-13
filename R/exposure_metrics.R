@@ -51,7 +51,7 @@ calc_auc_from_regimen <- function(regimen, parameters, model, target_time, ...){
     parameters = parameters,
     regimen = regimen,
     t_obs = target_time,
-    iov_bins = iov[["bins"]]
+    iov_bins = iov[["bins"]],
     ...
   )
   calc_auc_from_sim(sim_output, attr(model, "size"))

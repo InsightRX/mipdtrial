@@ -94,6 +94,7 @@ sample_and_adjust_by_dose <- function(
       tdms = tdms_i,
       dose_update = j,
       regimen = regimen,
+      covariates = covariates,
       ...
     )
     regimen <- out$regimen
