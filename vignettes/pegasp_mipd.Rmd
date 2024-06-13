@@ -1,0 +1,319 @@
+---
+title: "pegasparaginase_mipd"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PEG-Asparaginase}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r setup}
+library(mipdtrial)
+require(pkpegasparaginasewurthwein, warn.conflicts = FALSE)
+require(pkpegasparaginasewurthwein, warn.conflicts = FALSE)
+
+# For data handling/plotting
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## 1. Define simulation parameters
+
+Given the long half-life of PEG-asparaginase, in this simulation trial patients 
+will receive 4 doses separated by 14 days levels collected every 14 days just 
+prior to the next dose. We will adjust doses 2 and 3 to achieve a steady state 
+asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
+
+```{r}
+tdm_times <- c( 13.9*24,  27.9*24,  41.9*24) 
+adjust_at_dose <- c(2, 3) 
+
+target <- list(
+  type = "conc",
+  value = 300 
+)
+
+conc_times <- c( 14*24,  28*24,  42*24) 
+```
+
+## 2. Create a set of digital patient covariates
+
+Synthetic dataset based on CDC growth curves of children.
+
+```{r}
+# Load required packages
+library(dplyr)
+library(tidyr)
+
+# Define age range (in months)
+age_range <- c(0, 60) 
+
+# Define sample size
+n <- 1000
+
+# Generate random ages within the specified range
+ages <- sort(runif(n, age_range[1], age_range[2]))
+
+# Generate random sexes (1 = male, 2 = female)
+sexes <- sample(c(1, 2), n, replace = TRUE)
+
+# Load CDC growth data from alternative source (example data)
+cdc_data <- data.frame(
+  Age = c( 24, 30, 36, 42, 48, 54, 60),
+  Sex = c(rep("M", 7), rep("F",7)),
+  Height_cm = c(87.6, 91.5, 94.6, 97.1, 99.2, 101.1, 102.7,
+                85.4, 89.5, 92.8, 95.5, 97.8, 99.7, 101.4),
+  Weight_kg = c( 12.4, 13.6, 14.8, 15.8, 16.8, 17.7, 18.6,
+                 11.9, 13.1, 14.2, 15.2, 16.1, 17.0, 17.8),
+  BMI = c( 16.2, 16.2, 16.5, 16.8, 17.1, 17.3, 17.6,
+           16.4, 16.4, 16.5, 16.7, 16.9, 17.1, 17.3),
+  BSA = c( 0.56, 0.61, 0.65, 0.69, 0.73, 0.76, 0.79,
+           0.54, 0.59, 0.63, 0.67, 0.71, 0.74, 0.77)
+)
+
+# Function to calculate height, weight, BMI, and BSA based on CDC growth curves
+get_ht_wt_bmi_bsa <- function(age, sex) {
+  age_months <- age
+  sex_label <- ifelse(sex == 1, "M", "F")
+  data_subset <- cdc_data %>%
+    filter(Age <= age_months & Sex == sex_label) %>%
+    arrange(desc(Age))
+  
+  height_cm <- data_subset$Height_cm[1]
+  weight_kg <- data_subset$Weight_kg[1]
+  bmi <- data_subset$BMI[1]
+  bsa <- data_subset$BSA[1]
+  
+  return(list(height_cm = height_cm, weight_kg = weight_kg, bmi = bmi, bsa = bsa))
+}
+
+# Calculate heights, weights, BMIs, and BSAs based on CDC growth curves
+ht_wt_bmi_bsa <- lapply(ages, function(x) {
+  get_ht_wt_bmi_bsa(x, sexes[which(ages == x)])
+})
+
+# Extract individual vectors
+heights <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$height_cm))
+weights <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$weight_kg))
+bmis <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$bmi))
+bsas <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$bsa))
+
+# Create a data frame
+patient_data <- data.frame(
+  ID = 1:n,
+  Age_months = ages,
+  Sex = factor(sexes, levels = c(1, 2), labels = c("Male", "Female")),
+  Height_cm = heights,
+  Weight_kg = weights,
+  BMI = bmis,
+  BSA = bsas
+)
+
+# Convert age to years
+patient_data$Age_years <- round(patient_data$Age_months / 12, 2)
+
+dat <- patient_data %>%
+  mutate(AGE = Age_years,
+         WT = Weight_kg,
+         HT = Height_cm,
+         SEX = ifelse(Sex=="Female",0,1)) %>%
+  select(ID,AGE,WT,HT,SEX,BMI,BSA)  %>%
+  filter(!is.na(WT))
+```
+
+Here are the first few rows of our data set:
+
+```{r}
+head(dat)
+```
+
+Sample size for simulation from synthetic dataset.
+
+```{r}
+ids <- sample(dat$ID,100)
+```
+
+## 3. Load model definitions
+
+We need to define the model parameters and variability terms for our simulation.
+For this study, we will use the ones defined in the models.
+
+```{r}
+# Set up simulation model 
+model_sim <- pkpegasparaginasewurthwein::model()
+parameters_sim <- pkpegasparaginasewurthwein::parameters()
+omega_sim <- pkpegasparaginasewurthwein::omega_matrix()
+ruv_sim <- pkpegasparaginasewurthwein::ruv()
+```
+
+We also need to link the covariates in our data set to the covariates expected
+in the model.
+
+```{r}
+# check which covariates are required for your model using 
+# `attr(model_sim, "covariates")`
+
+# check which covariates are in your data set using `colnames(dat)`
+cov_mapping <- c(
+  AGE = "AGE", 
+  WT = "WT", 
+  HT = "HT", 
+  BSA = "BSA",
+  SEX = "SEX"
+)
+```
+
+## 4. Initialize output metrics of interest
+
+We will pre-populate a data frame rather than iteratively binding rows, since
+that is more performent.
+
+```{r}
+results <- data.frame(
+  id = rep(ids,each=3),
+  iter = c(1,2,3),
+  day = c(14,28,42),
+  amt = rep(NA_real_,each=3),
+  conc = rep(NA_real_,each=3)
+)
+```
+
+
+## 5. Simulate a trial!
+
+Patients will start at a dose of 2000 IU/m2 if <22 yo and 2500 IU/m2 if >22 yo, 
+with doses capped at a maximum total dose of 3750 IU. We will then use
+`mipdtrial::dose_grid_search` to optimize doses to attain a target concentration 
+of 0.3 IU/mL.
+
+For inter-individual variability terms, we will use the inter-individual
+variability described by our model, since this should reflect the distribution 
+in patient pharmacokinetics. Later, we will estimate the individual PK 
+parameters using our estimation model and the measured TDMs we "collect".
+
+For residual error terms, we will use the residual error of our  model,
+since this is supposed to reflect the unexplained error (assay error, 
+etc.). This function creates a data frame of error to add to each simulated 
+concentrations to produced a measured therapeutic drug monitoring sample.
+
+```{r}
+set.seed(1) # important for reproducibility
+
+for (i in ids) {
+  # get patient covariates
+  covs <- create_cov_object(
+    dat[dat$ID == i,],
+    mapping = cov_mapping
+  )
+  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
+  reg <- PKPDsim::new_regimen(
+    amt = ifelse(covs$AGE$value >=22, 2500 * covs$BSA$value, 2000*covs$BSA$value), # FDA/COG starting dose
+    interval = 14*24,
+    n = 4,
+    t_inf = 1,
+    type = "infusion"
+  )
+  reg$dose_amts <-  ifelse(reg$dose_amts>3750,3750,reg$dose_amts) # cap doses at 3750 mg
+  # randomly draw individual PK parameters
+  pars_true_i <- generate_iiv(
+    sim_model = model_sim,
+    omega = omega_sim,
+    parameters = parameters_sim,
+    type="infusion"
+  )
+  
+  treatment_summary <- sample_and_adjust_by_dose(
+    adjust_at_dose = adjust_at_dose,
+    tdm_times = tdm_times,
+    regimen = reg,
+    covariates = covs,
+    pars_true_i = pars_true_i,
+    sim_model = model_sim,
+    sim_ruv = ruv_sim,
+    est_model = model_sim,
+    est_parameters = parameters_sim,
+    est_omega = omega_sim,
+    est_ruv = ruv_sim,
+    target_time = conc_times,
+    target = target,
+    )
+    
+  # get final asparaginase activity level
+  sim <- PKPDsim::sim(
+    model_sim,
+    parameters = as.list(pars_true_i), # true patient parameters
+    regimen = treatment_summary$final_regimen,
+    covariates = covs,
+    ruv = ruv,
+    t_obs = conc_times,
+    iov_bins = attr(model_sim, "iov")$bins,
+    only_obs=T
+  )
+  conc  <- sim$y
+  results$conc[results$id == i] <- conc
+  
+  #Add amounts
+  amt <- treatment_summary$final_regimen$dose_amts
+  results$amt[results$id == i] <- amt
+}
+```
+
+Here are the first few rows of our simulation results:
+
+```{r}
+head(results)
+```
+
+## 6. Analyze results
+
+How well did our patients get to target?
+
+```{r}
+results %>%
+  filter(day %in% c(14,28,42)) %>%
+  filter(!is.na(conc)) %>%
+  group_by(day) %>%
+  mutate(below_flag = ifelse(conc<100,1,0),
+         within_flag = ifelse(conc>=100 & conc<=500,1,0),
+         above_flag = ifelse(conc>500,1,0),
+         below_per = sum(below_flag)/length(below_flag),
+         within_per = sum(within_flag)/length(within_flag),
+         above_per = sum(above_flag)/length(above_flag)
+         ) %>%
+  ungroup() %>%
+  pivot_longer(
+    c(below_per,within_per,above_per),
+    names_to = "per_type",
+    values_to = "per"
+  ) %>%
+  mutate(per_type=case_when(per_type=="below_per"~"C. < 0.1 IU/mL",
+                            per_type=="within_per"~"B. 0.1 - 0.5 IU/mL",
+                            per_type=="above_per"~"A. > 0.5 IU/mL")) %>%
+  select(id,day,conc,per,per_type) %>%
+  filter(id==id[1]) %>%
+  ggplot(aes(x=day,
+             y=per*100,
+             group=per_type,
+             fill=per_type,
+             label = ifelse(round(per*100,1)==0,"",round(per*100,1))))+
+  geom_bar(position="stack", stat="identity")+
+  geom_text(size =3, position = position_stack(vjust = 0.6),color="black")+
+  #scale_fill_irx_d()+
+  theme_minimal()+
+  ylab("Percent (%)")+
+  xlab("Time (d)")+
+  theme(legend.title = element_blank())+
+  scale_x_continuous(breaks=c(14,28,42),labels=c(14,28,42))
+```
+
