@@ -4,7 +4,7 @@
 \alias{calc_auc_from_regimen}
 \title{Get AUC from a regimen}
 \usage{
-calc_auc_from_regimen(regimen, parameters, model, t_obs, ...)
+calc_auc_from_regimen(regimen, parameters, model, target_time, ...)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}
@@ -16,14 +16,14 @@ list.}
 
 \item{model}{model to use for AUC calculations.}
 
-\item{t_obs}{timepoint(s) at which to calculate AUC}
+\item{target_time}{timepoint(s) at which to calculate AUC}
 
 \item{...}{arguments passed on to PKPDsim::sim. Typical arguments include
 \code{covariates} or \code{iov_bins}}
 }
 \value{
 numeric vector of AUCs between each simulated time point. Control
-time period over which AUC should be calculated using \code{t_obs}.
+time period over which AUC should be calculated using \code{target_time}.
 }
 \description{
 Supply the final regimen and the final parameter estimates to get the final

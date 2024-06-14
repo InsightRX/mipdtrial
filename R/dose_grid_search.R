@@ -7,7 +7,8 @@
 #' @param regimen PKPDsim regimen object
 #' @param target list with arguments `type`, and `value`. `type` = observation
 #'   type, either "conc" or auc".
-#' @param t_obs vector of observation times
+#' @param target_time vector of observation times at which to evaluate the
+#'   target exposure.
 #' @param obs_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
 #'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
@@ -45,7 +46,7 @@
 dose_grid_search <- function(
     est_model = NULL,
     regimen,
-    t_obs = 24,
+    target_time = 24,
     target = list(
       type = "conc",
       value = 10
@@ -81,8 +82,8 @@ dose_grid_search <- function(
     }
   }
 
-  if(length(t_obs) > 1 && !target$type %in% c("auc", target_types_time)) {
-    t_obs <- t_obs[1]
+  if(length(target_time) > 1 && !target$type %in% c("auc", target_types_time)) {
+    target_time <- target_time[1]
   }
 
   if(target$type %in% c(target_types_conc, target_types_time)) {
@@ -97,8 +98,8 @@ dose_grid_search <- function(
   }
 
   if(target$type %in% c("auc", target_types_time)) {
-    if(length(t_obs) != 2) {
-      stop("Need start and end of observation interval as vector t_obs.")
+    if(length(target_time) != 2) {
+      stop("Need start and end of observation interval as vector target_time.")
     }
   }
   if (target$type == "auc" & !is.null(pta)) {
@@ -132,7 +133,7 @@ dose_grid_search <- function(
     pta = pta,
     target = target,
     model = est_model,
-    t_obs = t_obs,
+    t_obs = target_time,
     omega = omega,
     obs = obs,
     ruv = ruv,
@@ -173,7 +174,7 @@ dose_grid_search <- function(
       dose <- dose_grid_search(
         est_model = est_model,
         regimen = regimen,
-        t_obs = t_obs,
+        target_time = target_time,
         target = target,
         obs_comp = obs_comp,
         pta = pta,
@@ -198,7 +199,7 @@ dose_grid_search <- function(
     dose <- dose_grid_search(
       est_model = est_model,
       regimen = regimen,
-      t_obs = t_obs,
+      target_time = target_time,
       target = target,
       obs_comp = obs_comp,
       pta = pta,
@@ -235,6 +236,7 @@ dose_grid_search <- function(
 #' @inheritParams dose_grid_search
 #' @param model model for simulating dose (estimation model)
 #' @param dose_grid element of the dose grid
+#' @param t_obs time at which observation should be calculated
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)
 #' @md
 simulate_dose <- function(dose_grid,

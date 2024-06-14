@@ -24,7 +24,7 @@ test_that("calc_auc_from_sim: parameter mismatch raises error", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = list(CL = 5, V = 50), # missing V2, Q
       model = pkbusulfanmccune::model(),
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     "Model/parameter mismatch"
   )
@@ -37,7 +37,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = list(CL = 5, V = 50),
       model = mod_1cmt_iv,
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )
@@ -47,7 +47,7 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = data.frame(ID = 1, CL = 5, V = 50),
       model = mod_1cmt_iv, # defined in setup
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )
@@ -57,8 +57,54 @@ test_that("calc_auc_from_sim: correct AUC calculated", {
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
       parameters = c(CL = 5, V = 50),
       model = mod_1cmt_iv, # defined in setup
-      t_obs = c(48, 72)
+      target_time = c(48, 72)
     ),
     19.984296
   )
 })
+
+test_that("handles IOV correctly", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 200,
+    interval = 24,
+    times = 4,
+    t_inf = 3,
+    type = "infusion"
+  )
+  mod <- pkbusulfanmccune::model()
+  pars <- pkbusulfanmccune::parameters()
+  covs <- list(AGE = 15, WT = 70, HT = 150, SEX = 0, T_CL_EFF = 0)
+  result1a <- calc_auc_from_regimen(
+    regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
+    parameters = pars,
+    model = mod,
+    target_time = c(0, 24),
+    covariates = covs
+  )
+  result1b <- calc_auc_from_regimen(
+    regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
+    parameters = pars,
+    model = mod,
+    target_time = c(48, 72),
+    covariates = covs
+  )
+  pars$kappa_CL_3 <- 2
+  pars$kappa_CL_4 <- 2
+  result2a <- calc_auc_from_regimen(
+    regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
+    parameters = pars,
+    model = mod,
+    target_time = c(0, 24),
+    covariates = covs
+  )
+  result2b <- calc_auc_from_regimen(
+    regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
+    parameters = pars,
+    model = mod,
+    target_time = c(48, 72),
+    covariates = covs
+  )
+  expect_equal(result1a, result2a) # iov is the same on day 1
+  expect_false(result2a == result2b) # iov is different after day 3
+})
+
