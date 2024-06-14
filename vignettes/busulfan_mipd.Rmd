@@ -31,7 +31,7 @@ if (.Platform$OS.type == "windows") {
   }
 ```
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, warning=FALSE}
 library(mipdtrial)
 if(!require(pkbusulfanmccune, warn.conflicts = FALSE)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")

@@ -104,7 +104,7 @@ if (.Platform$OS.type == "windows") {
   }
 ```
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 # Set up simulation model
 if (!require(pkvancothomson)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
