@@ -1,31 +1,32 @@
+#' Create sampling schemes (static or adaptive) for use in simulated trial
+#'
 #' Sampling times can usually be pre-specified if the dosing schedule is fixed.
-#' In that case a scheme can be prespecified with static timepoints e.g.
-#' `c(1, 7.5, 25, 31.5)` for taking peak-trough samples at dose 1 and 4 for an
-#' 8-hour regimen.
+#' In that case a scheme can be specified with static timepoints e.g.
+#' `time = c(1, 7.5, 25, 31.5)` for taking peak-trough samples at dose
+#' 1 and 4 for an 8-hour regimen.
 #'
 #' However, when the dosing interval is adaptive, the peak and trough sampling
 #' times cannot stay static and have to be adapted on-the-fly during
 #' simulations.
 #'
-#' @param time a vector of either all numeric values or all character values. If
-#' numeric values are specified, these will be used as the fixed sampling times
-#' in the simulated trial. If character values are supplied, the sampling times
-#' will be calculated adaptively during the trial, if needed. The "times" should
-#' then be of the form "<anchor><+/-><offset>", e.g. "trough-0.5" or "peak+0.5",
-#' meaning the trough for the referenced dose minus half an hour, or the peak for the
-#' referenced dose plus half an hour. The `anchor` determine which dose is
-#' used as reference anchor.
+#' @param time a vector of numeric values. If no `anchor` values are specified,
+#' these will be used as the fixed sampling times in the simulated trial.
+#' If `anchor` values are supplied, the sampling times  will be calculated
+#' adaptively during the trial. The `anchor` determine which dose is
+#' used as reference anchor, and `time` will be relative to the specified
+#' `anchor`.
 #' @param offset_base character vector of same length as `time` (or single
 #' value) determining how to interpret the provided sampling `time`. If `NULL`
 #' will use the dose time as offset (default). Other options are `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
 #' `cmin` or `trough`, which will use the time of next dose as the offset.
-#' @param anchor numeric vector of the dose number of day number to "anchor"
-#' the TDMs to. Vector needs to be of same length as `t`. If `anchor_by` is set
-#' to `day`, then the first dose in that day is used. If later doses in the day
-#' are preferred, the anchor can also be specified fractionally, e.g. `1.5`
-#' will use the time of the first dose in the second half of the 1st day.
-#' @param anchor_by either "day" or "dose". Single value required, i.e. anchor
+#' @param anchor numeric vector of the dose or day number to "anchor"
+#' the sampling times to. Vector needs to be of same length as `t`.
+#' If `anchor_by` is set to `day`, then the first dose in that day is used.
+#' If later doses in the day are preferred, the anchor can also be specified
+#' fractionally, e.g. `1.5` will use the time of the first dose in the
+#' second half of the 1st day.
+#' @param anchor_by either `day` or `dose`. Single value required, i.e. anchor
 #' types cannot be mixed.
 #'
 #' @export
