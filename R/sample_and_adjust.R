@@ -13,8 +13,8 @@
 #' designs, and may serve as a template for more complex designs.
 #'
 #' @param adjust_at_dose vector of integers indicating which doses to adjust
-#' @param tdm_times vector of times to sample at, in hours starting from the
-#'   time of first dose.
+#' @param sampling_scheme a data.frame with a sampling scheme, created using
+#' `create_sampling_scheme()`.
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
@@ -36,7 +36,7 @@
 
 sample_and_adjust_by_dose <- function(
   adjust_at_dose,
-  tdm_times,
+  sampling_scheme,
   regimen,
   covariates = NULL,
   pars_true_i,
@@ -57,6 +57,7 @@ sample_and_adjust_by_dose <- function(
     stop("TDM collection before the first dose is not yet supported")
   }
   first_dose_time <- regimen$dose_times[adjust_at_dose[1]]
+  tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
   if (!any(tdm_times < first_dose_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }

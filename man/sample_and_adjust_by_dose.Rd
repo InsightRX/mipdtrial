@@ -6,7 +6,7 @@
 \usage{
 sample_and_adjust_by_dose(
   adjust_at_dose,
-  tdm_times,
+  sampling_scheme,
   regimen,
   covariates = NULL,
   pars_true_i,
@@ -19,8 +19,8 @@ sample_and_adjust_by_dose(
 \arguments{
 \item{adjust_at_dose}{vector of integers indicating which doses to adjust}
 
-\item{tdm_times}{vector of times to sample at, in hours starting from the
-time of first dose.}
+\item{sampling_scheme}{a data.frame with a sampling scheme, created using
+\code{create_sampling_scheme()}.}
 
 \item{regimen}{PKPDsim regimen object, containing initial dosing regimen.}
 

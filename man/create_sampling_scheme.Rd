@@ -9,7 +9,8 @@ In that case a scheme can be prespecified with static timepoints e.g.
 \usage{
 create_sampling_scheme(
   time = NULL,
-  anchors = NULL,
+  offset_base = NULL,
+  anchor = NULL,
   anchor_by = c("day", "dose")
 )
 }
@@ -20,10 +21,16 @@ in the simulated trial. If character values are supplied, the sampling times
 will be calculated adaptively during the trial, if needed. The "times" should
 then be of the form "\if{html}{\out{<anchor>}}<+/->\if{html}{\out{<offset>}}", e.g. "trough-0.5" or "peak+0.5",
 meaning the trough for the referenced dose minus half an hour, or the peak for the
-referenced dose plus half an hour. The \code{anchors} determine which dose is
+referenced dose plus half an hour. The \code{anchor} determine which dose is
 used as reference anchor.}
 
-\item{anchors}{numeric vector of the dose number of day number to "anchor"
+\item{offset_base}{character vector of same length as \code{time} (or single
+value) determining how to interpret the provided sampling \code{time}. If \code{NULL}
+will use the dose time as offset (default). Other options are \code{cmax} or
+\code{peak}, which will use the end of infusion as the base for the \code{time}, or
+\code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
+
+\item{anchor}{numeric vector of the dose number of day number to "anchor"
 the TDMs to. Vector needs to be of same length as \code{t}. If \code{anchor_by} is set
 to \code{day}, then the first dose in that day is used. If later doses in the day
 are preferred, the anchor can also be specified fractionally, e.g. \code{1.5}

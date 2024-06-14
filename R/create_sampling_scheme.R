@@ -13,9 +13,14 @@
 #' will be calculated adaptively during the trial, if needed. The "times" should
 #' then be of the form "<anchor><+/-><offset>", e.g. "trough-0.5" or "peak+0.5",
 #' meaning the trough for the referenced dose minus half an hour, or the peak for the
-#' referenced dose plus half an hour. The `anchors` determine which dose is
+#' referenced dose plus half an hour. The `anchor` determine which dose is
 #' used as reference anchor.
-#' @param anchors numeric vector of the dose number of day number to "anchor"
+#' @param offset_base character vector of same length as `time` (or single
+#' value) determining how to interpret the provided sampling `time`. If `NULL`
+#' will use the dose time as offset (default). Other options are `cmax` or
+#' `peak`, which will use the end of infusion as the base for the `time`, or
+#' `cmin` or `trough`, which will use the time of next dose as the offset.
+#' @param anchor numeric vector of the dose number of day number to "anchor"
 #' the TDMs to. Vector needs to be of same length as `t`. If `anchor_by` is set
 #' to `day`, then the first dose in that day is used. If later doses in the day
 #' are preferred, the anchor can also be specified fractionally, e.g. `1.5`
@@ -26,45 +31,42 @@
 #' @export
 #'
 create_sampling_scheme <- function(
-    time = NULL,
-    anchors = NULL,
-    anchor_by = c("day", "dose")
+  time = NULL,
+  offset_base = NULL,
+  anchor = NULL,
+  anchor_by = c("day", "dose")
 ) {
   anchor_by <- match.arg(anchor_by)
-  if(inherits(time, "character")) {
-    if(is.null(anchors)) {
-      stop("Please specify `anchors` when supplying `time` as adaptive values.")
+  if(!is.null(anchor)) {
+    if(length(anchor) != length(time)) {
+      stop("Please specify `anchor` with same length as `time`")
     }
-    if(length(anchors) != length(time)) {
-      stop("Please specify `anchors` with same length as `time`")
+    if(length(offset_base) == 1) offset_base <- rep(offset_base, length(time))
+    if(length(offset_base) != length(time)) {
+      stop("Please specify `offset` with same length as `time`, or as single value.")
     }
-    allowed_times <- c("dose", "trough", "peak", "cmax", "cmin")
-    t_clean <- unlist(
-      lapply(stringr::str_split(time, "[+-]"), function(x) x[1])
-    )
-    if(any(! unique(t_clean) %in% c(allowed_times))) {
+    allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
+    if(any(! unique(offset_base) %in% c(allowed_bases))) {
       stop(
-        "Please specify only any of: ", paste(allowed_times, collapse = ", "),
+        "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
         " when using adaptive times."
       )
     }
-    offsets <- as.numeric(stringr::str_extract_all(time, "[+-].*$"))
-    if(any(is.na(offsets))) offsets[is.na(offsets)] <- 0
     scheme <- data.frame(
-      time = t_clean,
-      offset_from_dose = offsets,
-      anchor = anchors,
+      base = offset_base,
+      offset = time,
+      anchor = anchor,
       anchor_by = anchor_by
     )
   } else {
     if(! all(is.numeric(time))) {
-      stop("When not anchoring TDM times to dose or day, `t` must be all numeric.")
+      stop("When not anchoring TDM times to `dose` or `day`, `time` must be all numeric.")
     }
     scheme <- data.frame(
-      time = time,
-      offset_from_dose = NA,
-      anchor = NA,
-      anchor_by = "time"
+      base = "dose",
+      offset = time,
+      anchor = 1,
+      anchor_by = "dose"
     )
   }
   scheme
