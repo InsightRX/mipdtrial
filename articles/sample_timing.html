@@ -277,7 +277,7 @@ described in the model.</p>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    obs_comp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model</span>, <span class="st">"size"</span><span class="op">)</span>,</span>
 <span>    <span class="co"># define PK target</span></span>
-<span>    t_obs <span class="op">=</span> <span class="va">auc_time</span>,</span>
+<span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
 <span>    target <span class="op">=</span> <span class="va">target</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
@@ -295,12 +295,15 @@ described in the model.</p>
 <span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
+<span>    sim_model <span class="op">=</span> <span class="va">model</span>,</span>
+<span>    sim_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    est_parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
-<span>    est_omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    est_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
+<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
+<span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
 <span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span></span>
+<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
+<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">treatment_summary2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
 <span>    adjust_at_dose <span class="op">=</span> <span class="va">adjust_at_dose</span>, </span>
@@ -308,12 +311,15 @@ described in the model.</p>
 <span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
+<span>    sim_model <span class="op">=</span> <span class="va">model</span>,</span>
+<span>    sim_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    est_parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
-<span>    est_omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    est_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
+<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
+<span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
 <span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span></span>
+<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
+<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
 <span>  <span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="co"># get steady-state AUC at end of treatment course</span></span>
@@ -321,14 +327,14 @@ described in the model.</p>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary1</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    t_obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
+<span>    target_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">results</span><span class="op">$</span><span class="va">random</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary2</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    t_obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
+<span>    target_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>

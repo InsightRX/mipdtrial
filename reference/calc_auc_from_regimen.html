@@ -55,7 +55,7 @@ estimates to get the final true AUC.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_auc_from_regimen</span><span class="op">(</span><span class="va">regimen</span>, <span class="va">parameters</span>, <span class="va">model</span>, <span class="va">t_obs</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_auc_from_regimen</span><span class="op">(</span><span class="va">regimen</span>, <span class="va">parameters</span>, <span class="va">model</span>, <span class="va">target_time</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,7 +75,7 @@ list.</p></dd>
 <dd><p>model to use for AUC calculations.</p></dd>
 
 
-<dt>t_obs</dt>
+<dt>target_time</dt>
 <dd><p>timepoint(s) at which to calculate AUC</p></dd>
 
 
@@ -89,7 +89,7 @@ list.</p></dd>
     
 
 <p>numeric vector of AUCs between each simulated time point. Control
-time period over which AUC should be calculated using <code>t_obs</code>.</p>
+time period over which AUC should be calculated using <code>target_time</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -392,28 +392,28 @@ therapeutic drug monitoring sample.</p>
 <span>    sim_model <span class="op">=</span> <span class="va">model_sim</span>,</span>
 <span>    sim_ruv <span class="op">=</span> <span class="va">ruv_sim</span>,</span>
 <span>    est_model <span class="op">=</span> <span class="va">model_est</span>,</span>
-<span>    est_parameters <span class="op">=</span> <span class="va">parameters_est</span>,</span>
-<span>    est_omega <span class="op">=</span> <span class="va">omega_est</span>,</span>
-<span>    est_ruv <span class="op">=</span> <span class="va">ruv_est</span>,</span>
+<span>    parameters <span class="op">=</span> <span class="va">parameters_est</span>,</span>
+<span>    omega <span class="op">=</span> <span class="va">omega_est</span>,</span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv_est</span>,</span>
 <span>    target_time <span class="op">=</span> <span class="va">auc_times</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span></span>
+<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
+<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="co"># extract metrics of interest</span></span>
 <span>  <span class="va">results</span><span class="op">$</span><span class="va">true_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model_sim</span>,</span>
-<span>    t_obs <span class="op">=</span> <span class="va">auc_times</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    iov_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model_sim</span>, <span class="st">"iov"</span><span class="op">)</span><span class="op">$</span><span class="va">bins</span></span>
+<span>    target_time <span class="op">=</span> <span class="va">auc_times</span>,</span>
+<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
+<span>  <span class="va">final_parameters</span> <span class="op">&lt;-</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
 <span>  <span class="va">results</span><span class="op">$</span><span class="va">est_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_estimates</span>, <span class="co"># estimated patient PK</span></span>
+<span>    parameters <span class="op">=</span> <span class="va">final_parameters</span>, <span class="co"># estimated patient PK</span></span>
 <span>    model <span class="op">=</span> <span class="va">model_est</span>,</span>
-<span>    t_obs <span class="op">=</span> <span class="va">auc_times</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    iov_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model_est</span>, <span class="st">"iov"</span><span class="op">)</span><span class="op">$</span><span class="va">bins</span></span>
+<span>    target_time <span class="op">=</span> <span class="va">auc_times</span>,</span>
+<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Here are the first few rows of our simulation results:</p>
