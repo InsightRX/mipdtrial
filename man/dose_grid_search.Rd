@@ -9,7 +9,7 @@ dose_grid_search(
   regimen,
   target_time = 24,
   target = list(type = "conc", value = 10),
-  obs_comp = NULL,
+  auc_comp = NULL,
   pta = NULL,
   omega = NULL,
   ruv = NULL,
@@ -38,7 +38,7 @@ target exposure.}
 \item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
 type, either "conc" or auc".}
 
-\item{obs_comp}{auc compartment (starting from 1, R-style not C-style!)}
+\item{auc_comp}{auc compartment (starting from 1, R-style not C-style!)}
 
 \item{pta}{probability of target attainment, list with arguments \code{type} and
 \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for

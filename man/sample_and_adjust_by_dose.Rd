@@ -13,6 +13,8 @@ sample_and_adjust_by_dose(
   sim_model,
   sim_ruv = NULL,
   dose_optimization_method = dose_adjust_map,
+  verbose = FALSE,
+  accumulate_data = TRUE,
   ...
 )
 }
@@ -38,6 +40,12 @@ be adjusted given the collected drug levels. The function must return a
 named list of the structure \code{list(regimen = reg, additional_info = x)},
 where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
 another other information useful for post-processing of trial results.}
+
+\item{verbose}{verbose output?}
+
+\item{accumulate_data}{if \code{TRUE}, will use all available data up until the
+adjustment timepoint. If set to \code{FALSE}, will use only the data since the
+last adjustment timepoint and the current one.}
 
 \item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
 function.}

@@ -9,7 +9,7 @@
 #'   type, either "conc" or auc".
 #' @param target_time vector of observation times at which to evaluate the
 #'   target exposure.
-#' @param obs_comp auc compartment (starting from 1, R-style not C-style!)
+#' @param auc_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
 #'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
 #'   specific conc or auc.
@@ -51,7 +51,7 @@ dose_grid_search <- function(
       type = "conc",
       value = 10
     ),
-    obs_comp = NULL,
+    auc_comp = NULL,
     pta = NULL,
     omega = NULL,
     ruv = NULL,
@@ -89,10 +89,10 @@ dose_grid_search <- function(
   if(target$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
   } else if(target$type %in% target_types_auc) {
-    if(is.null(obs_comp)) {
+    if(is.null(auc_comp)) {
       stop("AUC compartment not specified")
     }
-    obs <- obs_comp
+    obs <- auc_comp
   } else {
     stop("Target type not recognized!")
   }
@@ -157,10 +157,8 @@ dose_grid_search <- function(
   } else {
     tmp <- tab[order(abs(tab$y - target$value)),][1:2,]
   }
-
   fit <- lm(dose ~ y, data.frame(tmp))
   dose <- as.numeric(predict(fit, list(y=target$value)))
-  fit_reverse <- lm(y ~ dose, data.frame(tmp))
 
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
     if(dose == dose_grid[1] && dose > min_dose) {

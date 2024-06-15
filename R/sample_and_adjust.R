@@ -26,8 +26,12 @@
 #'   named list of the structure `list(regimen = reg, additional_info = x)`,
 #'   where `reg` is the updated PKPDsim regimen for the patient and `x` can be
 #'   another other information useful for post-processing of trial results.
+#' @param accumulate_data if `TRUE`, will use all available data up until the
+#' adjustment timepoint. If set to `FALSE`, will use only the data since the
+#' last adjustment timepoint and the current one.
 #' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
 #'   function.
+#' @param verbose verbose output?
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `tdms` (all collected levels, both true and measured, that is,
 #' both with and without residual variability), and `additional_info`, which
@@ -43,6 +47,8 @@ sample_and_adjust_by_dose <- function(
   sim_model,
   sim_ruv = NULL,
   dose_optimization_method = dose_adjust_map,
+  verbose = FALSE,
+  accumulate_data = TRUE,
   ...
 ) {
 
@@ -81,10 +87,15 @@ sample_and_adjust_by_dose <- function(
   additional_info <- c()
 
   for (j in adjust_at_dose) {
+    if(verbose) message("Adjustment of dose# ", j)
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[j]
+    tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     last_adjust_time <- adjust_time
+    if(verbose) {
+      message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
+    }
     new_tdms <- collect_tdms(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
@@ -93,7 +104,11 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       covariates = covariates
     )
-    tdms_i <- rbind(tdms_i, new_tdms)
+    if(accumulate_data) {
+      tdms_i <- rbind(tdms_i, new_tdms)
+    } else {
+      tdms_i <- new_tdms
+    }
 
     # update regimen based on specified algorithm
     out <- dose_optimization_method(
@@ -104,6 +119,9 @@ sample_and_adjust_by_dose <- function(
       ...
     )
     regimen <- out$regimen
+    if(verbose) {
+      message("New dose: ", out$regimen$dose_amts[j])
+    }
     additional_info <- c(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", j))
@@ -169,7 +187,7 @@ dose_adjust_map <- function(
     parameters = est_par, # we want to use our "best guess" to get the dose
     target_time = target_time,
     target = target,
-    obs_comp = PKPDsim::get_model_auc_compartment(est_model),
+    auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
     dose_grid = dose_grid,
     covariates = covariates,
