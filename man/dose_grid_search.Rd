@@ -14,7 +14,8 @@ dose_grid_search(
   omega = NULL,
   ruv = NULL,
   dose_update = 1,
-  dose_grid = seq(1, 6000, by = 10),
+  grid = seq(1, 6000, by = 10),
+  grid_type = "dose",
   dose_resolution = 1,
   refine = NULL,
   refine_range = c(0.7, 1.4),
@@ -53,8 +54,8 @@ types.}
 
 \item{dose_update}{update dose from which dose?}
 
-\item{dose_grid}{vector specifying doses to use as test grid, Example:
-seq(from = 50, to = 500, by = (500 - 50) / 10 )}
+\item{grid}{vector specifying doses or intervals to use as test grid,
+Example: \code{seq(from = 50, to = 500, by = (500 - 50) / 10)}}
 
 \item{dose_resolution}{to which precision should the output be rounded
 (e.g. 50), useful when in practice only a specific set of dose units.

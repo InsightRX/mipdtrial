@@ -10,7 +10,7 @@ get_sampling_times_from_scheme <- function(
     regimen
 ) {
   t <- c()
-  for(i in seq(scheme$offset)) {
+  for(i in 1:length(scheme$offset)) {
     t <- c(t, get_sampling_time_core(scheme[i,], regimen))
   }
   return(t)

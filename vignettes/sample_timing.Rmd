@@ -39,9 +39,21 @@ In each case, we will collect the samples in the fourth dosing interval, and for
 infused over 2 hours.
 
 ```{r}
-end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
-tdm_times1 <- c(1, 9) + end_of_fourth_infusion
-tdm_times2 <- 5 + end_of_fourth_infusion
+# end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
+# tdm_times1 <- c(1, 9) + end_of_fourth_infusion
+# tdm_times2 <- 5 + end_of_fourth_infusion
+tdm_scheme1 <- create_sampling_scheme(
+  time = c(1, 9), 
+  offset_base = c("dose", "dose"), 
+  anchor = c(4, 4), 
+  anchor_by = "dose"
+)
+tdm_scheme2 <- create_sampling_scheme(
+  time = 5, 
+  offset_base = "dose", 
+  anchor = 4,
+  anchor_by = "dose"
+)
 ```
 
 We will adjust the fifth dose based on these levels, aiming for a daily AUC of 
@@ -159,16 +171,18 @@ for (i in dat$ID) {
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
     # define dosing strategy
+    sampling_scheme = tdm_scheme1,
     n = 12,
     interval = 12,
     t_inf = 2,
     dose_resolution = 250, # round to nearest 250 mg
-    dose_grid = seq(250, 6000, by = 250),
+    grid = seq(250, 6000, by = 250),
+    grid_type = "dose",
     # define model components
     est_model = model,
     parameters = pop_parameters,
     covariates = covs,
-    obs_comp = attr(model, "size"),
+    auc_comp = attr(model, "size"),
     # define PK target
     target_time = auc_time,
     target = target
@@ -184,7 +198,7 @@ for (i in dat$ID) {
   # Summary of both MIPD approaches
   treatment_summary1 <- sample_and_adjust_by_dose(
     adjust_at_dose = adjust_at_dose, 
-    tdm_times = tdm_times1, # arm 1
+    sampling_scheme = tdm_scheme1, # arm 1
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -200,7 +214,7 @@ for (i in dat$ID) {
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
     adjust_at_dose = adjust_at_dose, 
-    tdm_times = tdm_times2, # arm 2
+    sampling_scheme = tdm_scheme2, # arm 2
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
