@@ -85,6 +85,11 @@ sample_and_adjust_by_dose <- function(
   last_adjust_time <- 0
 
   additional_info <- c()
+  dose_updates <- c()
+
+  if(verbose) {
+    message("Starting dose: ", round(regimen$dose_amts[1]))
+  }
 
   for (j in adjust_at_dose) {
     if(verbose) message("Adjustment of dose# ", j)
@@ -104,6 +109,9 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       covariates = covariates
     )
+    if(verbose) {
+      message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
+    }
     if(accumulate_data) {
       tdms_i <- rbind(tdms_i, new_tdms)
     } else {
@@ -126,11 +134,16 @@ sample_and_adjust_by_dose <- function(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", j))
     )
+    dose_updates <- bind_rows(
+      dose_updates,
+      data.frame(dose_update = j, new_dose = out$new_dose)
+    )
   }
   list(
     final_regimen = regimen,
     tdms = tdms_i,
-    additional_info = additional_info
+    additional_info = additional_info,
+    dose_updates = dose_updates
   )
 }
 
@@ -189,12 +202,98 @@ dose_adjust_map <- function(
     target = target,
     auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
-    dose_grid = dose_grid,
+    grid = dose_grid,
+    grid_type = "dose",
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,
     ...
   )
   # return new regimen
-  regimen <- update_regimen(regimen, new_dose, dose_update)
-  list(regimen = regimen, additional_info = est_par)
+  regimen <- update_regimen(
+    regimen,
+    new_dose = new_dose,
+    dose_update_number = dose_update
+  )
+  list(
+    regimen = regimen,
+    dose_update = dose_update,
+    new_dose = new_dose,
+    additional_info = est_par
+  )
+}
+
+#' Adjust doses to achieve a target metric using MAP Bayesian estimation by
+#' adapting the dosing interval
+#'
+#' Given a set of levels and a model definition, performs MAP Bayesian
+#' estimation of individual PK/PD parameters, then finds the appropriate dosing
+#' interval to achieve the specified PK/PD target and updates the
+#' individual's regimen accordingly.
+#'
+#' @inheritParams simulate_fit
+#' @inheritParams interval_grid_search
+#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
+#'   PKPDsim::sim
+#' @returns Returns a named list: `regimen`: the updated regimen;
+#'   `additional_info`: the MAP parameter estimates
+#' @export
+
+interval_adjust_map <- function(
+    tdms,
+    est_model,
+    parameters,
+    omega,
+    ruv,
+    regimen,
+    covariates = NULL,
+    target_time,
+    target,
+    dose_update,
+    interval_grid = NULL,
+    ...
+) {
+
+  # get MAP fit, using model for estimation
+  est_par <- simulate_fit(
+    est_model = est_model,
+    parameters = parameters,
+    omega = omega,
+    ruv = ruv,
+    tdms = tdms,
+    covariates = covariates,
+    regimen = regimen,
+    ...
+  )
+
+  # calculate new dose, using the estimation model
+  if (is.null(interval_grid)) {
+    interval_grid <- c(0.5, 0.75, 1, 1.25, 1.5, 2) * regimen$interval
+  }
+  new_interval <- dose_grid_search(
+    est_model = est_model,
+    regimen = regimen,
+    parameters = est_par, # we want to use our "best guess" to get the dose
+    target_time = target_time,
+    target = target,
+    auc_comp = PKPDsim::get_model_auc_compartment(est_model),
+    dose_update = dose_update,
+    grid = interval_grid,
+    grid_type = "interval",
+    covariates = covariates,
+    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
+    ...
+  )
+
+  # return new regimen
+  regimen <- update_regimen(
+    regimen,
+    new_interval = new_interval,
+    dose_update_number = dose_update
+  )
+  list(
+    regimen = regimen,
+    dose_update = dose_update,
+    new_interval = new_interval,
+    additional_info = est_par
+  )
 }

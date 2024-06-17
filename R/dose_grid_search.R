@@ -19,8 +19,8 @@
 #'   `list(prop = 0.1, add = 1.5)`, for probability of target attainment target
 #'   types.
 #' @param dose_update update dose from which dose?
-#' @param dose_grid vector specifying doses to use as test grid, Example:
-#'   seq(from = 50, to = 500, by = (500 - 50) / 10 )
+#' @param grid vector specifying doses or intervals to use as test grid,
+#' Example: `seq(from = 50, to = 500, by = (500 - 50) / 10)`
 #' @param dose_resolution to which precision should the output be rounded
 #'   (e.g. 50), useful when in practice only a specific set of dose units.
 #'   Can of course also be controlled by altering the grid.
@@ -56,7 +56,8 @@ dose_grid_search <- function(
     omega = NULL,
     ruv = NULL,
     dose_update = 1,
-    dose_grid = seq(1, 6000, by = 10),
+    grid = seq(1, 6000, by = 10),
+    grid_type = "dose",
     dose_resolution = 1,
     refine = NULL,
     refine_range = c(0.7, 1.4),
@@ -110,8 +111,8 @@ dose_grid_search <- function(
       stop("PTA method requires specification of omega!")
     }
   }
-  if (is.null(dose_grid) || any(is.na(dose_grid)) || length(dose_grid) < 2) {
-    stop("Must supply grid search space in `dose_grid`")
+  if (is.null(grid) || any(is.na(grid)) || length(grid) < 2) {
+    stop("Must supply grid search space in `grid`")
   }
   if(is.null(target$value) || length(target$value) == 0) {
     stop("Target not specified!")
@@ -125,8 +126,9 @@ dose_grid_search <- function(
   }
 
   y <- mclapply(
-    dose_grid,
-    simulate_dose,
+    grid,
+    simulate_dose_interval,
+    grid_type = grid_type,
     dose_update = dose_update,
     regimen = regimen,
     md = md,
@@ -141,7 +143,17 @@ dose_grid_search <- function(
     covariates = covariates,
     ...
   )
-  tab <- data.frame(dose = dose_grid, y = unlist(y))
+
+  if(grid_type == "interval") {
+    tab <- data.frame(dose = grid, y = unlist(y))
+    if (target$type %in% target_types_time) {
+      tab <- filter_rows_0_100(tab)
+    }
+    interval <- tab[which.min(abs(tab$y - target$value)),]$interval
+    return(interval)
+  } else {
+    tab <- data.frame(dose = grid, y = unlist(y))
+  }
 
   ## get best dose:
   if (target$type %in% target_types_time) {
@@ -161,14 +173,14 @@ dose_grid_search <- function(
   dose <- as.numeric(predict(fit, list(y=target$value)))
 
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
-    if(dose == dose_grid[1] && dose > min_dose) {
+    if(dose == grid[1] && dose > min_dose) {
       dose_grid <- dose_grid / 4
     } else {
-      if(dose == tail(dose_grid,1) && dose < max_dose) {
-        dose_grid <- dose_grid * 4
+      if(dose == tail(grid,1) && dose < max_dose) {
+        grid <- grid * 4
       }
     }
-    if(dose == dose_grid[1] || dose == tail(dose_grid,1)) {
+    if(dose == grid[1] || dose == tail(grid,1)) {
       dose <- dose_grid_search(
         est_model = est_model,
         regimen = regimen,
@@ -178,7 +190,8 @@ dose_grid_search <- function(
         pta = pta,
         omega = omega, ruv = ruv,
         dose_update = dose_update,
-        dose_grid = dose_grid,
+        grid = grid,
+        grid_type = "dose",
         dose_resolution = NULL,
         refine = refine,
         check_boundaries = FALSE, # !!
@@ -204,7 +217,8 @@ dose_grid_search <- function(
       omega = omega,
       ruv = ruv,
       dose_update = dose_update,
-      dose_grid = dose_grid, # updated under refined range
+      grid = dose_grid, # updated under refined range
+      grid_type = "dose",
       dose_resolution = NULL, # will round again below
       refine = FALSE, # !!
       check_boundaries = FALSE,
@@ -227,33 +241,43 @@ dose_grid_search <- function(
   return(dose)
 }
 
-#' Simulate dose
-#'
-#' Simulate a dose in the dose grid
+#' Simulate different doses/intervals in a dose/interval grid
 #'
 #' @inheritParams dose_grid_search
 #' @param model model for simulating dose (estimation model)
-#' @param dose_grid element of the dose grid
+#' @param value element of the dose/interval grid
+#' @param grid_type either `dose` grid or `interval` grid
 #' @param t_obs time at which observation should be calculated
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)
 #' @md
-simulate_dose <- function(dose_grid,
-                          dose_update,
-                          regimen,
-                          md,
-                          pta,
-                          target,
-                          model,
-                          t_obs,
-                          omega,
-                          obs,
-                          ruv,
-                          ...) {
+simulate_dose_interval <- function(value,
+                              grid_type = "dose",
+                              dose_update,
+                              regimen,
+                              md,
+                              pta,
+                              target,
+                              model,
+                              t_obs,
+                              omega,
+                              obs,
+                              ruv,
+                              ...) {
+
   reg <- regimen
-  reg$dose_amts[dose_update:length(reg$dose_amts)] <- rep(
-    dose_grid,
-    length(reg$dose_amts[dose_update:length(reg$dose_amts)])
-  )
+  if(grid_type == "dose") {
+    reg <- update_regimen(
+      regimen = reg,
+      new_dose = value,
+      dose_update_number = dose_update
+    )
+  } else if(grid_type == "interval") {
+    reg <- update_regimen(
+      regimen = reg,
+      new_interval = value,
+      dose_update_number = dose_update
+    )
+  }
 
   if (target$type %in% target_types_time || target$type == "auc") {
     # need two time points for time-based targets
