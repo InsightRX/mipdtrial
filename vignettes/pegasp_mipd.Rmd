@@ -18,12 +18,13 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(mipdtrial)
 require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)
+library(NHANES)
 
 # For data handling/plotting
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
-library(nhanesA)
+
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
@@ -52,27 +53,20 @@ conc_times <- c( 14*24,  28*24,  42*24)
 Synthetic dataset based on CDC growth curves of children.
 
 ```{r}
-# Pull demographic & body measure data
-demo_data <- nhanes('DEMO_I', 2015)
-bm_data <- nhanes('BMX_I', 2015)
-
-# Filter for ages 0-17 (pediatric)
-pediatric_data <- filter(demo_data, RIDAGEYR < 18) %>%
-  merge(bm_data, by="SEQN") %>%
-  select(SEQN,RIAGENDR,RIDAGEYR,BMXHT,BMXWT,BMXBMI)
-
-# Rename variables for clarity
-names(pediatric_data) <- c("ID", "Sex", "Age", "Height", "Weight", "BMI")
-
-dat <- pediatric_data %>%
-  mutate(AGE = Age,
-         WT = Weight,
-         HT = Height,
-         BSA = sqrt(WT*HT/3600),
-         SEX = ifelse(Sex=="Female",0,1)) %>%
-  select(ID,AGE,WT,HT,SEX,BMI,BSA)
-
+dat <- NHANES::NHANES %>%
+  # take just the first record per patient
+  group_by(ID) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # convert columns to numeric
+  mutate(Sex = ifelse(Gender == "male", 1, 0)) %>% # as defined in models
+  filter(Age<18) %>%
+  select(ID, Sex, Age, Weight, Height) %>%
+  # include only patients with all information available
+  filter(!is.na(Sex), !is.na(Weight), !is.na(Height), !is.na(Age)) %>%
+  mutate(BSA = sqrt(Weight * Height / 3600))
 dat <- na.omit(dat)
+head(dat)
 ```
 
 Here are the first few rows of our data set:
