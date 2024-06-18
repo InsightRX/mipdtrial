@@ -17,13 +17,13 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(mipdtrial)
-require(pkpegasparaginasewurthwein, warn.conflicts = FALSE)
-require(pkpegasparaginasewurthwein, warn.conflicts = FALSE)
+require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)
 
 # For data handling/plotting
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
+library(nhanesA)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
@@ -52,84 +52,27 @@ conc_times <- c( 14*24,  28*24,  42*24)
 Synthetic dataset based on CDC growth curves of children.
 
 ```{r}
-# Load required packages
-library(dplyr)
-library(tidyr)
+# Pull demographic & body measure data
+demo_data <- nhanes('DEMO_I', 2015)
+bm_data <- nhanes('BMX_I', 2015)
 
-# Define age range (in months)
-age_range <- c(0, 60) 
+# Filter for ages 0-17 (pediatric)
+pediatric_data <- filter(demo_data, RIDAGEYR < 18) %>%
+  merge(bm_data, by="SEQN") %>%
+  select(SEQN,RIAGENDR,RIDAGEYR,BMXHT,BMXWT,BMXBMI)
 
-# Define sample size
-n <- 1000
+# Rename variables for clarity
+names(pediatric_data) <- c("ID", "Sex", "Age", "Height", "Weight", "BMI")
 
-# Generate random ages within the specified range
-ages <- sort(runif(n, age_range[1], age_range[2]))
-
-# Generate random sexes (1 = male, 2 = female)
-sexes <- sample(c(1, 2), n, replace = TRUE)
-
-# Load CDC growth data from alternative source (example data)
-cdc_data <- data.frame(
-  Age = c( 24, 30, 36, 42, 48, 54, 60),
-  Sex = c(rep("M", 7), rep("F",7)),
-  Height_cm = c(87.6, 91.5, 94.6, 97.1, 99.2, 101.1, 102.7,
-                85.4, 89.5, 92.8, 95.5, 97.8, 99.7, 101.4),
-  Weight_kg = c( 12.4, 13.6, 14.8, 15.8, 16.8, 17.7, 18.6,
-                 11.9, 13.1, 14.2, 15.2, 16.1, 17.0, 17.8),
-  BMI = c( 16.2, 16.2, 16.5, 16.8, 17.1, 17.3, 17.6,
-           16.4, 16.4, 16.5, 16.7, 16.9, 17.1, 17.3),
-  BSA = c( 0.56, 0.61, 0.65, 0.69, 0.73, 0.76, 0.79,
-           0.54, 0.59, 0.63, 0.67, 0.71, 0.74, 0.77)
-)
-
-# Function to calculate height, weight, BMI, and BSA based on CDC growth curves
-get_ht_wt_bmi_bsa <- function(age, sex) {
-  age_months <- age
-  sex_label <- ifelse(sex == 1, "M", "F")
-  data_subset <- cdc_data %>%
-    filter(Age <= age_months & Sex == sex_label) %>%
-    arrange(desc(Age))
-  
-  height_cm <- data_subset$Height_cm[1]
-  weight_kg <- data_subset$Weight_kg[1]
-  bmi <- data_subset$BMI[1]
-  bsa <- data_subset$BSA[1]
-  
-  return(list(height_cm = height_cm, weight_kg = weight_kg, bmi = bmi, bsa = bsa))
-}
-
-# Calculate heights, weights, BMIs, and BSAs based on CDC growth curves
-ht_wt_bmi_bsa <- lapply(ages, function(x) {
-  get_ht_wt_bmi_bsa(x, sexes[which(ages == x)])
-})
-
-# Extract individual vectors
-heights <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$height_cm))
-weights <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$weight_kg))
-bmis <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$bmi))
-bsas <- unlist(lapply(ht_wt_bmi_bsa, function(x) x$bsa))
-
-# Create a data frame
-patient_data <- data.frame(
-  ID = 1:n,
-  Age_months = ages,
-  Sex = factor(sexes, levels = c(1, 2), labels = c("Male", "Female")),
-  Height_cm = heights,
-  Weight_kg = weights,
-  BMI = bmis,
-  BSA = bsas
-)
-
-# Convert age to years
-patient_data$Age_years <- round(patient_data$Age_months / 12, 2)
-
-dat <- patient_data %>%
-  mutate(AGE = Age_years,
-         WT = Weight_kg,
-         HT = Height_cm,
+dat <- pediatric_data %>%
+  mutate(AGE = Age,
+         WT = Weight,
+         HT = Height,
+         BSA = sqrt(WT*HT/3600),
          SEX = ifelse(Sex=="Female",0,1)) %>%
-  select(ID,AGE,WT,HT,SEX,BMI,BSA)  %>%
-  filter(!is.na(WT))
+  select(ID,AGE,WT,HT,SEX,BMI,BSA)
+
+dat <- na.omit(dat)
 ```
 
 Here are the first few rows of our data set:
@@ -151,10 +94,10 @@ For this study, we will use the ones defined in the models.
 
 ```{r}
 # Set up simulation model 
-model_sim <- pkpegasparaginasewurthwein::model()
-parameters_sim <- pkpegasparaginasewurthwein::parameters()
-omega_sim <- pkpegasparaginasewurthwein::omega_matrix()
-ruv_sim <- pkpegasparaginasewurthwein::ruv()
+model_sim <- pkpegasparaginasemodifiedwurthwein::model()
+parameters_sim <- pkpegasparaginasemodifiedwurthwein::parameters()
+omega_sim <- pkpegasparaginasemodifiedwurthwein::omega_matrix()
+ruv_sim <- pkpegasparaginasemodifiedwurthwein::ruv()
 ```
 
 We also need to link the covariates in our data set to the covariates expected
@@ -218,13 +161,17 @@ for (i in ids) {
   )
   # create initial dosing regimen (see PKPDsim::new_regimen for more info)
   reg <- PKPDsim::new_regimen(
-    amt = ifelse(covs$AGE$value >=22, 2500 * covs$BSA$value, 2000*covs$BSA$value), # FDA/COG starting dose
+    amt = ifelse(covs$AGE$value >=22, # FDA/COG starting dose
+                 2500 * covs$BSA$value, 
+                 2000*covs$BSA$value), 
     interval = 14*24,
     n = 4,
     t_inf = 1,
     type = "infusion"
   )
-  reg$dose_amts <-  ifelse(reg$dose_amts>3750,3750,reg$dose_amts) # cap doses at 3750 mg
+  reg$dose_amts <-  ifelse(reg$dose_amts>3750, # cap doses at 3750 mg
+                           3750,
+                           reg$dose_amts) 
   # randomly draw individual PK parameters
   pars_true_i <- generate_iiv(
     sim_model = model_sim,
