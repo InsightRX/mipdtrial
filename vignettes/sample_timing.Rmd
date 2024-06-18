@@ -21,7 +21,7 @@ they were to switch to collecting a single sample at 5 hours post-dose.
 
 Here is how we could answer that problem using simulation!
 
-```{r setup}
+```{r setup,message=FALSE}
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
@@ -95,7 +95,16 @@ head(dat)
 We need to define the model parameters and variability terms for our simulation.
 For this study, we will use the ones defined in the models.
 
+
 ```{r echo=FALSE}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+  }
+```
+
+```{r message=FALSE, warning=FALSE}
 # Set up simulation model
 if (!require(pkvancothomson)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
@@ -170,7 +179,7 @@ for (i in dat$ID) {
     covariates = covs,
     obs_comp = attr(model, "size"),
     # define PK target
-    t_obs = auc_time,
+    target_time = auc_time,
     target = target
   )
 
@@ -188,12 +197,15 @@ for (i in dat$ID) {
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
     est_model = model,
-    est_parameters = pop_parameters,
-    est_omega = omega,
-    est_ruv = ruv,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
     target_time = auc_time,
-    target = target
+    target = target,
+    dose_optimization_method = dose_adjust_map
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
     adjust_at_dose = adjust_at_dose, 
@@ -201,12 +213,15 @@ for (i in dat$ID) {
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
     est_model = model,
-    est_parameters = pop_parameters,
-    est_omega = omega,
-    est_ruv = ruv,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
     target_time = auc_time,
-    target = target
+    target = target,
+    dose_optimization_method = dose_adjust_map
   )
   
   # get steady-state AUC at end of treatment course
@@ -214,14 +229,14 @@ for (i in dat$ID) {
     regimen = treatment_summary1$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    t_obs = c(auc_time - 24, auc_time),
+    target_time = c(auc_time - 24, auc_time),
     covariates = covs
   )
   results$random[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary2$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    t_obs = c(auc_time - 24, auc_time),
+    target_time = c(auc_time - 24, auc_time),
     covariates = covs
   )
 }

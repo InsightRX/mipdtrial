@@ -34,7 +34,7 @@ collect_tdms <- function(
   }
   # simulate TDM collection (no residual error)
   true_tdm <- sim(
-    sim_model,
+    ode = sim_model,
     parameters = pars_i,
     t_obs = t_obs,
     only_obs = TRUE,

@@ -10,15 +10,9 @@ sample_and_adjust_by_dose(
   regimen,
   covariates = NULL,
   pars_true_i,
-  est_model,
-  est_parameters,
-  est_omega,
-  est_ruv,
-  sim_model = NULL,
+  sim_model,
   sim_ruv = NULL,
-  dose_grid = NULL,
-  target = list(type = "conc", value = 10),
-  target_time = 24,
+  dose_optimization_method = dose_adjust_map,
   ...
 )
 }
@@ -34,38 +28,25 @@ time of first dose.}
 
 \item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
 
-\item{est_model}{model to use for estimating patient response.}
-
-\item{est_parameters}{parameters for \code{est_model}.}
-
-\item{est_omega}{omega matrix for \code{est_model}}
-
-\item{est_ruv}{residual variability for \code{est_model}. Named list for
-proportional (\code{prop}) and additive (\code{add}) error.}
-
-\item{sim_model}{model to use for simulating "true" patient response. If
-NULL, uses \code{est_model}.}
+\item{sim_model}{model to use for simulating "true" patient response.}
 
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
-proportional (\code{prop}) and additive (\code{add}) error. If NULL, uses \code{est_ruv}.}
+proportional (\code{prop}) and additive (\code{add}) error.}
 
-\item{dose_grid}{vector specifying doses to use as test grid for dose
-finding, Example: seq(from = 50, to = 500, by = (500 - 50) / 10 ). If
-NULL, draws from around the initial dose provided in \code{regimen}.}
+\item{dose_optimization_method}{A function that determines how doses should
+be adjusted given the collected drug levels. The function must return a
+named list of the structure \code{list(regimen = reg, additional_info = x)},
+where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
+another other information useful for post-processing of trial results.}
 
-\item{target}{target for dose optimization. Named list with \code{type} (e.g.,
-"conc", "auc") and \code{value} (e.g., 10).}
-
-\item{target_time}{time (in hours since first dose) at which target should be
-estimated for dose finding.}
-
-\item{...}{arguments passed on to \code{simulate_fit} or \code{dose_grid_search}}
+\item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
+function.}
 }
 \value{
 a named list containing \code{final_regimen} (all doses after
-adjustment), \code{final_estimates} (MAP Bayesian estimation made with all
-available levels) and \code{tdms} (all collected levels, both true and measured,
-that is, both with and without residual variability).
+adjustment), \code{tdms} (all collected levels, both true and measured, that is,
+both with and without residual variability), and \code{additional_info}, which
+varies by \code{dose_optimization_method}. See selected function for details.
 }
 \description{
 Doses are iteratively adjusted for the specified dose numbers. Estimation is

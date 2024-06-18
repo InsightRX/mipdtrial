@@ -13,8 +13,8 @@ calc_auc_from_sim(sim_output, auc_comp)
 }
 \value{
 numeric vector of AUCs between each simulated time point. Control
-time period over which AUC should be calculated using \code{t_obs} argument to
-\code{PKPDsim::sim}.
+time period over which AUC should be calculated using \code{target_time}
+argument to \code{PKPDsim::sim}.
 }
 \description{
 Get AUC from a simulation

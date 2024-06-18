@@ -3,8 +3,8 @@
 #' @param sim_output output of a `PKPDsim::sim` call
 #' @param auc_comp auc compartment
 #' @returns numeric vector of AUCs between each simulated time point. Control
-#'   time period over which AUC should be calculated using `t_obs` argument to
-#'   `PKPDsim::sim`.
+#'   time period over which AUC should be calculated using `target_time`
+#'   argument to `PKPDsim::sim`.
 #' @export
 
 calc_auc_from_sim <- function(sim_output, auc_comp) {
@@ -28,25 +28,30 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #'   Accepts parameters supplied as a data frame row, a named vector or as a
 #'   list.
 #' @param model model to use for AUC calculations.
-#' @param t_obs timepoint(s) at which to calculate AUC
+#' @param target_time timepoint(s) at which to calculate AUC
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
 #' @returns numeric vector of AUCs between each simulated time point. Control
-#'   time period over which AUC should be calculated using `t_obs`.
+#'   time period over which AUC should be calculated using `target_time`.
 #' @export
 
-calc_auc_from_regimen <- function(regimen, parameters, model, t_obs, ...) {
+calc_auc_from_regimen <- function(regimen, parameters, model, target_time, ...){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
     stop("Model/parameter mismatch")
   }
   if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
     parameters <- as.list(parameters)
   }
+
+  iov <- PKPDsim::get_model_iov(model)
+  if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
+
   sim_output <- PKPDsim::sim(
     model,
     parameters = parameters,
     regimen = regimen,
-    t_obs = t_obs,
+    t_obs = target_time,
+    iov_bins = iov[["bins"]],
     ...
   )
   calc_auc_from_sim(sim_output, attr(model, "size"))

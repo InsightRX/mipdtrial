@@ -23,7 +23,15 @@ study](https://link.springer.com/article/10.1007/s10928-024-09915-w) in which we
 compared non-compartmental analysis (NCA) with MAP Bayesian estimation for
 AUC-guided busulfan dosing.
 
-```{r setup}
+```{r echo=FALSE}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+  }
+```
+
+```{r setup, message=FALSE, warning=FALSE}
 library(mipdtrial)
 if(!require(pkbusulfanmccune, warn.conflicts = FALSE)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")
@@ -224,28 +232,28 @@ for (i in ids) {
     sim_model = model_sim,
     sim_ruv = ruv_sim,
     est_model = model_est,
-    est_parameters = parameters_est,
-    est_omega = omega_est,
-    est_ruv = ruv_est,
+    parameters = parameters_est,
+    omega = omega_est,
+    ruv = ruv_est,
     target_time = auc_times,
-    target = target
+    target = target,
+    dose_optimization_method = dose_adjust_map
   )
   # extract metrics of interest
   results$true_auc[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model_sim,
-    t_obs = auc_times,
-    covariates = covs,
-    iov_bins = attr(model_sim, "iov")$bins
+    target_time = auc_times,
+    covariates = covs
   )
+  final_parameters <- treatment_summary$additional_info[[length(treatment_summary$additional_info)]]
   results$est_auc[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary$final_regimen,
-    parameters = treatment_summary$final_estimates, # estimated patient PK
+    parameters = final_parameters, # estimated patient PK
     model = model_est,
-    t_obs = auc_times,
-    covariates = covs,
-    iov_bins = attr(model_est, "iov")$bins
+    target_time = auc_times,
+    covariates = covs
   )
 }
 
