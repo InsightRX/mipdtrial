@@ -10,14 +10,29 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE
 )
+```
+
+```{r echo=FALSE}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+}
+if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+  PKPDsim::install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
+}
 ```
 
 
 ```{r setup}
 library(mipdtrial)
-require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)
+if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+  PKPDsim::install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
+}
 library(NHANES)
 
 # For data handling/plotting
@@ -25,13 +40,11 @@ library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
 
-
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 ## 1. Define simulation parameters
 
-Given the long half-life of PEG-asparaginase, in this simulation trial patients 
+PEG-asparaginase has a long half-life. In this simulation trial patients 
 will receive 4 doses separated by 14 days levels collected every 14 days just 
 prior to the next dose. We will adjust doses 2 and 3 to achieve a steady state 
 asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
@@ -40,9 +53,9 @@ asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
 tdm_times <- c( 13.9*24,  27.9*24,  41.9*24) 
 adjust_at_dose <- c(2, 3) 
 
-target <- list(
-  type = "conc",
-  value = 300 
+target <- create_target_object(
+  targettype = "conc", 
+  targetvalue = 300
 )
 
 conc_times <- c( 14*24,  28*24,  42*24) 
@@ -75,7 +88,8 @@ Here are the first few rows of our data set:
 head(dat)
 ```
 
-Sample size for simulation from synthetic dataset.
+While our data set is much larger, for this example let's take just the first
+100 patients. 
 
 ```{r}
 ids <- sample(dat$ID,100)
@@ -88,10 +102,10 @@ For this study, we will use the ones defined in the models.
 
 ```{r}
 # Set up simulation model 
-model_sim <- pkpegasparaginasemodifiedwurthwein::model()
-parameters_sim <- pkpegasparaginasemodifiedwurthwein::parameters()
-omega_sim <- pkpegasparaginasemodifiedwurthwein::omega_matrix()
-ruv_sim <- pkpegasparaginasemodifiedwurthwein::ruv()
+model <- pkpegasparaginasemodifiedwurthwein::model()
+parameters <- pkpegasparaginasemodifiedwurthwein::parameters()
+omega <- pkpegasparaginasemodifiedwurthwein::omega_matrix()
+ruv <- pkpegasparaginasemodifiedwurthwein::ruv()
 ```
 
 We also need to link the covariates in our data set to the covariates expected
@@ -99,15 +113,15 @@ in the model.
 
 ```{r}
 # check which covariates are required for your model using 
-# `attr(model_sim, "covariates")`
+# `attr(model, "covariates")`
 
 # check which covariates are in your data set using `colnames(dat)`
 cov_mapping <- c(
-  AGE = "AGE", 
-  WT = "WT", 
-  HT = "HT", 
+  AGE = "Age", 
+  WT = "Weight", 
+  HT = "Height", 
   BSA = "BSA",
-  SEX = "SEX"
+  SEX = "Sex"
 )
 ```
 
@@ -153,25 +167,25 @@ for (i in ids) {
     dat[dat$ID == i,],
     mapping = cov_mapping
   )
+  # use age-based nomogram
+  dose <- ifelse(covs$AGE$value >= 22, 2500*covs$BSA$value, 2000*covs$BSA$value)
+  # capt dose to a maximum of 3750
+  dose <- pmin(dose, 3750)
+  
   # create initial dosing regimen (see PKPDsim::new_regimen for more info)
   reg <- PKPDsim::new_regimen(
-    amt = ifelse(covs$AGE$value >=22, # FDA/COG starting dose
-                 2500 * covs$BSA$value, 
-                 2000*covs$BSA$value), 
+    amt = dose, 
     interval = 14*24,
     n = 4,
     t_inf = 1,
     type = "infusion"
   )
-  reg$dose_amts <-  ifelse(reg$dose_amts>3750, # cap doses at 3750 mg
-                           3750,
-                           reg$dose_amts) 
+  
   # randomly draw individual PK parameters
   pars_true_i <- generate_iiv(
-    sim_model = model_sim,
-    omega = omega_sim,
-    parameters = parameters_sim,
-    type="infusion"
+    sim_model = model,
+    omega = omega,
+    parameters = parameters
   )
   
   treatment_summary <- sample_and_adjust_by_dose(
