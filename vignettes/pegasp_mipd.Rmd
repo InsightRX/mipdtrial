@@ -30,10 +30,11 @@ if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
 
 ```{r setup}
 library(mipdtrial)
+library(PKPDsim) # for working with models
 if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
-  PKPDsim::install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
+  install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
 }
-library(NHANES)
+library(NHANES) # for example data
 
 # For data handling/plotting
 library(dplyr, warn.conflicts = FALSE)
@@ -89,10 +90,10 @@ head(dat)
 ```
 
 While our data set is much larger, for this example let's take just the first
-100 patients. 
+20 patients. 
 
 ```{r}
-ids <- sample(dat$ID,100)
+ids <- sample(dat$ID,20)
 ```
 
 ## 3. Load model definitions
@@ -173,7 +174,7 @@ for (i in ids) {
   dose <- pmin(dose, 3750)
   
   # create initial dosing regimen (see PKPDsim::new_regimen for more info)
-  reg <- PKPDsim::new_regimen(
+  reg <- new_regimen(
     amt = dose, 
     interval = 14*24,
     n = 4,
@@ -194,33 +195,33 @@ for (i in ids) {
     regimen = reg,
     covariates = covs,
     pars_true_i = pars_true_i,
-    sim_model = model_sim,
-    sim_ruv = ruv_sim,
-    est_model = model_sim,
-    est_parameters = parameters_sim,
-    est_omega = omega_sim,
-    est_ruv = ruv_sim,
+    sim_model = model,
+    sim_ruv = ruv,
+    est_model = model,
+    parameters = parameters,
+    omega = omega,
+    ruv = ruv,
     target_time = conc_times,
     target = target,
-    )
+    dose_optimization_method = dose_adjust_map
+  )
     
   # get final asparaginase activity level
   sim <- PKPDsim::sim(
-    model_sim,
+    model,
     parameters = as.list(pars_true_i), # true patient parameters
     regimen = treatment_summary$final_regimen,
     covariates = covs,
     ruv = ruv,
     t_obs = conc_times,
-    iov_bins = attr(model_sim, "iov")$bins,
-    only_obs=T
+    only_obs = TRUE
   )
   conc  <- sim$y
   results$conc[results$id == i] <- conc
   
   #Add amounts
   amt <- treatment_summary$final_regimen$dose_amts
-  results$amt[results$id == i] <- amt
+  results$amt[results$id == i] <- amt[-1]
 }
 ```
 
@@ -238,37 +239,49 @@ How well did our patients get to target?
 results %>%
   filter(day %in% c(14,28,42)) %>%
   filter(!is.na(conc)) %>%
+  mutate(
+    below_flag = conc < 100,
+    within_flag = conc >= 100 & conc <= 500,
+    above_flag = conc > 500
+  ) %>%
   group_by(day) %>%
-  mutate(below_flag = ifelse(conc<100,1,0),
-         within_flag = ifelse(conc>=100 & conc<=500,1,0),
-         above_flag = ifelse(conc>500,1,0),
-         below_per = sum(below_flag)/length(below_flag),
-         within_per = sum(within_flag)/length(within_flag),
-         above_per = sum(above_flag)/length(above_flag)
-         ) %>%
+  summarize(
+    below_per = mean(below_flag),
+    within_per = mean(within_flag),
+    above_per = mean(above_flag)
+  ) %>%
   ungroup() %>%
   pivot_longer(
     c(below_per,within_per,above_per),
     names_to = "per_type",
     values_to = "per"
   ) %>%
-  mutate(per_type=case_when(per_type=="below_per"~"C. < 0.1 IU/mL",
-                            per_type=="within_per"~"B. 0.1 - 0.5 IU/mL",
-                            per_type=="above_per"~"A. > 0.5 IU/mL")) %>%
-  select(id,day,conc,per,per_type) %>%
-  filter(id==id[1]) %>%
-  ggplot(aes(x=day,
-             y=per*100,
-             group=per_type,
-             fill=per_type,
-             label = ifelse(round(per*100,1)==0,"",round(per*100,1))))+
-  geom_bar(position="stack", stat="identity")+
-  geom_text(size =3, position = position_stack(vjust = 0.6),color="black")+
-  #scale_fill_irx_d()+
-  theme_minimal()+
-  ylab("Percent (%)")+
-  xlab("Time (d)")+
-  theme(legend.title = element_blank())+
-  scale_x_continuous(breaks=c(14,28,42),labels=c(14,28,42))
+  mutate(
+    per_type = case_when(
+      per_type == "below_per" ~ "C. < 0.1 IU/mL",
+      per_type == "within_per" ~ "B. 0.1 - 0.5 IU/mL",
+      per_type == "above_per" ~ "A. > 0.5 IU/mL"
+    )
+  ) %>%
+  select(day, per, per_type) %>%
+  ggplot(
+    aes(
+      x = day,
+      y = per*100,
+      group = per_type,
+      fill = per_type,
+      label = ifelse(round(per * 100,1) == 0, "" , round(per*100, 1)))
+  ) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3, position = position_stack(vjust = 0.6), color="black") +
+  theme_minimal() +
+  ylab("Percent (%)") +
+  xlab("Time (d)") +
+  theme(
+    legend.title = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_x_continuous(breaks = c(14,28,42), labels = c(14,28,42)) +
+  scale_fill_manual(values = c("#3870FA", "#35BCB1", "#FF8C00"))
 ```
 
