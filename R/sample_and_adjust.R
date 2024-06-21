@@ -100,6 +100,7 @@ sample_and_adjust_by_dose <- function(
       dose_update = j,
       regimen = regimen,
       covariates = covariates,
+      additional_info = additional_info,
       ...
     )
     regimen <- out$regimen
@@ -183,52 +184,57 @@ dose_adjust_map <- function(
 
 #' Adjust doses to achieve a target metric using NCA
 #'
-#' Given a set of levels and a model definition, performs MAP Bayesian
-#' estimation of individual PK/PD parameters, then finds the appropriate dose
-#' to achieve the specified PK/PD target and updates the individual's regimen
-#' accordingly.
+#' Given a set of levels calculates the AUC for a given dose, and adjusts the
+#' subsequent doses to achieve either the target AUC per dosing interval
+#' (`create_target_object(targettype = 'auc')`), AUC24
+#' (`create_target_object(targettype = 'auc24')`) or cumulative AUC
+#' (`create_target_object(targettype = 'cum_auc')`). Uses the most recently
+#' sampled dosing interval to estimate
 #'
-#' @inheritParams simulate_fit
-#' @inheritParams dose_grid_search
 #' @param ... arguments passed on to `clinPK::nca`
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
 dose_adjust_nca <- function(
-    tdms,
-    regimen,
-    target_time,
-    target,
-    dose_update,
-    ...
+  tdms,
+  regimen,
+  target,
+  dose_update,
+  additional_info,
+  ...
 ) {
-  # perform NCA
-  est_par <- perform_nca(
+  # perform NCA,
+  nca_res <- perform_nca(
     tdms = tdms,
     regimen = regimen,
     ...
   )
-
-  # calculate new dose, using the estimation model
-  if (is.null(dose_grid)) {
-    # base dose finding grid on initial regimen
-    d1 <- regimen$dose_amts[1]
-    dose_grid <- seq(d1/5, d1 * 5, length.out = 10)
+  # calculate new AUC since last NCA calculation, necessary for e.g., busulfan,
+  # where might dose Q6 but sample only 1 interval
+  intv_auc <- nca_res$descriptive$auc_tau
+  if (length(additional_info) > 0) {
+    last_dose_updated <- gsub(
+      "dose_", "",
+      names(additional_info[length(additional_info)])
+    )
+  } else {
+    last_dose_updated <- 1
   }
-  new_dose <- dose_grid_search(
-    est_model = est_model,
-    regimen = regimen,
-    parameters = est_par, # we want to use our "best guess" to get the dose
-    target_time = target_time,
+  auc_since_last_update <- intv_auc * (dose_update - last_dose_updated)
+  cumulative_auc <- additional_info[[length(additional_info)]]$cumulative_auc
+  nca_res$cumulative_auc <- cumulative_auc + auc_since_last_update
+
+
+  # calculate new dose, using a ratio of AUC to dose
+  new_dose <- dose_from_nca_auc(
     target = target,
-    obs_comp = PKPDsim::get_model_auc_compartment(est_model),
+    intv_auc = nca_res$descriptive$auc_tau,
+    regimen = regimen,
     dose_update = dose_update,
-    dose_grid = dose_grid,
-    covariates = covariates,
-    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
-    ...
+    cum_auc = nca_res$cumulative_auc
   )
+
   # return new regimen
   regimen <- update_regimen(regimen, new_dose, dose_update)
-  list(regimen = regimen, additional_info = est_par)
+  list(regimen = regimen, additional_info = nca_res)
 }

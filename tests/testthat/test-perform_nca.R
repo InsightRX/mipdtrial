@@ -37,3 +37,85 @@ test_that("NCA based on correct dosing interval", {
   expect_true(res1$pk$cl < res3$pk$cl)
   expect_true(res2$pk$cl < res3$pk$cl)
 })
+
+test_that("dose_from_nca_auc errors on unsupported target types", {
+  target <- create_target_object(targettype = "cmin", targetvalue = 100)
+  regimen <- PKPDsim::new_regimen(interval = 24)
+  expect_error(
+    dose_from_nca_auc(target, intv_auc = 5, regimen = regimen, dose_update = 2),
+    "target type cmin not yet supported!"
+  )
+})
+
+test_that("dose_from_nca_auc computes dose for 'auc' and 'auc24' target types", {
+  target1 <- create_target_object(targettype = "auc", targetvalue = 10)
+  target2 <- create_target_object(targettype = "auc24", targetvalue = 10)
+  regimen <- PKPDsim::new_regimen(
+    interval = 12,
+    n = 8,
+    amt = c(rep(100, 4), rep(200, 4))
+  )
+  expect_equal(
+    dose_from_nca_auc(target1, intv_auc = 8, regimen = regimen, dose_update = 2),
+    125 # 100 * 10/8
+  )
+  expect_equal(
+    dose_from_nca_auc(target1, intv_auc = 8, regimen = regimen, dose_update = 7),
+    250 # 200 * 10/8
+  )
+  expect_equal(
+    dose_from_nca_auc(target2, intv_auc = 8, regimen = regimen, dose_update = 2),
+    62.5 # 100 * 10/(8 * 24/12)
+  )
+  expect_equal(
+    dose_from_nca_auc(target2, intv_auc = 8, regimen = regimen, dose_update = 7),
+    125 # 200 * 10/(8 * 24/12)
+  )
+})
+
+test_that("dose_from_nca_auc computes dose for 'cum_auc' target type", {
+  regimen <- PKPDsim::new_regimen(
+    interval = 12,
+    n = 8,
+    amt = c(rep(100, 4), rep(200, 4))
+  )
+  target <- create_target_object(targettype = "cum_auc", targetvalue = 100)
+  # have given 40 AUC, need to give 60 AUC over 6 doses, and 100 mg -> 20 AUC
+  # so need to give 10 AUC per dose and 50 mg -> 10 AUC
+  overdosed1 <- dose_from_nca_auc(
+    target = target,
+    intv_auc = 20,
+    regimen = regimen,
+    dose_update = 3,
+    cum_auc = 40
+  )
+  expect_equal(overdosed1, 50)
+
+  # cum auc > target, new doses are 0
+  overdosed2 <- dose_from_nca_auc(
+    target = target,
+    intv_auc = 20,
+    regimen = regimen,
+    dose_update = 7,
+    cum_auc = 110
+  )
+  expect_equal(overdosed2, 0)
+
+  # have to give 40 AUC over remaining 2 doses, 200 mg -> 10 AUC
+  underdosed1 <- dose_from_nca_auc(
+    target = target,
+    intv_auc = 10,
+    regimen = regimen,
+    dose_update = 7,
+    cum_auc = 60
+  )
+  expect_equal(underdosed1, 400)
+})
+
+test_that("Tau from inter-dose intervals", {
+  reg <- PKPDsim::new_regimen(times = c(0, 6, 24, 36))
+  expect_equal(tau_from_regimen(reg, 1), 6)
+  expect_equal(tau_from_regimen(reg, 2), 18)
+  expect_equal(tau_from_regimen(reg, 3), 12)
+  expect_equal(tau_from_regimen(reg, 4), 12)
+})

@@ -4,21 +4,9 @@
 \alias{dose_adjust_nca}
 \title{Adjust doses to achieve a target metric using NCA}
 \usage{
-dose_adjust_nca(tdms, regimen, target_time, target, dose_update, ...)
+dose_adjust_nca(tdms, regimen, target, dose_update, additional_info, ...)
 }
 \arguments{
-\item{tdms}{observations to be included in MAP estimates}
-
-\item{regimen}{PKPDsim regimen object}
-
-\item{target_time}{vector of observation times at which to evaluate the
-target exposure.}
-
-\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
-type, either "conc" or auc".}
-
-\item{dose_update}{update dose from which dose?}
-
 \item{...}{arguments passed on to \code{clinPK::nca}}
 }
 \value{
@@ -26,8 +14,10 @@ Returns a named list: \code{regimen}: the updated regimen;
 \code{additional_info}: the MAP parameter estimates
 }
 \description{
-Given a set of levels and a model definition, performs MAP Bayesian
-estimation of individual PK/PD parameters, then finds the appropriate dose
-to achieve the specified PK/PD target and updates the individual's regimen
-accordingly.
+Given a set of levels calculates the AUC for a given dose, and adjusts the
+subsequent doses to achieve either the target AUC per dosing interval
+(\code{create_target_object(targettype = 'auc')}), AUC24
+(\code{create_target_object(targettype = 'auc24')}) or cumulative AUC
+(\code{create_target_object(targettype = 'cum_auc')}). Uses the most recently
+sampled dosing interval to estimate
 }
