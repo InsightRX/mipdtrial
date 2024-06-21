@@ -5,7 +5,7 @@
 \title{Adjust dosing using MIPD on TDMs at specified dose numbers}
 \usage{
 sample_and_adjust_by_dose(
-  adjust_at_dose,
+  regimen_update_scheme,
   sampling_scheme,
   regimen,
   covariates = NULL,
@@ -19,7 +19,9 @@ sample_and_adjust_by_dose(
 )
 }
 \arguments{
-\item{adjust_at_dose}{vector of integers indicating which doses to adjust}
+\item{regimen_update_scheme}{a data.frame with scheme with details on how
+and when to update the regimen in the MIPD trial. Schemes are created using
+\code{create_regimen_update_scheme()}.}
 
 \item{sampling_scheme}{a data.frame with a sampling scheme, created using
 \code{create_sampling_scheme()}.}

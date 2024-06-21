@@ -12,7 +12,9 @@
 #' function is intended to cover a broad range of relatively straight forward
 #' designs, and may serve as a template for more complex designs.
 #'
-#' @param adjust_at_dose vector of integers indicating which doses to adjust
+#' @param regimen_update_scheme a data.frame with scheme with details on how
+#' and when to update the regimen in the MIPD trial. Schemes are created using
+#' `create_regimen_update_scheme()`.
 #' @param sampling_scheme a data.frame with a sampling scheme, created using
 #' `create_sampling_scheme()`.
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
@@ -39,7 +41,7 @@
 #' @export
 
 sample_and_adjust_by_dose <- function(
-  adjust_at_dose,
+  regimen_update_scheme,
   sampling_scheme,
   regimen,
   covariates = NULL,
@@ -58,7 +60,7 @@ sample_and_adjust_by_dose <- function(
     stop("Insufficient doses in `regimen` for all dose adjustments specified.")
   }
 
-  adjust_at_dose <- sort(adjust_at_dose)
+  adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_scheme, regimen)
   if (any(adjust_at_dose <= 1)) {
     stop("TDM collection before the first dose is not yet supported")
   }
@@ -151,6 +153,10 @@ sample_and_adjust_by_dose <- function(
     if(verbose) {
       message("New dose: ", out$regimen$dose_amts[j])
     }
+
+    ## update the vector of dose_udpate numbers, if needed
+    adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_scheme, regimen)
+
     additional_info <- c(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
