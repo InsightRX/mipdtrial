@@ -35,11 +35,8 @@ elements for \code{prop} (proportional) and \code{add} (additive).}
 
 \item{covariates}{named list of PKPDsim covariates}
 
-\item{target_time}{vector of observation times at which to evaluate the
-target exposure.}
-
-\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
-type, either "conc" or auc".}
+\item{target}{list with arguments, created using function
+\code{create_target_object()}}
 
 \item{dose_update}{update dose from which dose?}
 

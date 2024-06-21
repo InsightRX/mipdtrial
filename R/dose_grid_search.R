@@ -5,10 +5,8 @@
 #'
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
-#' @param target list with arguments `type`, and `value`. `type` = observation
-#'   type, either "conc" or auc".
-#' @param target_time vector of observation times at which to evaluate the
-#'   target exposure.
+#' @param target list with arguments, created using function
+#' `create_target_object()`
 #' @param auc_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
 #'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
@@ -46,10 +44,10 @@
 dose_grid_search <- function(
     est_model = NULL,
     regimen,
-    target_time = 24,
-    target = list(
-      type = "conc",
-      value = 10
+    target = create_target_object(
+      targettype = "conc",
+      targetvalue = 10,
+      time = 24
     ),
     auc_comp = NULL,
     pta = NULL,
@@ -83,6 +81,7 @@ dose_grid_search <- function(
     }
   }
 
+  target_time <- get_sampling_times_from_scheme(target$scheme, regimen)
   if(length(target_time) > 1 && !target$type %in% c("auc", target_types_time)) {
     target_time <- target_time[1]
   }

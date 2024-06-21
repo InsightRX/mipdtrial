@@ -36,8 +36,8 @@ simulate_dose_interval(
 \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
 specific conc or auc.}
 
-\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
-type, either "conc" or auc".}
+\item{target}{list with arguments, created using function
+\code{create_target_object()}}
 
 \item{model}{model for simulating dose (estimation model)}
 

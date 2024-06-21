@@ -62,9 +62,9 @@ sample_and_adjust_by_dose <- function(
   if (any(adjust_at_dose <= 1)) {
     stop("TDM collection before the first dose is not yet supported")
   }
-  first_dose_time <- regimen$dose_times[adjust_at_dose[1]]
+  first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
   tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
-  if (!any(tdm_times < first_dose_time)) {
+  if (!any(tdm_times < first_adjust_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }
 
@@ -86,17 +86,21 @@ sample_and_adjust_by_dose <- function(
 
   additional_info <- c()
   dose_updates <- c()
+  aucs_i <- c()
 
   if(verbose) {
     message("Starting dose: ", round(regimen$dose_amts[1]))
   }
 
-  for (j in adjust_at_dose) {
-    if(verbose) message("Adjustment of dose# ", j)
+  for (j in seq(adjust_at_dose)) {
+    if(verbose) message("Adjustment of dose# ", adjust_at_dose[j])
     # collect TDMs from today (use model for simulation!)
-    adjust_time <- regimen$dose_times[j]
+    adjust_time <- regimen$dose_times[adjust_at_dose[j]]
     tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
+    if(!any(collect_idx)) {
+      stop("No new samples in current adjustment interval, check target and sampling settings.")
+    }
     last_adjust_time <- adjust_time
     if(verbose) {
       message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
@@ -109,6 +113,13 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       covariates = covariates
     )
+    auc_current_regimen <- calc_auc_from_regimen(
+      regimen = regimen,
+      parameters = pars_true_i, # true patient parameters
+      model = sim_model,
+      target = target,
+      covariates = covs
+    )
     if(verbose) {
       message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
     }
@@ -117,6 +128,16 @@ sample_and_adjust_by_dose <- function(
     } else {
       tdms_i <- new_tdms
     }
+    dose_updates <- bind_rows(
+      dose_updates,
+      data.frame(
+        t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
+        dose_update = adjust_at_dose[j],
+        t_adjust = regimen$dose_times[adjust_at_dose[j]],
+        dose_before_update = regimen$dose_amts[j], # previous dose
+        auc_before_update = auc_current_regimen
+      )
+    )
 
     # update regimen based on specified algorithm
     out <- dose_optimization_method(
@@ -132,16 +153,33 @@ sample_and_adjust_by_dose <- function(
     }
     additional_info <- c(
       additional_info,
-      setNames(list(out$additional_info), paste0("dose_", j))
-    )
-    dose_updates <- bind_rows(
-      dose_updates,
-      data.frame(dose_update = j, new_dose = out$new_dose)
+      setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
   }
+
+  ## Calculate AUC for final regimen
+  auc_final <- calc_auc_from_regimen(
+    regimen = regimen,
+    parameters = pars_true_i, # true patient parameters
+    model = sim_model,
+    target = target,
+    covariates = covs
+  )
+  dose_updates <- bind_rows(
+    dose_updates,
+    data.frame(
+      t = regimen$dose_times[adjust_at_dose[j]],
+      dose_update = NA,
+      t_adjust = NA,
+      dose_before_update = out$new_dose,
+      auc_before_update = auc_final
+    )
+  )
+
   list(
     final_regimen = regimen,
     tdms = tdms_i,
+    aucs = aucs_i,
     additional_info = additional_info,
     dose_updates = dose_updates
   )

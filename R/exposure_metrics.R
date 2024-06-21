@@ -28,14 +28,14 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #'   Accepts parameters supplied as a data frame row, a named vector or as a
 #'   list.
 #' @param model model to use for AUC calculations.
-#' @param target_time timepoint(s) at which to calculate AUC
+#' @param target target object, created using `create_target_object()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
 #' @returns numeric vector of AUCs between each simulated time point. Control
 #'   time period over which AUC should be calculated using `target_time`.
 #' @export
 
-calc_auc_from_regimen <- function(regimen, parameters, model, target_time, ...){
+calc_auc_from_regimen <- function(regimen, parameters, model, target, ...){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
     stop("Model/parameter mismatch")
   }
@@ -46,6 +46,13 @@ calc_auc_from_regimen <- function(regimen, parameters, model, target_time, ...){
   iov <- PKPDsim::get_model_iov(model)
   if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
 
+  target_time <- get_sampling_times_from_scheme(
+    target$scheme,
+    regimen
+  )
+  if(target$type == "auc24") {
+    target_time <- c(target_time - 24, target_time)
+  }
   sim_output <- PKPDsim::sim(
     model,
     parameters = parameters,

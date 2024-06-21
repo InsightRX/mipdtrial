@@ -23,7 +23,7 @@ get_sampling_time_core <- function(row, regimen) {
   if(row$anchor_by == "dose") {
     dose_anchor <- row$anchor
   } else { ## find dose closest to specified day
-    t_aim <- (row$anchor-1)*24
+    t_aim <- (row$anchor-1) * 24
     dose_anchor <- which.min(abs(regimen$dose_times - t_aim))
   }
   if(row$base %in% c("peak", "cmax")) {

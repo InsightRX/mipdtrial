@@ -5,7 +5,7 @@
 \title{Create sampling schemes (static or adaptive) for use in simulated trial}
 \usage{
 create_sampling_scheme(
-  time = NULL,
+  time,
   offset_base = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")

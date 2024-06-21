@@ -32,27 +32,14 @@
 #' @export
 #'
 create_sampling_scheme <- function(
-  time = NULL,
+  time,
   offset_base = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")
 ) {
   anchor_by <- match.arg(anchor_by)
   if(!is.null(anchor)) {
-    if(length(anchor) != length(time)) {
-      stop("Please specify `anchor` with same length as `time`")
-    }
-    if(length(offset_base) == 1) offset_base <- rep(offset_base, length(time))
-    if(length(offset_base) != length(time)) {
-      stop("Please specify `offset` with same length as `time`, or as single value.")
-    }
-    allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
-    if(any(! unique(offset_base) %in% c(allowed_bases))) {
-      stop(
-        "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
-        " when using adaptive times."
-      )
-    }
+    offset_base <- check_offset_base(offset_base, time, anchor)
     scheme <- data.frame(
       base = offset_base,
       offset = time,
@@ -61,7 +48,7 @@ create_sampling_scheme <- function(
     )
   } else {
     if(! all(is.numeric(time))) {
-      stop("When not anchoring TDM times to `dose` or `day`, `time` must be all numeric.")
+      stop("When not anchoring times to `dose` or `day`, `time` must be all numeric.")
     }
     scheme <- data.frame(
       base = "dose",
@@ -71,4 +58,24 @@ create_sampling_scheme <- function(
     )
   }
   scheme
+}
+
+#' Check / clean offset_base element
+#'
+check_offset_base <- function(offset_base, time, anchor) {
+  if(length(anchor) != length(time)) {
+    stop("Please specify `anchor` with same length as `time`")
+  }
+  if(length(offset_base) == 1) offset_base <- rep(offset_base, length(time))
+  if(length(offset_base) != length(time)) {
+    stop("Please specify `offset` with same length as `time`, or as single value.")
+  }
+  allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
+  if(any(! unique(offset_base) %in% c(allowed_bases))) {
+    stop(
+      "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
+      " when using adaptive times."
+    )
+  }
+  offset_base
 }

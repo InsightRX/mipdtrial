@@ -12,19 +12,70 @@
 #' @param single_point_variation acceptable variation from targetvalue. By
 #'   default 20%. Considered for assessment of target attainment a posteriori,
 #'   not used for dose-finding logic.
-#' @export
-#' @examples
-#' create_target_object(targettype = "cum_auc", targetvalue = 90)
+#' @param time a vector of numeric values at which to measure and optimize the
+#' target. If no `anchor` values are specified, these will be used as the
+#' fixed target times in the simulated trial.
+#' If `anchor` values are supplied, the target times  will be calculated
+#' adaptively during the trial. The `anchor` determine which dose is
+#' used as reference anchor, and `time` will be relative to the specified
+#' `anchor`.
+#' @param offset_base character vector of same length as `time` (or single
+#' value) determining how to interpret the provided target `time`. If `NULL`
+#' will use the dose time as offset (default). Other options are `cmax` or
+#' `peak`, which will use the end of infusion as the base for the `time`, or
+#' `cmin` or `trough`, which will use the time of next dose as the offset.
+#' @param anchor numeric vector of the dose or day number to "anchor"
+#' the target times to. Vector needs to be of same length as `t`.
+#' If `anchor_by` is set to `day`, then the first dose in that day is used.
+#' If later doses in the day are preferred, the anchor can also be specified
+#' fractionally, e.g. `1.5` will use the time of the first dose in the
+#' second half of the 1st day.
+#' @param anchor_by either `day` or `dose`. Single value required, i.e. anchor
+#' types cannot be mixed.
 #'
-
+#' @export
+#'
+#' @examples
+#'
+#' ## Target cumulative AUC at 72 hours:
+#' create_target_object(
+#'   targettype = "cum_auc", targetvalue = 90,
+#'   time = 72
+#' )
+#'
+#' ## Target trough concentration at trough after dose 4.
+#' create_target_object(
+#'   targettype = "cmin",
+#'   targetvalue = 15,
+#'   time = 0,
+#'   offset_base = "trough",
+#'   anchor = 4,
+#'   anchor_by = "dose"
+#' )
+#'
 create_target_object <- function(
  targettype = mipd_target_types(),
  targetmin = NULL,
  targetmax = NULL,
  targetvalue = NULL,
- single_point_variation = 0.20
+ single_point_variation = 0.20,
+ time,
+ offset_base = NULL,
+ anchor = NULL,
+ anchor_by = c("day", "dose")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
+  anchor_by <- match.arg(anchor_by)
+
+  ## Leverage sampling scheme creation for target as well to anchor to dose/days
+  scheme <- create_sampling_scheme(
+    time = time,
+    offset_base = offset_base,
+    anchor = anchor,
+    anchor_by = anchor_by
+  )
+
+  ## Parse targets
   if ((is.null(targetmin) || is.null(targetmax)) && is.null(targetvalue)) {
     stop("Either targetmin + targetmax or midpoint must be supplied")
   }
@@ -52,7 +103,8 @@ create_target_object <- function(
     type = targettype,
     value = midpoint,
     min = lowerbound,
-    max = upperbound
+    max = upperbound,
+    scheme = scheme
   )
 }
 
