@@ -23,7 +23,7 @@ study](https://link.springer.com/article/10.1007/s10928-024-09915-w) in which we
 compared non-compartmental analysis (NCA) with MAP Bayesian estimation for
 AUC-guided busulfan dosing.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 # for CI, most windows users should not need this since the .libPaths should
 # include where the model was installed.
 if (.Platform$OS.type == "windows") { 
@@ -33,7 +33,7 @@ if(!require(pkbusulfanmccune, warn.conflicts = FALSE)) {
   capture.output(PKPDsim::install_default_literature_model("pk_busulfan_mccune"))
 }
 if (!require(pkbusulfanshukla, warn.conflicts = FALSE)) {
-  capture.output(PKPDsim::install_default_literature_model("pk_busulfan_shukla"))
+  capture.output(capture.output(PKPDsim::install_default_literature_model("pk_busulfan_shukla")))
 }
 ```
 
