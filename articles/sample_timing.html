@@ -147,73 +147,7 @@ your data set!</p>
 <p>We need to define the model parameters and variability terms for our
 simulation. For this study, we will use the ones defined in the
 models.</p>
-<pre><code><span><span class="co">#&gt; Loading required package: pkvancothomson</span></span>
-<span><span class="co">#&gt; Warning in library(package, lib.loc = lib.loc, character.only = TRUE,</span></span>
-<span><span class="co">#&gt; logical.return = TRUE, : there is no package called 'pkvancothomson'</span></span>
-<span><span class="co">#&gt; - Retrieving model definition ()...</span></span>
-<span><span class="co">#&gt; - Package pkvancothomson not installed yet.</span></span>
-<span><span class="co">#&gt; - Compiling model.</span></span>
-<span><span class="co">#&gt; * Adding model definition to R package.</span></span>
-<span><span class="co">#&gt;       [,1]                  </span></span>
-<span><span class="co">#&gt;  [1,] "\\[MODULE\\]"        </span></span>
-<span><span class="co">#&gt;  [2,] "\\[N_COMP\\]"        </span></span>
-<span><span class="co">#&gt;  [3,] "\\[OBS_COMP\\]"      </span></span>
-<span><span class="co">#&gt;  [4,] "\\[DOSE_COMP\\]"     </span></span>
-<span><span class="co">#&gt;  [5,] "\\[OBS_SCALE\\]"     </span></span>
-<span><span class="co">#&gt;  [6,] "\\[OBS_VARIABLE\\]"  </span></span>
-<span><span class="co">#&gt;  [7,] "\\[DOSE_BIOAV\\]"    </span></span>
-<span><span class="co">#&gt;  [8,] "\\[DOSE_DUPLICATE\\]"</span></span>
-<span><span class="co">#&gt;  [9,] "\\[CODE\\]"          </span></span>
-<span><span class="co">#&gt; [10,] "\\[PK_CODE\\]"       </span></span>
-<span><span class="co">#&gt; [11,] "\\[DOSE_CODE\\]"     </span></span>
-<span><span class="co">#&gt; [12,] "\\[STATE_INIT\\]"    </span></span>
-<span><span class="co">#&gt; [13,] "\\[PARS\\]"          </span></span>
-<span><span class="co">#&gt; [14,] "\\[REPARAM\\]"       </span></span>
-<span><span class="co">#&gt; [15,] "\\[MIXTURE\\]"       </span></span>
-<span><span class="co">#&gt; [16,] "\\[VARS\\]"          </span></span>
-<span><span class="co">#&gt; [17,] "\\[COVS\\]"          </span></span>
-<span><span class="co">#&gt; [18,] "\\[FIXED\\]"         </span></span>
-<span><span class="co">#&gt; [19,] "\\[LAGTIME\\]"       </span></span>
-<span><span class="co">#&gt; [20,] "\\[DURATION_SCALE\\]"</span></span>
-<span><span class="co">#&gt; [21,] "\\[USE_IOV\\]"       </span></span>
-<span><span class="co">#&gt; [22,] "\\[IOV\\]"           </span></span>
-<span><span class="co">#&gt; [23,] "\\[DEVELOPMENT\\]"   </span></span>
-<span><span class="co">#&gt; [24,] "\\[LTBS\\]"          </span></span>
-<span><span class="co">#&gt; [25,] "\\[MISC\\]"          </span></span>
-<span><span class="co">#&gt; [26,] "\\[CMT_MAPPING\\]"   </span></span>
-<span><span class="co">#&gt; [27,] "\\[INT_STEP_SIZE\\]" </span></span>
-<span><span class="co">#&gt; [28,] "\\[COMMENTS\\]"      </span></span>
-<span><span class="co">#&gt; [29,] "\\[NONMEM\\]"        </span></span>
-<span><span class="co">#&gt;       [,2]                                                                                                                                               </span></span>
-<span><span class="co">#&gt;  [1,] "pkvancothomson"                                                                                                                                   </span></span>
-<span><span class="co">#&gt;  [2,] "3"                                                                                                                                                </span></span>
-<span><span class="co">#&gt;  [3,] "1"                                                                                                                                                </span></span>
-<span><span class="co">#&gt;  [4,] "1"                                                                                                                                                </span></span>
-<span><span class="co">#&gt;  [5,] "V * WT"                                                                                                                                           </span></span>
-<span><span class="co">#&gt;  [6,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt;  [7,] "c(\"1\")"                                                                                                                                         </span></span>
-<span><span class="co">#&gt;  [8,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt;  [9,] "dAdt[0] = -(CLtot/Vi)*A[0] - (Q/Vi)*A[0] + (Q/V2i)*A[1] ;\n    dAdt[1] = +(Q/Vi)*A[0] - (Q/V2i)*A[1] ;\n    dAdt[2] = A[0]/Vi ;\n"                </span></span>
-<span><span class="co">#&gt; [10,] "\n    CLi = CL * (1 + TH_CRCL * (CRCL*16.66667 - 66)) ;\n    CLtot = CLi + CL_HEMO ;\n    Qi = Q ;\n    Vi = V * WT ;\n    V2i = V2 * WT ;\n  ;\n"</span></span>
-<span><span class="co">#&gt; [11,] ""                                                                                                                                                 </span></span>
-<span><span class="co">#&gt; [12,] "\"A[0] = TDM_INIT * Vi; A[1] = (Qi/Vi)*(TDM_INIT *Vi) / (Qi/V2i); \""                                                                             </span></span>
-<span><span class="co">#&gt; [13,] "c(\"CL\", \"V\", \"TH_CRCL\", \"Q\", \"V2\", \"TDM_INIT\")"                                                                                       </span></span>
-<span><span class="co">#&gt; [14,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [15,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [16,] "c(\"CLi\", \"Qi\", \"Vi\", \"V2i\", \"CLtot\")"                                                                                                   </span></span>
-<span><span class="co">#&gt; [17,] "c(\"WT\", \"CRCL\", \"CL_HEMO\")"                                                                                                                 </span></span>
-<span><span class="co">#&gt; [18,] "c(\"TH_CRCL\", \"TDM_INIT\", \"TH_CVVH\")"                                                                                                        </span></span>
-<span><span class="co">#&gt; [19,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [20,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [21,] "FALSE"                                                                                                                                            </span></span>
-<span><span class="co">#&gt; [22,] "n_bins = 1"                                                                                                                                       </span></span>
-<span><span class="co">#&gt; [23,] ""                                                                                                                                                 </span></span>
-<span><span class="co">#&gt; [24,] "FALSE"                                                                                                                                            </span></span>
-<span><span class="co">#&gt; [25,] "list(model_type = \"2cmt_iv\", linearity = \"linear\", init_parameter = TRUE)"                                                                    </span></span>
-<span><span class="co">#&gt; [26,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [27,] "NULL"                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [28,] "\n - "                                                                                                                                            </span></span>
-<span><span class="co">#&gt; [29,] "NULL"</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Loading required package: pkvancothomson</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up simulation model</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkvancothomson</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
