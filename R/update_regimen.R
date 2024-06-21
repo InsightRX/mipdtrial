@@ -21,6 +21,7 @@ update_regimen <- function(
     n_doses <- length(dose_update_number:length(regimen$dose_amts))
     regimen$dose_times[dose_update_number:length(regimen$dose_amts)] <-
       regimen$dose_times[dose_update_number] + (seq(1:n_doses)-1) * new_interval
+    regimen$interval <- new_interval
   }
   regimen
 }

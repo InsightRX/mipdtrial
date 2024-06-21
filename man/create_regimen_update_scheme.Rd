@@ -4,7 +4,12 @@
 \alias{create_regimen_update_scheme}
 \title{Create scheme for updating dose or interval during dose optimization trial}
 \usage{
-create_regimen_update_scheme(time = NULL, anchor, anchor_by)
+create_regimen_update_scheme(
+  time = NULL,
+  anchor,
+  anchor_by,
+  update_type = c("dose", "interval")
+)
 }
 \arguments{
 \item{time}{a vector of numeric values. If no \code{anchor} values are specified,
@@ -23,6 +28,8 @@ second half of the 1st day.}
 
 \item{anchor_by}{either \code{day} or \code{dose}. Single value required, i.e. anchor
 types cannot be mixed.}
+
+\item{update_type}{update either future \code{dose} (default) or \code{interval}.}
 }
 \description{
 Create scheme for updating dose or interval during dose optimization trial

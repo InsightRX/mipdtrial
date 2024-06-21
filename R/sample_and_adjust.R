@@ -39,7 +39,6 @@
 #' both with and without residual variability), and `additional_info`, which
 #' varies by `dose_optimization_method`. See selected function for details.
 #' @export
-
 sample_and_adjust_by_dose <- function(
   regimen_update_scheme,
   sampling_scheme,
@@ -137,6 +136,7 @@ sample_and_adjust_by_dose <- function(
         dose_update = adjust_at_dose[j],
         t_adjust = regimen$dose_times[adjust_at_dose[j]],
         dose_before_update = regimen$dose_amts[j], # previous dose
+        interval_before_update = regimen$interval, # previous interval
         auc_before_update = auc_current_regimen
       )
     )
@@ -144,14 +144,14 @@ sample_and_adjust_by_dose <- function(
     # update regimen based on specified algorithm
     out <- dose_optimization_method(
       tdms = tdms_i,
-      dose_update = j,
+      dose_update = adjust_at_dose[j],
       regimen = regimen,
       covariates = covariates,
       ...
     )
     regimen <- out$regimen
     if(verbose) {
-      message("New dose: ", out$regimen$dose_amts[j])
+      message("New dose / interval: ", out$regimen$dose_amts[j], " / ", out$regimen$interval)
     }
 
     ## update the vector of dose_udpate numbers, if needed
@@ -161,6 +161,7 @@ sample_and_adjust_by_dose <- function(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
+
   }
 
   ## Calculate AUC for final regimen
@@ -178,6 +179,7 @@ sample_and_adjust_by_dose <- function(
       dose_update = NA,
       t_adjust = NA,
       dose_before_update = out$new_dose,
+      interval_before_update = out$new_interval,
       auc_before_update = auc_final
     )
   )
@@ -205,8 +207,7 @@ sample_and_adjust_by_dose <- function(
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
-
-dose_adjust_map <- function(
+map_adjust_dose <- function(
   tdms,
   est_model,
   parameters,
@@ -262,11 +263,12 @@ dose_adjust_map <- function(
     regimen = regimen,
     dose_update = dose_update,
     new_dose = new_dose,
+    new_interval = NA,
     additional_info = est_par
   )
 }
 
-#' Adjust doses to achieve a target metric using MAP Bayesian estimation by
+#' Adjust intervals to achieve a target metric using MAP Bayesian estimation by
 #' adapting the dosing interval
 #'
 #' Given a set of levels and a model definition, performs MAP Bayesian
@@ -275,14 +277,13 @@ dose_adjust_map <- function(
 #' individual's regimen accordingly.
 #'
 #' @inheritParams simulate_fit
-#' @inheritParams interval_grid_search
+#' @inheritParams dose_grid_search
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
-
-interval_adjust_map <- function(
+map_adjust_interval <- function(
     tdms,
     est_model,
     parameters,
@@ -311,7 +312,7 @@ interval_adjust_map <- function(
 
   # calculate new dose, using the estimation model
   if (is.null(interval_grid)) {
-    interval_grid <- c(0.5, 0.75, 1, 1.25, 1.5, 2) * regimen$interval
+    stop("Interval-optimization requires `interval_grid` argument.")
   }
   new_interval <- dose_grid_search(
     est_model = est_model,
@@ -337,6 +338,7 @@ interval_adjust_map <- function(
   list(
     regimen = regimen,
     dose_update = dose_update,
+    new_dose = NA,
     new_interval = new_interval,
     additional_info = est_par
   )

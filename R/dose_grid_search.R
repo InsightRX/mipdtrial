@@ -144,7 +144,7 @@ dose_grid_search <- function(
   )
 
   if(grid_type == "interval") {
-    tab <- data.frame(dose = grid, y = unlist(y))
+    tab <- data.frame(interval = grid, y = unlist(y))
     if (target$type %in% target_types_time) {
       tab <- filter_rows_0_100(tab)
     }

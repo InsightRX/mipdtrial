@@ -1,0 +1,338 @@
+---
+title: "Effect of sample timing"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Effect of sample timing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In model-informed precision dosing we can update doses, but of course we can also reduce or increase the dosing interval length. This can also be studied using 
+the `mipdtrial` package.
+
+```{r setup}
+library(mipdtrial)
+library(dplyr)   # for easier data manipulation 
+library(tidyr)
+library(ggplot2) # for plotting our results
+```
+
+## 1. Define simulation parameters
+
+This simulated trial will have two samples, with a peak and trough collected
+in dose 1 and 3.
+
+
+```{r}
+# end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
+# tdm_times1 <- c(1, 9) + end_of_fourth_infusion
+# tdm_times2 <- 5 + end_of_fourth_infusion
+tdm_scheme1 <- create_sampling_scheme(
+  time = c(1, -1, 1, -1), # sample 1-hour before next dose
+  offset_base = c("peak", "trough", "peak", "trough"),
+  anchor = c(1, 1, 3, 3),
+  anchor_by = "dose"
+)
+```
+
+We assume that we can update the dose amount or dosing interval
+at dose 3 and 5 and aim for an AUC24 of 400-600 mg*h/L by day 6.
+
+```{r}
+target <- create_target_object(
+  targettype = "auc24", 
+  targetmin = 400,
+  targetmax = 600,
+  time = 0,
+  offset_base = "trough",
+  anchor = 6,
+  anchor_by = "day"
+)
+dose_update_scheme <- create_regimen_update_scheme(
+  anchor = c(3, 5),
+  anchor_by = "dose",
+  update_type = "dose"
+)
+```
+
+## 2. Create a set of digital patient covariates
+
+For this example, we will randomly generate a set of weights and creatinine
+clearances (CRCLs) for our synthetic data set. See `sampling_timing()` vignette
+for a longer description.
+
+```{r}
+set.seed(15)
+dat <- data.frame(
+  ID = 1:30,
+  weight = rnorm(30, 90, 25),               # kg, normally distributed
+  crcl = exp(rnorm(30, log(6), log(1.6)))   # L/hr, log-normally distributed 
+)
+dat$CL_HEMO <- 0
+```
+
+## 3. Load model definitions
+
+We need to define the model parameters and variability terms for our simulation.
+For this study, we will use the ones defined in the models.
+
+```{r echo=FALSE}
+# Set up simulation model
+if (!require(pkvancothomson)) {
+  PKPDsim::install_default_literature_model("pk_vanco_thomson")
+  library(pkvancothomson)
+}
+model <- pkvancothomson::model()
+pop_parameters <- pkvancothomson::parameters()
+omega <- pkvancothomson::omega_matrix()
+ruv <- pkvancothomson::ruv()
+```
+
+We also need to link the covariates in our data set to the covariates expected
+in the model.
+
+```{r}
+# check which covariates are required for your model using 
+# `PKPDsim::get_model_covariates(model)`
+
+# check which covariates are in your data set using `colnames(dat)`
+cov_mapping <- c(
+  WT = "weight", 
+  CRCL = "crcl",
+  CL_HEMO = "CL_HEMO"
+)
+```
+
+## 4. Simulate a trial!
+
+Patients will get a model-based dose (using population PK parameters), and then
+we will adjust either the dose or the interval based on the MAP Bayesian fit made
+using the collected samples.
+
+Individual PK parameters will be randomly generated based on the interindividual
+variability described in the model, and residual variability will be added to
+each sample collected using the error model described in the model.
+
+First let's simulate the "dose optimization" scenario, leaving the interval
+fixed.
+
+```{r}
+set.seed(15) # important for reproducibility
+tdms <- c()
+dose_updates <- c()
+for (i in dat$ID) {
+  
+  #################################################################################
+  ## Create individual
+  #################################################################################
+  # get patient covariates
+  covs <- create_cov_object(
+    dat[dat$ID == i,],
+    mapping = cov_mapping
+  )
+  # randomly draw individual PK parameters
+  pars_true_i <- generate_iiv(
+    sim_model = model,
+    omega = omega,
+    parameters = pop_parameters
+  )
+
+  #################################################################################
+  ## Find initial starting dose
+  #################################################################################
+  # find initial starting dose: define basic regimen, then upda
+  initial_reg <- model_based_starting_dose(
+    sampling_scheme = tdm_scheme1,
+    n = 12,
+    interval = 12,
+    t_inf = 2,
+    dose_resolution = 250, # round to nearest 250 mg
+    grid = seq(250, 6000, by = 250),
+    grid_type = "dose",
+    # define model components
+    est_model = model,
+    parameters = pop_parameters,
+    covariates = covs,
+    auc_comp = attr(model, "size"),
+    # define PK target
+    target = target
+  )
+
+  #################################################################################
+  ## Main patient-level loop: run through regimen optimization
+  #################################################################################
+  treatment_summary <- sample_and_adjust_by_dose(
+    regimen_update_scheme = dose_update_scheme, 
+    sampling_scheme = tdm_scheme1, # arm 1
+    regimen = initial_reg,
+    covariates = covs,
+    pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
+    est_model = model,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
+    target_time = auc_time,
+    target = target,
+    dose_optimization_method = map_adjust_dose
+  )
+  
+  #################################################################################
+  ## Collect data into object
+  #################################################################################
+  tdms <- bind_rows(
+    tdms,
+    treatment_summary$tdms %>% mutate(id = i)
+  )
+  dose_updates <- bind_rows(
+    dose_updates,
+    treatment_summary$dose_updates %>% mutate(id = i)
+  )
+  
+}
+```
+
+## 5. Analyze results for dose-adaptation
+
+Let's see how well that worked. In the figure below we plot the steady state
+AUC that is attained using the regimen updated at the time shown on the x-axis.
+You would expect over time the steady state AUC to approach the middle of the
+range more closely, as more TDM is available to optimize the dose. Since
+we're keeping the interval fixed, each patient will have the same dose update
+times on the x-axis.
+
+```{r}
+ggplot(dose_updates) +
+  geom_line(aes(x = t, y = auc_before_update, group = id)) +
+  geom_point(aes(x = t, y = auc_before_update, group = id)) +
+  geom_ribbon(data = data.frame(t = c(0, max(dose_updates$t)), ymin = c(400, 400), ymax = c(600, 600)), aes(x = t, ymin = ymin, ymax = ymax), fill = "blue", alpha = 0.2) +
+  xlab("Weeks") + ylab("Trough concentration (mg/L)")
+```
+
+## 6. Interval adaptation
+
+Next, we'll simulate a trial in which the *interval* is optimized, and the
+dose is fixed (after an initial model-based dose is obtained). Again, we'll
+allow the dose to be changed after doses 3 and 5 (irrespective of interval).
+
+```{r}
+interval_update_scheme <- create_regimen_update_scheme(
+  anchor = c(3, 5),
+  anchor_by = "dose",
+  update_type = "interval"
+)
+```
+
+```{r}
+set.seed(15) # important for reproducibility
+tdms <- c()
+dose_updates <- c()
+for (i in dat$ID) {
+  
+  #################################################################################
+  ## Create individual
+  #################################################################################
+  # get patient covariates
+  covs <- create_cov_object(
+    dat[dat$ID == i,],
+    mapping = cov_mapping
+  )
+  # randomly draw individual PK parameters
+  pars_true_i <- generate_iiv(
+    sim_model = model,
+    omega = omega,
+    parameters = pop_parameters
+  )
+
+  #################################################################################
+  ## Find initial starting dose
+  #################################################################################
+  # find initial starting dose: define basic regimen, then upda
+  initial_reg <- model_based_starting_dose(
+    # define dosing strategy
+    sampling_scheme = tdm_scheme1,
+    n = 30,
+    interval = 12,
+    t_inf = 2,
+    dose_resolution = 250, # round to nearest 250 mg
+    grid = seq(250, 6000, by = 250),
+    grid_type = "dose",
+    # define model components
+    est_model = model,
+    parameters = pop_parameters,
+    covariates = covs,
+    auc_comp = attr(model, "size"),
+    # define PK target
+    target = target
+  )
+
+  #################################################################################
+  ## Main patient-level loop: run through regimen optimization
+  #################################################################################
+  # Summary of both MIPD approaches
+  treatment_summary <- sample_and_adjust_by_dose(
+    regimen_update_scheme = interval_update_scheme, 
+    sampling_scheme = tdm_scheme1, # arm 1
+    regimen = initial_reg,
+    covariates = covs,
+    pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
+    est_model = model,
+    parameters = pop_parameters,
+    omega = omega,
+    ruv = ruv,
+    target_time = auc_time,
+    target = target,
+    dose_optimization_method = map_adjust_interval,
+    interval_grid = c(6, 8, 12, 16, 24, 36),
+    verbose = F
+  )
+  
+  #################################################################################
+  ## Collect data into object
+  #################################################################################
+  # extract metrics of interest
+  tdms <- bind_rows(
+    tdms,
+    treatment_summary$tdms %>% mutate(id = i)
+  )
+  dose_updates <- bind_rows(
+    dose_updates,
+    treatment_summary$dose_updates %>% mutate(id = i)
+  )
+}
+```
+
+## 7. Analyze results for interval-adaptation
+
+When we plot the results of this simulation, we now see that dose update times
+are flexible, and not the same for each patient. We again see that the resulting
+steady state AUC24 also approaches the middle of the targeted AUC range. So this
+shows that the dosing interval can also be used very easily to obtain optimal 
+drug exposure.
+
+```{r}
+ggplot(dose_updates) +
+  geom_line(aes(x = t, y = auc_before_update, group = id)) +
+  geom_point(aes(x = t, y = auc_before_update, group = id)) +
+  geom_ribbon(data = data.frame(t = c(0, max(dose_updates$t)), ymin = c(400, 400), ymax = c(600, 600)), aes(x = t, ymin = ymin, ymax = ymax), fill = "blue", alpha = 0.2) +
+  xlab("Time of regimen update") + ylab("Resulting AUC at t=6 days")
+```
+
+```{r}
+dose_updates %>%
+  mutate(idx = rep(c(1:3), 30)) %>%
+  ggplot() +
+    geom_bar(aes(x = as.factor(interval_before_update))) +
+    facet_wrap(~idx) +
+    xlab("Interval")
+```
