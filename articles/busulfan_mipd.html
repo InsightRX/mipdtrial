@@ -78,12 +78,13 @@ simulate (McCune, 2014) and one model to estimate (Shukla, 2020). This
 is a simplified version of a <a href="https://link.springer.com/article/10.1007/s10928-024-09915-w" class="external-link">published
 study</a> in which we compared non-compartmental analysis (NCA) with MAP
 Bayesian estimation for AUC-guided busulfan dosing.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mipdtrial</span><span class="op">)</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_mccune"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<pre><code><span><span class="co">#&gt; Loading required package: pkbusulfanmccune</span></span>
+<span><span class="co">#&gt; Warning in library(package, lib.loc = lib.loc, character.only = TRUE,</span></span>
+<span><span class="co">#&gt; logical.return = TRUE, : there is no package called 'pkbusulfanmccune'</span></span>
+<span><span class="co">#&gt; - Retrieving model definition ()...</span></span>
+<span><span class="co">#&gt; - Package pkbusulfanmccune not installed yet.</span></span>
+<span><span class="co">#&gt; - Compiling model.</span></span>
+<span><span class="co">#&gt; * Adding model definition to R package.</span></span>
 <span><span class="co">#&gt;       [,1]                  </span></span>
 <span><span class="co">#&gt;  [1,] "\\[MODULE\\]"        </span></span>
 <span><span class="co">#&gt;  [2,] "\\[N_COMP\\]"        </span></span>
@@ -143,12 +144,14 @@ Bayesian estimation for AUC-guided busulfan dosing.</p>
 <span><span class="co">#&gt; [26,] "NULL"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </span></span>
 <span><span class="co">#&gt; [27,] "NULL"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </span></span>
 <span><span class="co">#&gt; [28,] "\n - "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </span></span>
-<span><span class="co">#&gt; [29,] "NULL"</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_shukla"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="co">#&gt; [29,] "NULL"</span></span>
+<span><span class="co">#&gt; Loading required package: pkbusulfanshukla</span></span>
+<span><span class="co">#&gt; Warning in library(package, lib.loc = lib.loc, character.only = TRUE,</span></span>
+<span><span class="co">#&gt; logical.return = TRUE, : there is no package called 'pkbusulfanshukla'</span></span>
+<span><span class="co">#&gt; - Retrieving model definition ()...</span></span>
+<span><span class="co">#&gt; - Package pkbusulfanshukla not installed yet.</span></span>
+<span><span class="co">#&gt; - Compiling model.</span></span>
+<span><span class="co">#&gt; * Adding model definition to R package.</span></span>
 <span><span class="co">#&gt;       [,1]                  </span></span>
 <span><span class="co">#&gt;  [1,] "\\[MODULE\\]"        </span></span>
 <span><span class="co">#&gt;  [2,] "\\[N_COMP\\]"        </span></span>
@@ -208,9 +211,18 @@ Bayesian estimation for AUC-guided busulfan dosing.</p>
 <span><span class="co">#&gt; [26,] "NULL"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </span></span>
 <span><span class="co">#&gt; [27,] "NULL"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </span></span>
 <span><span class="co">#&gt; [28,] "\n - "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             </span></span>
-<span><span class="co">#&gt; [29,] "NULL"</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; [29,] "NULL"</span></span></code></pre>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mipdtrial</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_mccune"</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_shukla"</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
 <span><span class="co"># For example data</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">NHANES</span><span class="op">)</span></span>
 <span></span>
@@ -225,7 +237,7 @@ Bayesian estimation for AUC-guided busulfan dosing.</p>
 days, with 4 levels collected per day, at 3.5, 4, 6 and 8 hours
 post-dose. We will adjust doses 2, 3, and 4 to achieve a target
 cumulative AUC of 90 by t = 192 hours.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tdm_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3.5</span>, <span class="fl">4</span>, <span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">24</span>, <span class="fl">48</span>, <span class="fl">72</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">adjust_at_dose</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
@@ -249,7 +261,7 @@ way.” –– <a href="https://r4ds.had.co.nz/tidy-data.html" class="external-l
 Wickham</a>), data cleaning should be handled outside of the
 <code>mipdtrial</code> tools. The functions expect all patient
 covariates to be numeric.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">NHANES</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/NHANES/man/NHANES.html" class="external-link">NHANES</a></span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="co"># take just the first record per patient</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -274,11 +286,11 @@ covariates. This would be a good time to do that sort of processing on
 your data set!</p>
 <p>You may also need to convert between units (height in m to cm, for
 example.)</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span><span class="op">$</span><span class="va">T_CL_EFF</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">REGI</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></code></pre></div>
 <p>Here are the first few rows of our data set:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
 <span><span class="co">#&gt;      ID Gender   Age Weight Height T_CL_EFF  REGI</span></span>
@@ -291,7 +303,7 @@ example.)</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> <span style="text-decoration: underline;">51</span>647      0    45   75.7   167.        0     0</span></span></code></pre></div>
 <p>We will also only look at the first 10 patients in our data set, in
 the interest of speed.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">ID</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -300,7 +312,7 @@ the interest of speed.</p>
 <p>We need to define the model parameters and variability terms for our
 simulation. For this study, we will use the ones defined in the
 models.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up simulation model ("true")</span></span>
 <span><span class="va">model_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">model</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">parameters_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">parameters</span><span class="op">(</span><span class="op">)</span></span>
@@ -314,7 +326,7 @@ models.</p>
 <span><span class="va">ruv_est</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanshukla</span><span class="fu">::</span><span class="fu">ruv</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>We also need to link the covariates in our data set to the covariates
 expected in the model.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check which covariates are required for your model using </span></span>
 <span><span class="co"># `attr(model_sim, "covariates")`</span></span>
 <span></span>
@@ -335,7 +347,7 @@ expected in the model.</p>
 AUC, along with patient identifiers (i.e., id). We will pre-populate a
 data frame rather than iteratively binding rows, since that is more
 performant.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id <span class="op">=</span> <span class="va">ids</span>,</span>
 <span>  iter <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -359,7 +371,7 @@ estimation model and the measured TDMs we “collect”.</p>
 error (assay error, etc.). This function creates a data frame of error
 to add to each “true” simulated concentration to produced a measured
 therapeutic drug monitoring sample.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="co"># important for reproducibility</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">ids</span><span class="op">)</span> <span class="op">{</span></span>
@@ -417,7 +429,7 @@ therapeutic drug monitoring sample.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Here are the first few rows of our simulation results:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      id iter  true_auc  est_auc</span></span>
 <span><span class="co">#&gt; 1 51624    1  83063.85 90006.79</span></span>
@@ -434,7 +446,7 @@ therapeutic drug monitoring sample.</p>
 that target attainment would be very high (all patients have an AUC very
 close to 90 mg*h/L), but “true” AUC was higher than that due to some
 model misspecification!</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">true_auc</span>, <span class="va">est_auc</span><span class="op">)</span>,</span>
@@ -454,7 +466,7 @@ model misspecification!</p>
 <p><img src="busulfan_mipd_files/figure-html/unnamed-chunk-13-1.png" width="192"></p>
 <p>Even with some model misspecification, target attainment (within 20%
 of target AUC) was still high:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">true_auc</span>,  <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
