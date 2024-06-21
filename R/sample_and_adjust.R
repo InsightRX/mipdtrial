@@ -179,3 +179,56 @@ dose_adjust_map <- function(
   regimen <- update_regimen(regimen, new_dose, dose_update)
   list(regimen = regimen, additional_info = est_par)
 }
+
+
+#' Adjust doses to achieve a target metric using NCA
+#'
+#' Given a set of levels and a model definition, performs MAP Bayesian
+#' estimation of individual PK/PD parameters, then finds the appropriate dose
+#' to achieve the specified PK/PD target and updates the individual's regimen
+#' accordingly.
+#'
+#' @inheritParams simulate_fit
+#' @inheritParams dose_grid_search
+#' @param ... arguments passed on to `clinPK::nca`
+#' @returns Returns a named list: `regimen`: the updated regimen;
+#'   `additional_info`: the MAP parameter estimates
+#' @export
+dose_adjust_nca <- function(
+    tdms,
+    regimen,
+    target_time,
+    target,
+    dose_update,
+    ...
+) {
+  # perform NCA
+  est_par <- perform_nca(
+    tdms = tdms,
+    regimen = regimen,
+    ...
+  )
+
+  # calculate new dose, using the estimation model
+  if (is.null(dose_grid)) {
+    # base dose finding grid on initial regimen
+    d1 <- regimen$dose_amts[1]
+    dose_grid <- seq(d1/5, d1 * 5, length.out = 10)
+  }
+  new_dose <- dose_grid_search(
+    est_model = est_model,
+    regimen = regimen,
+    parameters = est_par, # we want to use our "best guess" to get the dose
+    target_time = target_time,
+    target = target,
+    obs_comp = PKPDsim::get_model_auc_compartment(est_model),
+    dose_update = dose_update,
+    dose_grid = dose_grid,
+    covariates = covariates,
+    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
+    ...
+  )
+  # return new regimen
+  regimen <- update_regimen(regimen, new_dose, dose_update)
+  list(regimen = regimen, additional_info = est_par)
+}
