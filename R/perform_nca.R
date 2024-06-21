@@ -59,7 +59,7 @@ perform_nca <- function(
 #' @param cum_auc AUC estimated for all dosing intervals up to the dose_update
 #'   interval.
 
-dose_from_nca_auc <- function(
+dose_from_auc <- function(
   target,
   intv_auc,
   regimen,
