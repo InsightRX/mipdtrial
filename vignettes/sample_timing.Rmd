@@ -96,7 +96,7 @@ We need to define the model parameters and variability terms for our simulation.
 For this study, we will use the ones defined in the models.
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, results='hide'}
 # for CI, most windows users should not need this since the .libPaths should
 # include where the model was installed.
 if (.Platform$OS.type == "windows") { 
