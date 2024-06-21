@@ -101,7 +101,11 @@ For this study, we will use the ones defined in the models.
 # include where the model was installed.
 if (.Platform$OS.type == "windows") { 
     .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
-  }
+}
+
+if (!require(pkvancothomson)) {
+  PKPDsim::install_default_literature_model("pk_vanco_thomson")
+}
 ```
 
 ```{r message=FALSE, warning=FALSE}
