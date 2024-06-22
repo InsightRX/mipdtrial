@@ -277,7 +277,6 @@ for (i in dat$ID) {
   #################################################################################
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
-  # Summary of both MIPD approaches
   treatment_summary <- sample_and_adjust_by_dose(
     regimen_update_scheme = interval_update_scheme, 
     sampling_scheme = tdm_scheme1, # arm 1

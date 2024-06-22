@@ -68,7 +68,7 @@ check_offset_base <- function(offset_base, time, anchor) {
   }
   if(length(offset_base) == 1) offset_base <- rep(offset_base, length(time))
   if(length(offset_base) != length(time)) {
-    stop("Please specify `offset` with same length as `time`, or as single value.")
+    stop("Please specify `offset_base` with same length as `time`, or as single value.")
   }
   allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
   if(any(! unique(offset_base) %in% c(allowed_bases))) {

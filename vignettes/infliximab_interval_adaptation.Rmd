@@ -31,9 +31,6 @@ if(!require(pkinfliximabfasanmade, warn.conflicts = FALSE)) {
   library(pkinfliximabfasanmade)
 }
 
-# For example data
-library(NHANES)
-
 # For data handling/plotting
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
@@ -61,14 +58,17 @@ adjust_at_dose <- c(2, 3, 4)
 ## Target
 target <- create_target_object(
   targettype = "cmin", 
-  targetvalue = 7
+  targetvalue = 7,
+  time = 0,
+  offset_base = "dose",
+  anchor = 6,
+  anchor_by = "dose"
 )
 ```
 
 ## 2. Create a set of digital patient covariates
 
-The Fasanmade model includes weight (WT), serum albumin (ALB) as covariates, as well as
-the use of concomittant immunomodulatory drugs (IMM) and the development of 
+The Fasanmade model includes weight (WT), serum albumin (ALB) as covariates, as well as the use of concomittant immunomodulatory drugs (IMM) and the development of 
 antibodies against infliximab (ATI). 
 
 For this simulation study, we will assume a multivariate distribution for WT
@@ -122,16 +122,7 @@ We gave the covariates in the dataset the exact names expected by the model
 so we do not have map the covariates (how to use `cov_mapping` is shown in other 
 vignettes).
 
-## 4. Initialize output metrics of interest
-
-We want to record both "true" trough concentration and estimated trough, 
-along with patient identifiers (i.e., `id`).
-
-```{r}
-comb <- c()
-```
-
-## 5. Simulate a trial!
+## 4. Simulate a model-informed precision dosing trial
 
 Each patient will start at a dose of 5 mg/kg body weight given every 8 weeks. 
 
@@ -139,34 +130,51 @@ We will then use sample troughs, perform MAP estimations, and use
 `mipdtrial::interval_grid_search` to optimize intervals to attain a target of 
 7 mg/L.
 
+```{r}
+regimen_update_scheme <- create_regimen_update_scheme(
+  anchor = c(2, 3, 4),
+  anchor_by = "dose",
+  update_type = "interval"
+)
+```
+
 ```{r dose-adapt}
-set.seed(123) # important for reproducibility
+set.seed(123) # for reproducibility
+tdms <- c()
+dose_updates <- c()
 for (i in ids) {
-  
+
+  #################################################################################
+  ## Create individual
+  #################################################################################
   # get patient covariates
   covs <- create_cov_object(
     dat[dat$ID == i,], 
     mapping = c(WT = "WT", ALB = "ALB", ATI = "ATI", IMM = "IMM")
   )
-  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
-  reg <- PKPDsim::new_regimen(
-    amt = 5 * covs$WT$value, # we will update this each "day" of the trial.
-    interval = 8 * 7 * 24,
-    n = 5,
-    t_inf = 2,
-    type = "infusion"
-  )
-  cmin_times <- reg$dose_times[5] + 24 * 7 * 8
-  
   # randomly draw individual PK parameters
   pars_true_i <- generate_iiv(
     sim_model = model,
     omega = omega,
     parameters = parameters
   )
+
+  #################################################################################
+  ## create initial dosing regimen (see PKPDsim::new_regimen for more info)
+  #################################################################################
+  reg <- PKPDsim::new_regimen(
+    amt = 5 * covs$WT$value, # we will update this each "day" of the trial.
+    interval = 8 * 7 * 24,
+    n = 10,
+    t_inf = 2,
+    type = "infusion"
+  )
   
+  #################################################################################
+  ## Main patient-level loop: run through regimen optimization
+  #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    adjust_at_dose  = adjust_at_dose, 
+    regimen_update_scheme = regimen_update_scheme,
     sampling_scheme = tdm_scheme,
     regimen         = reg,
     covariates      = covs,
@@ -177,94 +185,40 @@ for (i in ids) {
     parameters      = parameters,
     omega           = omega,
     ruv             = ruv,
-    target_time     = cmin_times,
     target          = target,
-    dose_optimization_method = dose_adjust_map,
-    max_dose = 2900,
-    verbose = T
-  )
-  
-  # extract metrics of interest
-  comb <- bind_rows(
-    comb,
-    treatment_summary$tdms %>%
-      mutate(
-        id = i, 
-        new_dose = treatment_summary$dose_updates$new_dose
-      )
-  )
-}
-```
-
-Here are the first few rows of our simulation results:
-
-```{r}
-head(comb)
-```
-
-## 6. Analyze results for dose-adaptation
-
-```{r}
-ggplot(comb, aes(x = t / (24*7), y = y, group = id)) +
-  geom_line() +
-  geom_point() +
-  xlab("Weeks") + ylab("Trough concentration (mg/L)")
-```
-
-## 7. Run same simulatin but now for interval adaptation
-
-```{r interval-adapt}
-set.seed(1) # same set of patients
-for (i in ids) {
-  
-  # get patient covariates
-  covs <- create_cov_object(
-    dat[dat$ID == i,], 
-    mapping = c(WT = "WT", ALB = "ALB", ATI = "ATI", IMM = "IMM")
-  )
-  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
-  reg <- PKPDsim::new_regimen(
-    amt = 5 * covs$WT$value, # we will update this each "day" of the trial.
-    interval = 8 * 7 * 24,
-    n = 5,
-    t_inf = 2,
-    type = "infusion"
-  )
-  
-  # randomly draw individual PK parameters
-  pars_true_i <- generate_iiv(
-    sim_model = model,
-    omega = omega,
-    parameters = parameters
-  )
-  
-  treatment_summary <- sample_and_adjust_by_dose(
-    adjust_at_dose  = adjust_at_dose, 
-    sampling_scheme = tdm_scheme,
-    regimen         = reg,
-    covariates      = covs,
-    pars_true_i     = pars_true_i,
-    sim_model       = model,
-    sim_ruv         = ruv,
-    est_model       = model,
-    parameters      = parameters,
-    omega           = omega,
-    ruv             = ruv,
-    target_time     = cmin_times,
-    target          = target,
-    dose_optimization_method = interval_adjust_map,
-    interval_grid = c(4, 6, 8, 10, 12),
+    dose_optimization_method = map_adjust_interval,
+    interval_grid = c(4, 6, 8, 10, 12) * 7 * 24,
     verbose = F
   )
   
-  # extract metrics of interest
-  comb <- bind_rows(
-    comb,
-    treatment_summary$tdms %>%
-      mutate(
-        id = i, 
-        new_dose = reg$dose_amts[adjust_at_dose]
-      )
+  #################################################################################
+  ## Collect data into object
+  #################################################################################
+  tdms <- bind_rows(
+    tdms,
+    treatment_summary$tdms %>% mutate(id = i)
+  )
+  dose_updates <- bind_rows(
+    dose_updates,
+    treatment_summary$dose_updates %>% mutate(id = i)
   )
 }
+```
+
+## 5. Analyze results for interval-adaptation
+
+```{r}
+ggplot(tdms) +
+  geom_hline(yintercept = target$value, color = "red", linewidth = 1) +
+  geom_line(aes(x = t, y = y, group = id)) +
+  geom_point(aes(x = t, y = y, group = id))
+```
+
+```{r}
+dose_updates %>%
+  mutate(idx = rep(c(1:4), 10)) %>%
+  ggplot() +
+    geom_bar(aes(x = as.factor(interval_before_update))) +
+    facet_wrap(~idx) +
+    xlab("Interval")
 ```

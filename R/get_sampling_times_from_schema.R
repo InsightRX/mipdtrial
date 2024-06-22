@@ -34,7 +34,6 @@ get_sampling_time_core <- function(row, regimen) {
     t_anchor <- regimen$dose_times[dose_anchor]
   }
   if(is.na(t_anchor)) {
-    browser()
     stop("Not enough doses in regimen to update, please increase initial regimen length.")
   }
   t_anchor + row$offset
