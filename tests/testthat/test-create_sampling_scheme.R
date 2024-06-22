@@ -1,4 +1,3 @@
-
 regimen <- PKPDsim::new_regimen(amt = 1, n = 10, interval = 12)
 
 test_that("simple usage works, with fixed pre-specified timepoints", {
