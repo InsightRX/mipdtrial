@@ -23,7 +23,7 @@ test_that("trough concentration search works", {
     refine = FALSE,
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 50% should be the same thing
   dose_ctr_prob1 <- dose_grid_search(
@@ -33,9 +33,10 @@ test_that("trough concentration search works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .5, type="gt"),
+    auc_comp = 1,
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% should require a higher dose
   dose_ctr_prob2 <- dose_grid_search(
@@ -47,7 +48,7 @@ test_that("trough concentration search works", {
     pta = list(prob = .9, type="gt"),
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% + ruv should require an even higher dose
   dose_ctr_prob3 <- dose_grid_search(
@@ -60,7 +61,7 @@ test_that("trough concentration search works", {
     ruv = list(prop = .1, add = .5),
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
   )
 
   expect_lt(abs(dose_ctr - 105)/105, 0.01)
@@ -81,7 +82,14 @@ test_that("peak concentration search works", {
     refine = FALSE,
     target_time = intv * (n-1) + t_inf,
     return_obj = FALSE,
-    target = list(value = 10, type = "conc", method = "nearest_value")
+    target = create_target_object(
+      targettype = "conc",
+      targetvalue = 10,
+      time = 0,
+      offset_base = "peak",
+      anchor_by = "dose",
+      anchor = 5
+    )
   )
   expect_lt(abs(dose_cpeak - 77)/77, 0.01)
 })
@@ -92,13 +100,16 @@ test_that("AUC search works", {
     dose_grid = dose_grid,
     parameters = par,
     regimen = reg,
-    obs_comp = 2,
+    auc_comp = 2,
     refine = FALSE,
     target_time = 5*intv,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_object(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      time = 0,
+      offset_base = "dose",
+      anchor_by = "dose",
+      anchor = 6
     )
   )
   # probability of AUC>target (at 50% prob it should be same as before)
@@ -108,14 +119,16 @@ test_that("AUC search works", {
     parameters = par,
     regimen = reg,
     pta = list(prob = .5, type="gt"),
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     ruv = list(prop = .1, add = .5),
-    target_time = intv * n,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_object(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      time = 0,
+      offset_base = "dose",
+      anchor_by = "dose",
+      anchor = 6
     )
   )
   # probability of AUC>target (at 90% prob it should be higher)
@@ -125,13 +138,15 @@ test_that("AUC search works", {
     parameters = par,
     regimen = reg,
     pta = list(prob = .9, type="gt"),
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
-    target_time = intv * n,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_object(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      time = 0,
+      offset_base = "dose",
+      anchor_by = "dose",
+      anchor = 6
     )
   )
 
@@ -149,20 +164,21 @@ test_that("Probability: less than target", {
     regimen = reg,
     pta = list(prob = .9,
                type="lt"), ## less than!
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     dose_resolution = 5,
-    target_time = intv * n,
     return_obj = FALSE,
-    target = list(
-      value = 1500,
-      type = "cum_auc"
+    target = create_target_object(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      time = 0,
+      offset_base = "dose",
+      anchor_by = "dose",
+      anchor = 6
     )
   )
   expect_lt(abs(dose_auc_prob3 - 240)/240, 0.01)
 })
-
-
 
 test_that('nonlinear models have refining activated rather than defaulting to linear interpolation', {
 
