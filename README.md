@@ -34,3 +34,6 @@ You can install the development version of mipdtrial from
 # install.packages("devtools")
 devtools::install_github("InsightRX/mipdtrial")
 ```
+
+For examples of how to use the package to answer questions about MIPD
+and target attainment, check out the vignettes listed under “Articles!”
