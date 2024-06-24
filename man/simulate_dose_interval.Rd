@@ -11,7 +11,7 @@ simulate_dose_interval(
   regimen,
   md,
   pta,
-  target,
+  target_design,
   model,
   t_obs,
   omega,
@@ -35,9 +35,6 @@ simulate_dose_interval(
 \item{pta}{probability of target attainment, list with arguments \code{type} and
 \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
 specific conc or auc.}
-
-\item{target}{list with arguments, created using function
-\code{create_target_design()}}
 
 \item{model}{model for simulating dose (estimation model)}
 

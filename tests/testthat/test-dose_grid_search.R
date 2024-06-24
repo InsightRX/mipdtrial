@@ -21,9 +21,8 @@ test_that("trough concentration search works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 50% should be the same thing
   dose_ctr_prob1 <- dose_grid_search(
@@ -36,7 +35,7 @@ test_that("trough concentration search works", {
     auc_comp = 1,
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% should require a higher dose
   dose_ctr_prob2 <- dose_grid_search(
@@ -48,7 +47,7 @@ test_that("trough concentration search works", {
     pta = list(prob = .9, type="gt"),
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% + ruv should require an even higher dose
   dose_ctr_prob3 <- dose_grid_search(
@@ -61,7 +60,7 @@ test_that("trough concentration search works", {
     ruv = list(prop = .1, add = .5),
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
+    target_design= create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
 
   expect_lt(abs(dose_ctr - 105)/105, 0.01)
@@ -267,7 +266,7 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target = target,
+      target_design = target,
       return_obj = FALSE
     ),
     dose_grid_error
@@ -280,7 +279,7 @@ test_that("user-friendly error if no dose_grid", {
       regimen = reg,
       refine = FALSE,
       return_obj = FALSE,
-      target = target
+      target_design = target
     ),
     dose_grid_error
   )
@@ -293,7 +292,7 @@ test_that("user-friendly error if no dose_grid", {
       refine = FALSE,
       target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
-      target = target
+      target_design = target
     ),
     dose_grid_error
   )

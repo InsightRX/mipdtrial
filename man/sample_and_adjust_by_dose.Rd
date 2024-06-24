@@ -7,13 +7,13 @@
 sample_and_adjust_by_dose(
   regimen_update_design,
   sampling_design,
+  target_design,
   regimen,
-  target,
   covariates = NULL,
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  dose_optimization_method = dose_adjust_map,
+  dose_optimization_method = map_adjust_dose,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -27,9 +27,9 @@ and when to update the regimen in the MIPD trial. Schemes are created using
 \item{sampling_design}{a data.frame with a sampling scheme, created using
 \code{create_sampling_design()}.}
 
-\item{regimen}{PKPDsim regimen object, containing initial dosing regimen.}
+\item{target_design}{target design created using \code{create_target_design()}}
 
-\item{target}{target object created using \code{create_target_design()}}
+\item{regimen}{PKPDsim regimen object, containing initial dosing regimen.}
 
 \item{covariates}{named list of PKPDsim covariates.}
 

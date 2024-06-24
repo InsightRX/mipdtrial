@@ -7,7 +7,7 @@
 dose_grid_search(
   est_model = NULL,
   regimen,
-  target = create_target_design(targettype = "conc", targetvalue = 10, time = 24),
+  target_design = create_target_design(targettype = "conc", targetvalue = 10, time = 24),
   auc_comp = NULL,
   pta = NULL,
   omega = NULL,
@@ -31,9 +31,6 @@ dose_grid_search(
 \item{est_model}{model used for estimation ("clinician facing")}
 
 \item{regimen}{PKPDsim regimen object}
-
-\item{target}{list with arguments, created using function
-\code{create_target_design()}}
 
 \item{auc_comp}{auc compartment (starting from 1, R-style not C-style!)}
 
@@ -81,6 +78,9 @@ should grid be expanded?}
 \item{covariates}{covariates object}
 
 \item{...}{passed on to PKPDsim function}
+
+\item{target}{list with arguments, created using function
+\code{create_target_design()}}
 }
 \value{
 A numeric value indicating the recommended dose

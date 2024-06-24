@@ -4,7 +4,7 @@
 \alias{calc_auc_from_regimen}
 \title{Get AUC from a regimen}
 \usage{
-calc_auc_from_regimen(regimen, parameters, model, target, ...)
+calc_auc_from_regimen(regimen, parameters, model, target_design, ...)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}
@@ -16,7 +16,7 @@ list.}
 
 \item{model}{model to use for AUC calculations.}
 
-\item{target}{target object, created using \code{create_target_design()}}
+\item{target_design}{target design, created using \code{create_target_design()}}
 
 \item{...}{arguments passed on to PKPDsim::sim. Typical arguments include
 \code{covariates} or \code{iov_bins}}

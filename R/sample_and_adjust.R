@@ -17,8 +17,8 @@
 #' `create_regimen_update_design()`.
 #' @param sampling_design a data.frame with a sampling scheme, created using
 #' `create_sampling_design()`.
+#' @param target_design target design created using `create_target_design()`
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
-#' @param target target object created using `create_target_design()`
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
 #' @param sim_model model to use for simulating "true" patient response.
@@ -43,13 +43,13 @@
 sample_and_adjust_by_dose <- function(
   regimen_update_design,
   sampling_design,
+  target_design,
   regimen,
-  target,
   covariates = NULL,
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  dose_optimization_method = dose_adjust_map,
+  dose_optimization_method = map_adjust_dose,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -114,7 +114,7 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       parameters = pars_true_i, # true patient parameters
       model = sim_model,
-      target = target,
+      target_design = target_design,
       covariates = covariates
     )
     if(verbose) {
@@ -142,7 +142,7 @@ sample_and_adjust_by_dose <- function(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
-      target = target,
+      target_design = target_design,
       covariates = covariates,
       ...
     )
@@ -166,7 +166,7 @@ sample_and_adjust_by_dose <- function(
     regimen = regimen,
     parameters = pars_true_i, # true patient parameters
     model = sim_model,
-    target = target,
+    target_design = target_design,
     covariates = covariates
   )
   dose_updates <- dplyr::bind_rows(
@@ -212,8 +212,7 @@ map_adjust_dose <- function(
   ruv,
   regimen,
   covariates = NULL,
-  target_time,
-  target,
+  target_design,
   dose_update,
   dose_grid = NULL,
   ...
@@ -240,8 +239,7 @@ map_adjust_dose <- function(
     est_model = est_model,
     regimen = regimen,
     parameters = est_par, # we want to use our "best guess" to get the dose
-    target_time = target_time,
-    target = target,
+    target_design = target_design,
     auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
     grid = dose_grid,
@@ -288,8 +286,7 @@ map_adjust_interval <- function(
     ruv,
     regimen,
     covariates = NULL,
-    target_time,
-    target,
+    target_design,
     dose_update,
     interval_grid = NULL,
     ...
@@ -315,8 +312,7 @@ map_adjust_interval <- function(
     est_model = est_model,
     regimen = regimen,
     parameters = est_par, # we want to use our "best guess" to get the dose
-    target_time = target_time,
-    target = target,
+    target_design = target_design,
     auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
     grid = interval_grid,
