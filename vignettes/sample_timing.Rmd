@@ -42,15 +42,15 @@ infused over 2 hours.
 # end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
 # tdm_times1 <- c(1, 9) + end_of_fourth_infusion
 # tdm_times2 <- 5 + end_of_fourth_infusion
-tdm_scheme1 <- create_sampling_scheme(
-  time = c(1, 9), 
-  offset_base = c("dose", "dose"), 
+tdm_scheme1 <- create_sampling_design(
+  time = c(1, 9),
+  offset_from = c("dose", "dose"), 
   anchor = c(4, 4), 
   anchor_by = "dose"
 )
-tdm_scheme2 <- create_sampling_scheme(
+tdm_scheme2 <- create_sampling_design(
   time = 5, 
-  offset_base = "dose", 
+  offset_from = "dose", 
   anchor = 4,
   anchor_by = "dose"
 )
@@ -60,16 +60,18 @@ We will adjust the fifth dose based on these levels, aiming for a daily AUC of
 400-600 mg*h/L by day 6.
 
 ```{r}
-adjust_at_dose <- 5
-
-target <- create_target_object(
+adjust_scheme <- create_regimen_update_design(
+  anchor = 5,
+  anchor_by = "dose"
+)
+target <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
-  targetmax = 600
+  targetmax = 600,
+  time = 24,
+  anchor = 6,
+  anchor_by = "day"
 )
-
-auc_time <- 6 * 24 # day 6
-
 ```
 
 ## 2. Create a set of digital patient covariates
@@ -184,7 +186,7 @@ for (i in dat$ID) {
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
     # define dosing strategy
-    sampling_scheme = tdm_scheme1,
+    sampling_design = tdm_scheme1,
     n = 12,
     interval = 12,
     t_inf = 2,
@@ -210,8 +212,8 @@ for (i in dat$ID) {
   
   # Summary of both MIPD approaches
   treatment_summary1 <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose, 
-    sampling_scheme = tdm_scheme1, # arm 1
+    regimen_update_design = adjust_scheme, 
+    sampling_design = tdm_scheme1, # arm 1
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -221,13 +223,12 @@ for (i in dat$ID) {
     parameters = pop_parameters,
     omega = omega,
     ruv = ruv,
-    target_time = auc_time,
     target = target,
-    dose_optimization_method = dose_adjust_map
+    dose_optimization_method = map_adjust_dose
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose, 
-    sampling_scheme = tdm_scheme2, # arm 2
+    regimen_update_design = adjust_scheme, 
+    sampling_design = tdm_scheme2, # arm 1
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -237,9 +238,8 @@ for (i in dat$ID) {
     parameters = pop_parameters,
     omega = omega,
     ruv = ruv,
-    target_time = auc_time,
     target = target,
-    dose_optimization_method = dose_adjust_map
+    dose_optimization_method = map_adjust_dose
   )
   
   # get steady-state AUC at end of treatment course
@@ -247,19 +247,17 @@ for (i in dat$ID) {
     regimen = treatment_summary1$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    target_time = c(auc_time - 24, auc_time),
+    target = target,
     covariates = covs
   )
   results$random[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary2$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    target_time = c(auc_time - 24, auc_time),
+    target = target,
     covariates = covs
   )
 }
-
-
 ```
 
 Here are the first few rows of our simulation results:
@@ -277,16 +275,16 @@ between the two arms of the trial?
 target_attainment <- results %>%
   pivot_longer(
     c(peak_trough, random),
-    names_to = "sampling_scheme",
+    names_to = "sampling_design",
     values_to = "steady_state_auc"
   ) %>%
   mutate(ontarget = is_on_target(steady_state_auc, target)) %>%
-  group_by(sampling_scheme) %>%
+  group_by(sampling_design) %>%
   summarize(prop_on_target = 100 * mean(ontarget))
 
 target_attainment %>%
   ggplot() +
-  aes(x = sampling_scheme, y = prop_on_target) +
+  aes(x = sampling_design, y = prop_on_target) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   theme(
@@ -309,20 +307,19 @@ look at how each patient responded to each sampling strategy.
 ```{r}
 results %>%
   ggplot() +
-  aes(x = peak_trough, y = random) +
-  geom_rect(
-    aes(xmin = 400, xmax = 600, ymin = -Inf, ymax = Inf), 
-    fill = "grey70",
-    alpha = 0.05
-  ) +
-  geom_rect(
-    aes(ymin = 400, ymax = 600, xmin = -Inf, xmax = Inf),
-    fill = "grey70",
-    alpha = 0.05
-  ) +
-  geom_point() +
-  theme_minimal()
-
+    aes(x = peak_trough, y = random) +
+    geom_rect(
+      aes(xmin = 400, xmax = 600, ymin = -Inf, ymax = Inf), 
+      fill = "grey70",
+      alpha = 0.05
+    ) +
+    geom_rect(
+      aes(ymin = 400, ymax = 600, xmin = -Inf, xmax = Inf),
+      fill = "grey70",
+      alpha = 0.05
+    ) +
+    geom_point() +
+    theme_minimal()
 ```
 
 There is a strong correlation in final AUC between the two sampling strategies.

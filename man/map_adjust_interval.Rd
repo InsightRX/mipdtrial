@@ -37,7 +37,7 @@ elements for \code{prop} (proportional) and \code{add} (additive).}
 \item{covariates}{named list of PKPDsim covariates}
 
 \item{target}{list with arguments, created using function
-\code{create_target_object()}}
+\code{create_target_design()}}
 
 \item{dose_update}{update dose from which dose?}
 

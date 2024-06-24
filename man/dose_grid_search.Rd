@@ -7,7 +7,7 @@
 dose_grid_search(
   est_model = NULL,
   regimen,
-  target = create_target_object(targettype = "conc", targetvalue = 10, time = 24),
+  target = create_target_design(targettype = "conc", targetvalue = 10, time = 24),
   auc_comp = NULL,
   pta = NULL,
   omega = NULL,
@@ -33,7 +33,7 @@ dose_grid_search(
 \item{regimen}{PKPDsim regimen object}
 
 \item{target}{list with arguments, created using function
-\code{create_target_object()}}
+\code{create_target_design()}}
 
 \item{auc_comp}{auc compartment (starting from 1, R-style not C-style!)}
 

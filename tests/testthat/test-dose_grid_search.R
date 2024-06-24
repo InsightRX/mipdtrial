@@ -23,7 +23,7 @@ test_that("trough concentration search works", {
     refine = FALSE,
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
+    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 50% should be the same thing
   dose_ctr_prob1 <- dose_grid_search(
@@ -36,7 +36,7 @@ test_that("trough concentration search works", {
     auc_comp = 1,
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
+    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% should require a higher dose
   dose_ctr_prob2 <- dose_grid_search(
@@ -48,7 +48,7 @@ test_that("trough concentration search works", {
     pta = list(prob = .9, type="gt"),
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
+    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% + ruv should require an even higher dose
   dose_ctr_prob3 <- dose_grid_search(
@@ -61,7 +61,7 @@ test_that("trough concentration search works", {
     ruv = list(prop = .1, add = .5),
     target_time = intv * n,
     return_obj = FALSE,
-    target = create_target_object(time = 72, targettype = "conc", targetvalue = 5)
+    target = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
 
   expect_lt(abs(dose_ctr - 105)/105, 0.01)
@@ -82,11 +82,11 @@ test_that("peak concentration search works", {
     refine = FALSE,
     target_time = intv * (n-1) + t_inf,
     return_obj = FALSE,
-    target = create_target_object(
+    target = create_target_design(
       targettype = "conc",
       targetvalue = 10,
       time = 0,
-      offset_base = "peak",
+      offset_from = "peak",
       anchor_by = "dose",
       anchor = 5
     )
@@ -103,11 +103,11 @@ test_that("AUC search works", {
     auc_comp = 2,
     refine = FALSE,
     target_time = 5*intv,
-    target = create_target_object(
+    target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
       time = 0,
-      offset_base = "dose",
+      offset_from = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -122,11 +122,11 @@ test_that("AUC search works", {
     auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     ruv = list(prop = .1, add = .5),
-    target = create_target_object(
+    target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
       time = 0,
-      offset_base = "dose",
+      offset_from = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -140,11 +140,11 @@ test_that("AUC search works", {
     pta = list(prob = .9, type="gt"),
     auc_comp = 2,  # take AUC, not conc!
     omega = omega,
-    target = create_target_object(
+    target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
       time = 0,
-      offset_base = "dose",
+      offset_from = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -168,11 +168,11 @@ test_that("Probability: less than target", {
     omega = omega,
     dose_resolution = 5,
     return_obj = FALSE,
-    target = create_target_object(
+    target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
       time = 0,
-      offset_base = "dose",
+      offset_from = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -199,7 +199,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     type = "infusion"
   )
 
-  target <- create_target_object(
+  target <- create_target_design(
     targetvalue = 225,
     targetmin = 200,
     targetmax = 250,
@@ -252,11 +252,11 @@ test_that('nonlinear models have refining activated rather than defaulting to li
 
 test_that("user-friendly error if no dose_grid", {
   dose_grid_error <- "Must supply grid search space in `grid`"
-  target <- create_target_object(
+  target <- create_target_design(
     targettype = "conc",
     targetvalue = 10,
     time = 0,
-    offset_base = "peak",
+    offset_from = "peak",
     anchor = 5,
     anchor_by = "dose"
   )

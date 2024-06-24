@@ -34,9 +34,9 @@ in dose 1 and 3.
 # end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
 # tdm_times1 <- c(1, 9) + end_of_fourth_infusion
 # tdm_times2 <- 5 + end_of_fourth_infusion
-tdm_scheme1 <- create_sampling_scheme(
+tdm_scheme1 <- create_sampling_design(
   time = c(1, -1, 1, -1), # sample 1-hour before next dose
-  offset_base = c("peak", "trough", "peak", "trough"),
+  offset_from = c("peak", "trough", "peak", "trough"),
   anchor = c(1, 1, 3, 3),
   anchor_by = "dose"
 )
@@ -46,16 +46,16 @@ We assume that we can update the dose amount or dosing interval
 at dose 3 and 5 and aim for an AUC24 of 400-600 mg*h/L by day 6.
 
 ```{r}
-target <- create_target_object(
+target <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
   targetmax = 600,
   time = 0,
-  offset_base = "trough",
+  offset_from = "trough",
   anchor = 6,
   anchor_by = "day"
 )
-dose_update_scheme <- create_regimen_update_scheme(
+dose_update_scheme <- create_regimen_update_design(
   anchor = c(3, 5),
   anchor_by = "dose",
   update_type = "dose"
@@ -149,7 +149,7 @@ for (i in dat$ID) {
   #################################################################################
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
-    sampling_scheme = tdm_scheme1,
+    sampling_design = tdm_scheme1,
     n = 12,
     interval = 12,
     t_inf = 2,
@@ -169,8 +169,8 @@ for (i in dat$ID) {
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    regimen_update_scheme = dose_update_scheme, 
-    sampling_scheme = tdm_scheme1, # arm 1
+    regimen_update_design = dose_update_design, 
+    sampling_design = tdm_scheme1, # arm 1
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -224,7 +224,7 @@ dose is fixed (after an initial model-based dose is obtained). Again, we'll
 allow the dose to be changed after doses 3 and 5 (irrespective of interval).
 
 ```{r}
-interval_update_scheme <- create_regimen_update_scheme(
+interval_update_design <- create_regimen_update_design(
   anchor = c(3, 5),
   anchor_by = "dose",
   update_type = "interval"
@@ -258,7 +258,7 @@ for (i in dat$ID) {
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
     # define dosing strategy
-    sampling_scheme = tdm_scheme1,
+    sampling_design = tdm_scheme1,
     n = 30,
     interval = 12,
     t_inf = 2,
@@ -278,8 +278,8 @@ for (i in dat$ID) {
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    regimen_update_scheme = interval_update_scheme, 
-    sampling_scheme = tdm_scheme1, # arm 1
+    regimen_update_design = interval_update_design,
+    sampling_design = tdm_scheme1, # arm 1
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,

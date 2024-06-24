@@ -37,7 +37,7 @@ simulate_dose_interval(
 specific conc or auc.}
 
 \item{target}{list with arguments, created using function
-\code{create_target_object()}}
+\code{create_target_design()}}
 
 \item{model}{model for simulating dose (estimation model)}
 

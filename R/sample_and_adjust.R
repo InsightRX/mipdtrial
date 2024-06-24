@@ -12,13 +12,13 @@
 #' function is intended to cover a broad range of relatively straight forward
 #' designs, and may serve as a template for more complex designs.
 #'
-#' @param regimen_update_scheme a data.frame with scheme with details on how
+#' @param regimen_update_design a data.frame with scheme with details on how
 #' and when to update the regimen in the MIPD trial. Schemes are created using
-#' `create_regimen_update_scheme()`.
-#' @param sampling_scheme a data.frame with a sampling scheme, created using
-#' `create_sampling_scheme()`.
+#' `create_regimen_update_design()`.
+#' @param sampling_design a data.frame with a sampling scheme, created using
+#' `create_sampling_design()`.
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
-#' @param target target object created using `create_target_object()`
+#' @param target target object created using `create_target_design()`
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
 #' @param sim_model model to use for simulating "true" patient response.
@@ -41,8 +41,8 @@
 #' varies by `dose_optimization_method`. See selected function for details.
 #' @export
 sample_and_adjust_by_dose <- function(
-  regimen_update_scheme,
-  sampling_scheme,
+  regimen_update_design,
+  sampling_design,
   regimen,
   target,
   covariates = NULL,
@@ -57,9 +57,9 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
 
-  adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_scheme, regimen)
+  adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
-  tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
+  tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
   if (!any(tdm_times < first_adjust_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }
@@ -88,13 +88,14 @@ sample_and_adjust_by_dose <- function(
     message("Starting dose: ", round(regimen$dose_amts[1]))
   }
 
-  for (j in seq(adjust_at_dose)) {
+  for (j in 1:length(adjust_at_dose)) {
     if(verbose) message("Adjustment of dose# ", adjust_at_dose[j])
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
-    tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
+    tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
+      browser()
       stop("No new samples in current adjustment interval, check target and sampling settings.")
     }
     last_adjust_time <- adjust_time
@@ -151,7 +152,7 @@ sample_and_adjust_by_dose <- function(
     }
 
     ## update the vector of dose_udpate numbers, if needed
-    adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_scheme, regimen)
+    adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_design, regimen)
 
     additional_info <- c(
       additional_info,

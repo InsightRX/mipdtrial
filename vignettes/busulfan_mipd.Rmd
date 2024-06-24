@@ -65,16 +65,16 @@ levels collected per day, at 3.5, 4, 6 and 8 hours post-dose. We will adjust
 doses 2, 3, and 4 to achieve a target cumulative AUC of 90 by t = 192 hours.
 
 ```{r}
-tdm_scheme <- create_sampling_scheme(
+tdm_scheme <- create_sampling_design(
   time = rep(c(3.5, 4, 6, 8), 4),
-  offset_base = "dose",
+  offset_from = "dose",
   anchor = rep(1:4, each = 4),
   anchor_by = "dose"
 )
 
 adjust_at_dose <- c(2, 3, 4)
 
-target <- create_target_object(
+target <- create_target_design(
   targettype = "cum_auc", 
   targetvalue = 90 * 1000       # unit conversion
 )
@@ -237,7 +237,7 @@ for (i in ids) {
   
   treatment_summary <- sample_and_adjust_by_dose(
     adjust_at_dose = adjust_at_dose, 
-    sampling_scheme = tdm_scheme,
+    sampling_design = tdm_scheme,
     regimen = reg,
     covariates = covs,
     pars_true_i = pars_true_i,

@@ -28,7 +28,7 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #'   Accepts parameters supplied as a data frame row, a named vector or as a
 #'   list.
 #' @param model model to use for AUC calculations.
-#' @param target target object, created using `create_target_object()`
+#' @param target target object, created using `create_target_design()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
 #' @returns numeric vector of AUCs between each simulated time point. Control

@@ -47,20 +47,20 @@ take a TDM sample at the end of each dosing cycle.
 
 ```{r}
 ## TDM scheme
-tdm_scheme <- create_sampling_scheme(
+tdm_scheme <- create_sampling_design(
   time = c(-1, -1, -1, -1), # sample 1-hour before next dose
-  offset_base = "trough",
+  offset_from = "trough",
   anchor = c(1, 2, 3, 4),
   anchor_by = "dose"
 )
 adjust_at_dose <- c(2, 3, 4)
 
 ## Target
-target <- create_target_object(
+target <- create_target_design(
   targettype = "cmin", 
   targetvalue = 7,
   time = 0,
-  offset_base = "dose",
+  offset_from = "dose",
   anchor = 6,
   anchor_by = "dose"
 )
@@ -131,7 +131,7 @@ We will then use sample troughs, perform MAP estimations, and use
 7 mg/L.
 
 ```{r}
-regimen_update_scheme <- create_regimen_update_scheme(
+regimen_update_design <- create_regimen_update_design(
   anchor = c(2, 3, 4),
   anchor_by = "dose",
   update_type = "interval"
@@ -174,8 +174,8 @@ for (i in ids) {
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    regimen_update_scheme = regimen_update_scheme,
-    sampling_scheme = tdm_scheme,
+    regimen_update_design = regimen_update_design,
+    sampling_design = tdm_scheme,
     regimen         = reg,
     covariates      = covs,
     pars_true_i     = pars_true_i,

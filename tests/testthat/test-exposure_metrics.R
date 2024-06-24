@@ -32,7 +32,7 @@ test_that("calc_auc_from_sim: parameter mismatch raises error", {
 
 test_that("calc_auc_from_sim: correct AUC calculated", {
   # parameters as list
-  target <- create_target_object(targettype = "conc", targetvalue = 10, time = c(48, 72))
+  target <- create_target_design(targettype = "conc", targetvalue = 10, time = c(48, 72))
   expect_equal(
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
@@ -75,8 +75,8 @@ test_that("handles IOV correctly", {
   mod <- pkbusulfanmccune::model()
   pars <- pkbusulfanmccune::parameters()
   covs <- list(AGE = 15, WT = 70, HT = 150, SEX = 0, T_CL_EFF = 0)
-  target_a <- create_target_object(targettype = "cum_auc", targetvalue = 10, time = c(0, 24))
-  target_b <- create_target_object(targettype = "cum_auc", targetvalue = 10, time = c(48, 72))
+  target_a <- create_target_design(targettype = "cum_auc", targetvalue = 10, time = c(0, 24))
+  target_b <- create_target_design(targettype = "cum_auc", targetvalue = 10, time = c(48, 72))
   result1a <- calc_auc_from_regimen(
     regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
     parameters = pars,

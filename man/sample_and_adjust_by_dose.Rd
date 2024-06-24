@@ -5,9 +5,10 @@
 \title{Adjust dosing using MIPD on TDMs at specified dose numbers}
 \usage{
 sample_and_adjust_by_dose(
-  regimen_update_scheme,
-  sampling_scheme,
+  regimen_update_design,
+  sampling_design,
   regimen,
+  target,
   covariates = NULL,
   pars_true_i,
   sim_model,
@@ -19,14 +20,16 @@ sample_and_adjust_by_dose(
 )
 }
 \arguments{
-\item{regimen_update_scheme}{a data.frame with scheme with details on how
+\item{regimen_update_design}{a data.frame with scheme with details on how
 and when to update the regimen in the MIPD trial. Schemes are created using
-\code{create_regimen_update_scheme()}.}
+\code{create_regimen_update_design()}.}
 
-\item{sampling_scheme}{a data.frame with a sampling scheme, created using
-\code{create_sampling_scheme()}.}
+\item{sampling_design}{a data.frame with a sampling scheme, created using
+\code{create_sampling_design()}.}
 
 \item{regimen}{PKPDsim regimen object, containing initial dosing regimen.}
+
+\item{target}{target object created using \code{create_target_design()}}
 
 \item{covariates}{named list of PKPDsim covariates.}
 

@@ -1,7 +1,7 @@
 regimen <- PKPDsim::new_regimen(amt = 1, n = 10, interval = 12)
 
 test_that("simple usage works, anchoring to doses", {
-  scheme1 <- create_regimen_update_scheme(
+  scheme1 <- create_regimen_update_design(
     time = c(0, 0, 0),
     anchor = c(1, 2, 3),
     anchor_by = "dose"
@@ -19,7 +19,7 @@ test_that("simple usage works, anchoring to doses", {
 })
 
 test_that("simple usage works, anchoring to days, different `time` values", {
-  scheme2 <- create_regimen_update_scheme(
+  scheme2 <- create_regimen_update_design(
     time = c(0, 12, 0),
     anchor = c(1, 2, 5),
     anchor_by = "day"

@@ -16,7 +16,7 @@ list.}
 
 \item{model}{model to use for AUC calculations.}
 
-\item{target}{target object, created using \code{create_target_object()}}
+\item{target}{target object, created using \code{create_target_design()}}
 
 \item{...}{arguments passed on to PKPDsim::sim. Typical arguments include
 \code{covariates} or \code{iov_bins}}

@@ -6,7 +6,7 @@
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
 #' @param target list with arguments, created using function
-#' `create_target_object()`
+#' `create_target_design()`
 #' @param auc_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
 #'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
@@ -44,7 +44,7 @@
 dose_grid_search <- function(
     est_model = NULL,
     regimen,
-    target = create_target_object(
+    target = create_target_design(
       targettype = "conc",
       targetvalue = 10,
       time = 24
