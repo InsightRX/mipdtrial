@@ -18,6 +18,7 @@
 #' @param sampling_scheme a data.frame with a sampling scheme, created using
 #' `create_sampling_scheme()`.
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
+#' @param target target object created using `create_target_object()`
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
 #' @param sim_model model to use for simulating "true" patient response.
@@ -43,6 +44,7 @@ sample_and_adjust_by_dose <- function(
   regimen_update_scheme,
   sampling_scheme,
   regimen,
+  target,
   covariates = NULL,
   pars_true_i,
   sim_model,
@@ -55,14 +57,7 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
 
-  if (max(adjust_at_dose) > length(regimen$dose_times)) {
-    stop("Insufficient doses in `regimen` for all dose adjustments specified.")
-  }
-
   adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_scheme, regimen)
-  if (any(adjust_at_dose <= 1)) {
-    stop("TDM collection before the first dose is not yet supported")
-  }
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
   tdm_times <- get_sampling_times_from_scheme(sampling_scheme, regimen)
   if (!any(tdm_times < first_adjust_time)) {
@@ -119,7 +114,7 @@ sample_and_adjust_by_dose <- function(
       parameters = pars_true_i, # true patient parameters
       model = sim_model,
       target = target,
-      covariates = covs
+      covariates = covariates
     )
     if(verbose) {
       message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
@@ -129,7 +124,7 @@ sample_and_adjust_by_dose <- function(
     } else {
       tdms_i <- new_tdms
     }
-    dose_updates <- bind_rows(
+    dose_updates <- dplyr::bind_rows(
       dose_updates,
       data.frame(
         t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
@@ -146,6 +141,7 @@ sample_and_adjust_by_dose <- function(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
+      target = target,
       covariates = covariates,
       ...
     )
@@ -170,9 +166,9 @@ sample_and_adjust_by_dose <- function(
     parameters = pars_true_i, # true patient parameters
     model = sim_model,
     target = target,
-    covariates = covs
+    covariates = covariates
   )
-  dose_updates <- bind_rows(
+  dose_updates <- dplyr::bind_rows(
     dose_updates,
     data.frame(
       t = regimen$dose_times[adjust_at_dose[j]],

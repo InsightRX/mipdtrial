@@ -8,11 +8,12 @@
 #'
 #' @export
 get_dose_update_numbers_from_scheme <- function(scheme, regimen) {
-  dose <- c()
+  adjust_at_dose <- c()
   for(i in 1:length(scheme$anchor)) {
-    dose <- c(dose, get_dose_update_core(scheme[i,], regimen))
+    adjust_at_dose <- c(adjust_at_dose, get_dose_update_core(scheme[i,], regimen))
   }
-  sort(dose)
+  adjust_dose_checks(adjust_at_dose, regimen)
+  sort(adjust_at_dose)
 }
 
 #' Core function to calculate the dose update number for a row in a
@@ -26,4 +27,15 @@ get_dose_update_core <- function(row, regimen) {
     dose_anchor <- which.min(abs(regimen$dose_times - t_aim))
   }
   dose_anchor
+}
+
+#' Checks for dose_update_number obtained from dose_update scheme
+#'
+adjust_dose_checks <- function(adjust_at_dose, regimen) {
+  if (max(adjust_at_dose) > length(regimen$dose_times)) {
+    stop("Insufficient doses in `regimen` for all dose adjustments specified.")
+  }
+  if (any(adjust_at_dose <= 1)) {
+    stop("TDM collection before the first dose is not yet supported")
+  }
 }

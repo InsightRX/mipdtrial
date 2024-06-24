@@ -184,7 +184,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
 
   # mock a highly non-linear model: x ** 2
   local_mocked_bindings(
-    simulate_dose = function(dose_grid, ...) dose_grid ** 2
+    simulate_dose_interval = function(dose_grid, ...) dose_grid ** 2
   )
 
   # placeholder model + set-up
@@ -199,15 +199,17 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     type = "infusion"
   )
 
-  target_def <- list(
-    value = 225,
-    range = c(200, 250),
-    type = "conc"
+  target <- create_target_object(
+    targetvalue = 225,
+    targetmin = 200,
+    targetmax = 250,
+    time = 24,
+    targettype = "conc"
   )
 
   no_refine <- dose_grid_search(
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
+    grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
     refine = FALSE,
     refine_range = c(0.2, 5),
@@ -216,8 +218,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     dose_update = 1,
     parameters = ind_est,
     obs_comp = 2,
-    target = target_def,
-    target_time = 24,
+    target = target,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -226,7 +227,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
   )
   refine <- dose_grid_search( # uses default `refine` argument (not specified)
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
+    grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
     refine_range = c(0.2, 5),
     regimen = regimen,
@@ -234,8 +235,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     dose_update = 1,
     parameters = ind_est,
     obs_comp = 2,
-    target = target_def,
-    target_time = 24,
+    target = target,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -251,43 +251,49 @@ test_that('nonlinear models have refining activated rather than defaulting to li
 })
 
 test_that("user-friendly error if no dose_grid", {
-  dose_grid_error <- "Must supply grid search space in `dose_grid`"
+  dose_grid_error <- "Must supply grid search space in `grid`"
+  target <- create_target_object(
+    targettype = "conc",
+    targetvalue = 10,
+    time = 0,
+    offset_base = "peak",
+    anchor = 5,
+    anchor_by = "dose"
+  )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = NULL,
+      grid = NULL,
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_time = intv * (n-1) + t_inf,
-      return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target = target,
+      return_obj = FALSE
     ),
     dose_grid_error
   )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = c(1000),
+      grid = c(1000),
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target = target
     ),
     dose_grid_error
   )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = c(1000, NA),
+      grid = c(1000, NA),
       parameters = par,
       regimen = reg,
       refine = FALSE,
       target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target = target
     ),
     dose_grid_error
   )

@@ -26,10 +26,12 @@ test_that("simple usage works, anchoring to days, different `time` values", {
   )
   times <- get_sampling_times_from_scheme(scheme2, regimen)
   expect_equal(
-    scheme1,
+    scheme2,
     data.frame(
-      base = c("dose", "dose", "dose"), offset = c(0, 12, 0),
-      anchor = c(1, 2, 5), anchor_by = c("day", "day", "day"),
+      base = c("dose", "dose", "dose"),
+      offset = c(0, 12, 0),
+      anchor = c(1, 2, 5),
+      anchor_by = c("day", "day", "day"),
       update_type = c("dose", "dose", "dose")
     )
   )

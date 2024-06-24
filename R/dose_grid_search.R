@@ -173,7 +173,7 @@ dose_grid_search <- function(
 
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
     if(dose == grid[1] && dose > min_dose) {
-      dose_grid <- dose_grid / 4
+      grid <- grid / 4
     } else {
       if(dose == tail(grid,1) && dose < max_dose) {
         grid <- grid * 4
