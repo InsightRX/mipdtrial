@@ -82,7 +82,12 @@ We need to define the model parameters and variability terms for our simulation.
 For this study, we will use the ones defined in the models.
 
 ```{r echo=FALSE}
-# Set up simulation model
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+}
+
 if (!require(pkvancothomson)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
   library(pkvancothomson)
