@@ -34,7 +34,7 @@ in dose 1 and 3.
 # tdm_times1 <- c(1, 9) + end_of_fourth_infusion
 # tdm_times2 <- 5 + end_of_fourth_infusion
 tdm_design1 <- create_sampling_design(
-  time = c(1, -1, 1, -1), # sample 1-hour before next dose
+  time = c(1, -1, 1, -1), # sample 1-hour before next dose, and at peak
   offset_from = c("peak", "trough", "peak", "trough"),
   anchor = c(1, 1, 3, 3),
   anchor_by = "dose"
@@ -50,7 +50,6 @@ target_design <- create_target_design(
   targetmin = 400,
   targetmax = 600,
   time = 0,
-  offset_from = "trough",
   anchor = 6,
   anchor_by = "day"
 )

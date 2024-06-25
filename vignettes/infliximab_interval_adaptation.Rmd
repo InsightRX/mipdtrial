@@ -1,8 +1,8 @@
 ---
-title: "Interval adaptation"
+title: "Interval adaptation (infliximab)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Busulfan MIPD}
+  %\VignetteIndexEntry{Infliximab interval adaptation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -206,18 +206,9 @@ for (i in ids) {
 
 ```{r}
 ggplot(tdms) +
-  geom_hline(yintercept = target$value, color = "red", linewidth = 1) +
+  geom_hline(yintercept = target_design$value, color = "red", linewidth = 1) +
   geom_line(aes(x = t, y = y, group = id)) +
   geom_point(aes(x = t, y = y, group = id))
-```
-
-```{r}
-dose_updates %>%
-  mutate(idx = rep(c(1:4), 10)) %>%
-  ggplot() +
-    geom_histogram(aes(x = dose_before_update)) +
-    facet_wrap(~idx) +
-    xlab("Interval")
 ```
 
 ```{r}
