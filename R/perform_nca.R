@@ -36,14 +36,15 @@ perform_nca <- function(
   colnames(tdms)[colnames(tdms) == "t"] <- "time"
   colnames(tdms)[colnames(tdms) == "y"] <- "dv"
 
-  clinPK::nca(
-    data = tdms,
-    dose = regimen$dose_amts[dose_idx],
-    t_inf = regimen$t_inf[dose_idx],
-    tau = tau,
-    has_baseline = (round(tdms$t[1]) == 0),
-    ...
-  )
+  args <- list(...)
+  args_nca <- args[intersect(names(args), names(formals(clinPK::nca)))]
+  args_nca$data <- tdms
+  args_nca$dose <- regimen$dose_amts[dose_idx]
+  args_nca$t_inf <- regimen$t_inf[dose_idx]
+  args_nca$tau <- tau
+  args_nca$has_baseline <- (round(tdms$time[1]) == 0)
+
+  do.call(clinPK::nca, args_nca)
 }
 
 #' Calculate a new dose given an estimated AUC and target AUC

@@ -192,9 +192,9 @@ test_that("errors if dose update includes dose 1", {
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1),
       target_time = 4 * 24
     ),
     "TDM collection before the first dose is not yet supported"
@@ -211,9 +211,9 @@ test_that("errors if dose update before first TDM", {
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1),
       target_time = 4 * 24
     ),
     "At least one TDM must be collected before dose adjustment"
@@ -230,11 +230,60 @@ test_that("errors if update doses are longer than supplied regimen", {
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1),
       target_time = 4 * 24
     ),
     "Insufficient doses in `regimen` for all dose adjustments specified."
   )
+})
+
+test_that("Can adjust by NCA AUC", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 150,
+    t_inf = 1,
+    interval = 6,
+    n = 4 * 4,
+    type = "infusion"
+  )
+  tdm_times <- rep(c(1, 2, 3, 5, 6), 4) + rep(c(0, 24, 48, 72), each = 5)
+
+  out <- sample_and_adjust_by_dose(
+    adjust_at_dose = c(5, 9, 13),
+    tdm_times = tdm_times,
+    regimen = regimen,
+    pars_true_i = list(CL = 6, V = 10),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.01, add = 0.1),
+    dose_optimization_method = dose_adjust_nca,
+    target = create_target_object(targettype = "cum_auc", targetvalue = 500)
+  )
+  # expected structure
+  expect_true(inherits(out, "list"))
+  expect_true(
+    all(c("final_regimen", "tdms", "additional_info") %in% names(out))
+  )
+
+  # expected doses are changed
+  final_doses <- out$final_regimen
+  # first day (4 doses) unchanged
+  expect_equal(final_doses$dose_amts[1:4], regimen$dose_amts[1:4])
+  # other doses each change
+  expect_true(all(final_doses$dose_amts[5:8] != final_doses$dose_amts[1:4]))
+  expect_equal(
+    length(unique(final_doses$dose_amts[c(1,5,9,13)])),
+    length(final_doses$dose_amts[c(1,5,9,13)])
+  )
+
+  # expected tdm sampling structure
+  tdms <- out$tdms
+  expect_equal(nrow(tdms), 3 * 5) # 3 days, 5 * 3
+  expect_false(any(tdms$true_y == tdms$y))
+
+  # allow up to 1% error from goal of 500 mg-h/L over 4 days
+  cum_auc_dose3 <- out$additional_info[[3]]$cumulative_auc
+  # this is the cumulative auc after 3 days (4th day isn't sampled/calculated)
+  expect_true(abs((cum_auc_dose3 - 0.75 * 500)/(0.75 * 500)) < 0.01)
+  expect_true(all())
 })
