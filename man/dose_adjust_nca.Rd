@@ -32,5 +32,10 @@ subsequent doses to achieve either the target AUC per dosing interval
 (\code{create_target_object(targettype = 'auc')}), AUC24
 (\code{create_target_object(targettype = 'auc24')}) or cumulative AUC
 (\code{create_target_object(targettype = 'cum_auc')}). Uses the most recently
-sampled dosing interval to estimate
+sampled dosing interval to estimate AUC, extrapolating that over all doses
+between the dose to be updated and the last sampled dose. Note that in order
+to consider AUC contributions from previous doses, a baseline TDM collected
+within 30 minutes of the dose administration is required. This is a
+limitation of the algorithm, and not of the function. See \code{\link[=dose_from_auc]{dose_from_auc()}}
+for more information about dose selection logic.
 }
