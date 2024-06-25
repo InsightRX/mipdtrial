@@ -6,6 +6,27 @@
 \usage{
 check_offset_from(offset_from, time, anchor)
 }
+\arguments{
+\item{offset_from}{character vector of same length as \code{time} (or single
+value) determining how to interpret the provided sampling \code{time}. If \code{NULL}
+will use the dose time as offset (default). Other options are \code{cmax} or
+\code{peak}, which will use the end of infusion as the base for the \code{time}, or
+\code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
+
+\item{time}{a vector of numeric values. If no \code{anchor} values are specified,
+these will be used as the fixed sampling times in the simulated trial.
+If \code{anchor} values are supplied, the sampling times  will be calculated
+adaptively during the trial. The \code{anchor} determine which dose is
+used as reference anchor, and \code{time} will be relative to the specified
+\code{anchor}.}
+
+\item{anchor}{numeric vector of the dose or day number to "anchor"
+the sampling times to. Vector needs to be of same length as \code{t}.
+If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
+If later doses in the day are preferred, the anchor can also be specified
+fractionally, e.g. \code{1.5} will use the time of the first dose in the
+second half of the 1st day.}
+}
 \description{
 Check / clean offset_from element
 }

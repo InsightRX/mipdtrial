@@ -19,6 +19,9 @@ get_dose_update_numbers_from_scheme <- function(scheme, regimen) {
 #' Core function to calculate the dose update number for a row in a
 #' regimen update data.frame
 #'
+#' @param row a single row from a regimen_update data.frame
+#' @param regimen PKPDsim regimen
+#'
 get_dose_update_core <- function(row, regimen) {
   if(row$anchor_by == "dose") {
     dose_anchor <- row$anchor
@@ -31,6 +34,8 @@ get_dose_update_core <- function(row, regimen) {
 
 #' Checks for dose_update_number obtained from dose_update scheme
 #'
+#' @param adjust_at_dose number of dose at which to adjust
+#' @param regimen PKPDsim regimen
 adjust_dose_checks <- function(adjust_at_dose, regimen) {
   if (max(adjust_at_dose) > length(regimen$dose_times)) {
     stop("Insufficient doses in `regimen` for all dose adjustments specified.")

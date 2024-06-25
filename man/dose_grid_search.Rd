@@ -32,6 +32,9 @@ dose_grid_search(
 
 \item{regimen}{PKPDsim regimen object}
 
+\item{target_design}{object specifying target design, created using function
+\code{create_target_design()}}
+
 \item{auc_comp}{auc compartment (starting from 1, R-style not C-style!)}
 
 \item{pta}{probability of target attainment, list with arguments \code{type} and
@@ -49,6 +52,8 @@ types.}
 
 \item{grid}{vector specifying doses or intervals to use as test grid,
 Example: \code{seq(from = 50, to = 500, by = (500 - 50) / 10)}}
+
+\item{grid_type}{either "dose" or "interval"}
 
 \item{dose_resolution}{to which precision should the output be rounded
 (e.g. 50), useful when in practice only a specific set of dose units.
@@ -78,9 +83,6 @@ should grid be expanded?}
 \item{covariates}{covariates object}
 
 \item{...}{passed on to PKPDsim function}
-
-\item{target}{list with arguments, created using function
-\code{create_target_design()}}
 }
 \value{
 A numeric value indicating the recommended dose

@@ -286,7 +286,7 @@ for (i in dat$ID) {
     ruv = ruv,
     target_time = auc_time,
     dose_optimization_method = map_adjust_interval,
-    interval_grid = c(6, 8, 12, 16, 24, 36),
+    grid = c(6, 8, 12, 16, 24, 36),
     verbose = F
   )
   

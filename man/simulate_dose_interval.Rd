@@ -36,6 +36,9 @@ simulate_dose_interval(
 \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
 specific conc or auc.}
 
+\item{target_design}{object specifying target design, created using function
+\code{create_target_design()}}
+
 \item{model}{model for simulating dose (estimation model)}
 
 \item{t_obs}{time at which observation should be calculated}

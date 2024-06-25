@@ -19,6 +19,8 @@ get_sampling_times_from_scheme <- function(
 #' Core function to calculate the sampling time for a row in a sampling schema
 #' data.frame.
 #'
+#' @param row a single row from a sampling_time_design data.frame
+#' @param regimen PKPDsim regimen
 get_sampling_time_core <- function(row, regimen) {
   if(row$anchor_by == "dose") {
     dose_anchor <- row$anchor

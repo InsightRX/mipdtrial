@@ -14,7 +14,7 @@ map_adjust_dose(
   covariates = NULL,
   target_design,
   dose_update,
-  dose_grid = NULL,
+  grid = NULL,
   ...
 )
 }
@@ -34,7 +34,13 @@ elements for \code{prop} (proportional) and \code{add} (additive).}
 
 \item{covariates}{named list of PKPDsim covariates}
 
+\item{target_design}{object specifying target design, created using function
+\code{create_target_design()}}
+
 \item{dose_update}{update dose from which dose?}
+
+\item{grid}{vector specifying doses or intervals to use as test grid,
+Example: \code{seq(from = 50, to = 500, by = (500 - 50) / 10)}}
 
 \item{...}{arguments passed on to PKPDmap::get_map_estimates and/or
 PKPDsim::sim}

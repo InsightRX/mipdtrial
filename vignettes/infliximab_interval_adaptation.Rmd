@@ -131,9 +131,8 @@ vignettes).
 
 Each patient will start at a dose of 5 mg/kg body weight given every 8 weeks. 
 
-We will then use sample troughs, perform MAP estimations, and use 
-`mipdtrial::interval_grid_search` to optimize intervals to attain a target of 
-7.5 mg/L.
+We will then use sample troughs, perform MAP estimations, and try to optimize
+the dosing intervals to attain a target of 7.5 mg/L.
 
 ```{r dose-adapt}
 set.seed(123) # for reproducibility
@@ -184,7 +183,7 @@ for (i in ids) {
     omega           = omega,
     ruv             = ruv,
     dose_optimization_method = map_adjust_interval,
-    interval_grid = c(4, 6, 8, 10, 12) * 7 * 24,
+    grid = c(4, 6, 8, 10, 12) * 7 * 24,
     verbose = F
   )
   

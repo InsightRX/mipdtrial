@@ -56,6 +56,8 @@ create_design <- function(
 
 #' Check / clean offset_from element
 #'
+#' @inheritParams create_design
+#'
 check_offset_from <- function(offset_from, time, anchor) {
   if(length(anchor) != length(time)) {
     stop("Please specify `anchor` with same length as `time`")

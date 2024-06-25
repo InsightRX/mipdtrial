@@ -6,6 +6,11 @@
 \usage{
 adjust_dose_checks(adjust_at_dose, regimen)
 }
+\arguments{
+\item{adjust_at_dose}{number of dose at which to adjust}
+
+\item{regimen}{PKPDsim regimen}
+}
 \description{
 Checks for dose_update_number obtained from dose_update scheme
 }

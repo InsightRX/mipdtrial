@@ -5,7 +5,7 @@
 #'
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
-#' @param target list with arguments, created using function
+#' @param target_design object specifying target design, created using function
 #' `create_target_design()`
 #' @param auc_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
@@ -19,6 +19,7 @@
 #' @param dose_update update dose from which dose?
 #' @param grid vector specifying doses or intervals to use as test grid,
 #' Example: `seq(from = 50, to = 500, by = (500 - 50) / 10)`
+#' @param grid_type either "dose" or "interval"
 #' @param dose_resolution to which precision should the output be rounded
 #'   (e.g. 50), useful when in practice only a specific set of dose units.
 #'   Can of course also be controlled by altering the grid.

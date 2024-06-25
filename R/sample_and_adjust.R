@@ -203,6 +203,7 @@ sample_and_adjust_by_dose <- function(
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
+#'
 map_adjust_dose <- function(
   tdms,
   est_model,
@@ -213,7 +214,7 @@ map_adjust_dose <- function(
   covariates = NULL,
   target_design,
   dose_update,
-  dose_grid = NULL,
+  grid = NULL,
   ...
 ) {
   # get MAP fit, using model for estimation
@@ -229,10 +230,10 @@ map_adjust_dose <- function(
   )
 
   # calculate new dose, using the estimation model
-  if (is.null(dose_grid)) {
+  if (is.null(grid)) {
     # base dose finding grid on initial regimen
     d1 <- regimen$dose_amts[1]
-    dose_grid <- seq(d1/5, d1 * 5, length.out = 10)
+    grid <- seq(d1/5, d1 * 5, length.out = 10)
   }
   new_dose <- dose_grid_search(
     est_model = est_model,
@@ -241,7 +242,7 @@ map_adjust_dose <- function(
     target_design = target_design,
     auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
-    grid = dose_grid,
+    grid = grid,
     grid_type = "dose",
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,
@@ -287,7 +288,7 @@ map_adjust_interval <- function(
     covariates = NULL,
     target_design,
     dose_update,
-    interval_grid = NULL,
+    grid = NULL,
     ...
 ) {
 
@@ -304,8 +305,8 @@ map_adjust_interval <- function(
   )
 
   # calculate new dose, using the estimation model
-  if (is.null(interval_grid)) {
-    stop("Interval-optimization requires `interval_grid` argument.")
+  if (is.null(grid)) {
+    stop("Interval-optimization requires `grid` argument.")
   }
   new_interval <- dose_grid_search(
     est_model = est_model,
@@ -314,7 +315,7 @@ map_adjust_interval <- function(
     target_design = target_design,
     auc_comp = PKPDsim::get_model_auc_compartment(est_model),
     dose_update = dose_update,
-    grid = interval_grid,
+    grid = grid,
     grid_type = "interval",
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,

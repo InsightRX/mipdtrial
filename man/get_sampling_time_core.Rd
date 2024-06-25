@@ -7,6 +7,11 @@ data.frame.}
 \usage{
 get_sampling_time_core(row, regimen)
 }
+\arguments{
+\item{row}{a single row from a sampling_time_design data.frame}
+
+\item{regimen}{PKPDsim regimen}
+}
 \description{
 Core function to calculate the sampling time for a row in a sampling schema
 data.frame.
