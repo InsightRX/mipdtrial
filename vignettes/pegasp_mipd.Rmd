@@ -59,7 +59,7 @@ target <- create_target_object(
   targetvalue = 300
 )
 
-conc_times <- c( 14*24,  28*24,  42*24) 
+conc_times <- 1344
 ```
 
 ## 2. Create a set of digital patient covariates
@@ -213,7 +213,7 @@ for (i in ids) {
     regimen = treatment_summary$final_regimen,
     covariates = covs,
     ruv = ruv,
-    t_obs = conc_times,
+    t_obs = c(14, 28, 42) * 24,
     only_obs = TRUE
   )
   conc  <- sim$y
@@ -285,4 +285,9 @@ results %>%
   scale_fill_manual(values = c("#3870FA", "#35BCB1", "#FF8C00"))
 ```
 
-While further work is needed to establish a realistic upper toxicity threshold to inform the therapeutic window of PEG-asparaginase, an MIPD approach informed by AAL levels which are already germane to therapeutic care with PEG-asparaginase may translate to better target attainment and cost savings. For further details, see [Brooks et al., PAGE Meeting; June 26-28, 2024, Rome, Italy. (https://www.page-meeting.org/default.asp?abstract=10796)].
+While further work is needed to establish a realistic upper toxicity threshold
+to inform the therapeutic window of PEG-asparaginase, an MIPD approach informed
+by AAL levels which are already germane to therapeutic care with
+PEG-asparaginase may translate to better target attainment and cost savings. For
+further details, see [Brooks et al., PAGE Meeting; June 26-28, 2024, Rome,
+Italy. (https://www.page-meeting.org/default.asp?abstract=10796)].
