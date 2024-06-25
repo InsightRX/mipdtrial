@@ -59,6 +59,12 @@ perform_nca <- function(
 #' @param dose_update index of dose that should be updated
 #' @param cum_auc AUC estimated for all dosing intervals up to the dose_update
 #'   interval.
+#' @returns Returns a new dose (single numeric value), expected to achieve the
+#'   specified AUC target. For the targets 'auc24' and 'auc', returns the dose
+#'   required for the interval in `regimen` to achieve the specified AUC at
+#'   steady-state. For cumulative auc ('cum_auc'), returns the dose required to
+#'   achieve the specified AUC if spread across the remaining doses.
+#' @export
 
 dose_from_auc <- function(
   target,

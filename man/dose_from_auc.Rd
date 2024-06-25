@@ -18,6 +18,13 @@ dose_from_auc(target, intv_auc, regimen, dose_update, cum_auc = 0)
 \item{cum_auc}{AUC estimated for all dosing intervals up to the dose_update
 interval.}
 }
+\value{
+Returns a new dose (single numeric value), expected to achieve the
+specified AUC target. For the targets 'auc24' and 'auc', returns the dose
+required for the interval in \code{regimen} to achieve the specified AUC at
+steady-state. For cumulative auc ('cum_auc'), returns the dose required to
+achieve the specified AUC if spread across the remaining doses.
+}
 \description{
 Uses a simple ratio of \code{dose2 = dose1 * auc2 / auc1} (i.e., assumes
 constant clearance) to identify a new dose. For cumulative AUC targets, takes
