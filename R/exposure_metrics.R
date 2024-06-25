@@ -35,7 +35,13 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #'   time period over which AUC should be calculated using `target_time`.
 #' @export
 
-calc_auc_from_regimen <- function(regimen, parameters, model, target_design, ...){
+calc_auc_from_regimen <- function(
+  regimen,
+  parameters,
+  model,
+  target_design,
+  ...
+){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
     stop("Model/parameter mismatch")
   }

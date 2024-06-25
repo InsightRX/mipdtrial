@@ -1,8 +1,8 @@
 ---
-title: "Effect of sample timing"
+title: "Dose and interval adaptation (vancomycin)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Effect of sample timing}
+  %\VignetteIndexEntry{Dose and interval adaptation (vancomycin)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,11 +24,10 @@ library(tidyr)
 library(ggplot2) # for plotting our results
 ```
 
-## 1. Define simulation parameters
+## 1. Define the trial design
 
 This simulated trial will have two samples, with a peak and trough collected
 in dose 1 and 3.
-
 
 ```{r}
 # end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
@@ -150,19 +149,17 @@ for (i in dat$ID) {
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
     sampling_design = tdm_design1,
+    target_design = target_design,
     n = 12,
     interval = 12,
     t_inf = 2,
     dose_resolution = 250, # round to nearest 250 mg
     grid = seq(250, 6000, by = 250),
     grid_type = "dose",
-    # define model components
     est_model = model,
     parameters = pop_parameters,
     covariates = covs,
-    auc_comp = attr(model, "size"),
-    # define PK target
-    target = target_design
+    auc_comp = attr(model, "size")
   )
 
   #################################################################################
@@ -171,6 +168,7 @@ for (i in dat$ID) {
   treatment_summary <- sample_and_adjust_by_dose(
     regimen_update_design = dose_update_design, 
     sampling_design = tdm_design1, # arm 1
+    target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -181,7 +179,6 @@ for (i in dat$ID) {
     omega = omega,
     ruv = ruv,
     target_time = auc_time,
-    target = target_design,
     dose_optimization_method = map_adjust_dose
   )
   
@@ -257,8 +254,8 @@ for (i in dat$ID) {
   #################################################################################
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
-    # define dosing strategy
     sampling_design = tdm_design1,
+    target_design = target_design,
     n = 30,
     interval = 12,
     t_inf = 2,
@@ -269,9 +266,7 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     covariates = covs,
-    auc_comp = attr(model, "size"),
-    # define PK target
-    target = target_design
+    auc_comp = attr(model, "size")
   )
 
   #################################################################################
@@ -280,7 +275,7 @@ for (i in dat$ID) {
   treatment_summary <- sample_and_adjust_by_dose(
     regimen_update_design = interval_update_design,
     sampling_design = tdm_design1, # arm 1
-    target = target_design,
+    target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,

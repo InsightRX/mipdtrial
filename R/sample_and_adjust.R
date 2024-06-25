@@ -95,7 +95,6 @@ sample_and_adjust_by_dose <- function(
     tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
-      browser()
       stop("No new samples in current adjustment interval, check target and sampling settings.")
     }
     last_adjust_time <- adjust_time
@@ -319,6 +318,7 @@ map_adjust_interval <- function(
     grid_type = "interval",
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,
+    verbose = T,
     ...
   )
 

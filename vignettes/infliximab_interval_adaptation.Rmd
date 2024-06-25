@@ -35,10 +35,9 @@ if(!require(pkinfliximabfasanmade, warn.conflicts = FALSE)) {
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
-
 ```
 
-## 1. Define simulation parameters
+## 1. Define trial design
 
 Patients will be started on 5 mg/kg, doses every 8 weeks. Based on measured
 trough levels and MAP-bayed dose adaptation we will allow for changes in the 
@@ -53,15 +52,21 @@ tdm_scheme <- create_sampling_design(
   anchor = c(1, 2, 3, 4),
   anchor_by = "dose"
 )
-adjust_at_dose <- c(2, 3, 4)
 
 ## Target
-target <- create_target_design(
+target_design <- create_target_design(
   targettype = "cmin", 
-  targetvalue = 7,
+  targetmin = 5, 
+  targetmax = 10,
   time = 0,
   offset_from = "dose",
   anchor = 6,
+  anchor_by = "dose"
+)
+
+## Dose/interval update
+update_design <- create_regimen_update_design(
+  anchor = c(2, 3, 4),
   anchor_by = "dose"
 )
 ```
@@ -128,15 +133,7 @@ Each patient will start at a dose of 5 mg/kg body weight given every 8 weeks.
 
 We will then use sample troughs, perform MAP estimations, and use 
 `mipdtrial::interval_grid_search` to optimize intervals to attain a target of 
-7 mg/L.
-
-```{r}
-regimen_update_design <- create_regimen_update_design(
-  anchor = c(2, 3, 4),
-  anchor_by = "dose",
-  update_type = "interval"
-)
-```
+7.5 mg/L.
 
 ```{r dose-adapt}
 set.seed(123) # for reproducibility
@@ -163,7 +160,7 @@ for (i in ids) {
   ## create initial dosing regimen (see PKPDsim::new_regimen for more info)
   #################################################################################
   reg <- PKPDsim::new_regimen(
-    amt = 5 * covs$WT$value, # we will update this each "day" of the trial.
+    amt = round(5 * covs$WT$value), # we will update this each "day" of the trial.
     interval = 8 * 7 * 24,
     n = 10,
     t_inf = 2,
@@ -174,8 +171,9 @@ for (i in ids) {
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    regimen_update_design = regimen_update_design,
+    regimen_update_design = update_design,
     sampling_design = tdm_scheme,
+    target_design   = target_design,
     regimen         = reg,
     covariates      = covs,
     pars_true_i     = pars_true_i,
@@ -185,7 +183,6 @@ for (i in ids) {
     parameters      = parameters,
     omega           = omega,
     ruv             = ruv,
-    target          = target,
     dose_optimization_method = map_adjust_interval,
     interval_grid = c(4, 6, 8, 10, 12) * 7 * 24,
     verbose = F
@@ -212,6 +209,15 @@ ggplot(tdms) +
   geom_hline(yintercept = target$value, color = "red", linewidth = 1) +
   geom_line(aes(x = t, y = y, group = id)) +
   geom_point(aes(x = t, y = y, group = id))
+```
+
+```{r}
+dose_updates %>%
+  mutate(idx = rep(c(1:4), 10)) %>%
+  ggplot() +
+    geom_histogram(aes(x = dose_before_update)) +
+    facet_wrap(~idx) +
+    xlab("Interval")
 ```
 
 ```{r}
