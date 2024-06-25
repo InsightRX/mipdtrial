@@ -210,7 +210,7 @@ ggplot(dose_updates) +
   geom_line(aes(x = t, y = auc_before_update, group = id)) +
   geom_point(aes(x = t, y = auc_before_update, group = id)) +
   geom_ribbon(data = data.frame(t = c(0, max(dose_updates$t)), ymin = c(400, 400), ymax = c(600, 600)), aes(x = t, ymin = ymin, ymax = ymax), fill = "blue", alpha = 0.2) +
-  xlab("Weeks") + ylab("Trough concentration (mg/L)")
+  xlab("Time of regimen update") + ylab("Resulting AUC at t=6 days")
 ```
 
 ## 6. Interval adaptation
