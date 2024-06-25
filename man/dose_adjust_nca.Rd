@@ -7,11 +7,24 @@
 dose_adjust_nca(tdms, regimen, target, dose_update, additional_info, ...)
 }
 \arguments{
+\item{tdms}{observations to be included in MAP estimates}
+
+\item{regimen}{PKPDsim regimen object}
+
+\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
+type, either "conc" or auc".}
+
+\item{dose_update}{update dose from which dose?}
+
+\item{additional_info}{object returned and iteratively built in
+\code{sample_and_adjust_by_dose}. See \code{returns}}
+
 \item{...}{arguments passed on to \code{clinPK::nca}}
 }
 \value{
 Returns a named list: \code{regimen}: the updated regimen;
-\code{additional_info}: the MAP parameter estimates
+\code{additional_info}: output of clinPK::nca with a field for cumulative auc by
+that dose.
 }
 \description{
 Given a set of levels calculates the AUC for a given dose, and adjusts the

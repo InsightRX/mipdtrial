@@ -192,9 +192,13 @@ dose_adjust_map <- function(
 #' (`create_target_object(targettype = 'cum_auc')`). Uses the most recently
 #' sampled dosing interval to estimate
 #'
+#' @inheritParams dose_adjust_map
+#' @param additional_info object returned and iteratively built in
+#'   `sample_and_adjust_by_dose`. See `returns`
 #' @param ... arguments passed on to `clinPK::nca`
 #' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `additional_info`: the MAP parameter estimates
+#'   `additional_info`: output of clinPK::nca with a field for cumulative auc by
+#'   that dose.
 #' @export
 dose_adjust_nca <- function(
   tdms,
