@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,results='hide'}
 # for CI, most windows users should not need this since the .libPaths should
 # include where the model was installed.
 if (.Platform$OS.type == "windows") { 
