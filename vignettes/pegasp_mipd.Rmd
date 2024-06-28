@@ -61,10 +61,10 @@ update_design <- create_regimen_update_design(
 )
 
 target_design <- create_target_design(
-  targettype = "ctrough", 
+  targettype = "cmin", 
   targetvalue = 300,
   anchor_by = "dose",
-  anchor = 3
+  anchor = 4
 )
 
 ```
