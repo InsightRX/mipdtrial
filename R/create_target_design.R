@@ -38,13 +38,13 @@
 #' @examples
 #'
 #' ## Target cumulative AUC at 72 hours:
-#' create_target_object(
+#' create_target_design(
 #'   targettype = "cum_auc", targetvalue = 90,
 #'   time = 72
 #' )
 #'
 #' ## Target trough concentration at trough after dose 4.
-#' create_target_object(
+#' create_target_design(
 #'   targettype = "cmin",
 #'   targetvalue = 15,
 #'   time = 0,
@@ -53,22 +53,22 @@
 #'   anchor_by = "dose"
 #' )
 #'
-create_target_object <- function(
- targettype = mipd_target_types(),
- targetmin = NULL,
- targetmax = NULL,
- targetvalue = NULL,
- single_point_variation = 0.20,
- time,
- offset_from = NULL,
- anchor = NULL,
- anchor_by = c("day", "dose")
+create_target_design <- function(
+    targettype = mipd_target_types(),
+    targetmin = NULL,
+    targetmax = NULL,
+    targetvalue = NULL,
+    single_point_variation = 0.20,
+    time,
+    offset_from = rep("dose", length(time)),
+    anchor = NULL,
+    anchor_by = c("day", "dose")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
   anchor_by <- match.arg(anchor_by)
 
   ## Leverage sampling scheme creation for target as well to anchor to dose/days
-  scheme <- create_design(
+  scheme <- create_sampling_design(
     time = time,
     offset_from = offset_from,
     anchor = anchor,
@@ -135,7 +135,7 @@ target_types_conc <- c("cmax", "cmax_1hr", "ctrough", "cmin", "conc")
 #' Checks if a value (or vector of values) is within the specified target range
 #'
 #' @param v exposure metric, a single value or a vector
-#' @param target target specification created with [create_target_object()], or
+#' @param target target specification created with [create_target_design()], or
 #'   a named list with `min` and `max` specified.
 #' @export
 #' @returns Returns a logical value of `TRUE` or `FALSE` for each value in v.
