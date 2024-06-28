@@ -120,3 +120,32 @@ end of the simulated trial, and include it in the output from `sample_and_adjust
 - Add more optimization functions, e.g. combined dose- and interval- optimization
 - Add functionality to generate more realistic trial scenarios, e.g. allow some
 random scattering of TDM samples over time.
+
+## Contributing
+
+We welcome input from the community:
+
+- If you think you have encountered a bug, please [submit an issue](https://github.com/InsightRX/clinPK/issues) on the GitHub 
+page. Please include a reproducible example of the unexpected behavior.
+
+- Please [open a pull request](https://github.com/InsightRX/clinPK/pulls) if you have a fix or updates that would improve the package. If you're not sure if your proposed 
+changes are useful or within  scope of the package, feel free to contact one 
+of the authors of this package.
+
+## Disclaimer
+
+The functionality in this R package is provided "as is". While its authors 
+adhere to software development best practices, the software may still contain 
+unintended errors.
+
+InsightRX Inc. and the authors of this package can not be held liable for any
+damages resulting from any use of this software. By the use of this software 
+package, the user waives all warranties, expressed or implied, including any 
+warranties to the accuracy, quality or suitability of InsightRX for any 
+particular purpose, either medical or non-medical.
+
+---
+
+<div align="right">
+© <img src="man/figures/insightrx_logo_color.png" alt="InsightRX logo" width="120" />
+</div>
