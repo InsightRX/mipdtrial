@@ -57,7 +57,8 @@ tdm_design <- create_sampling_design(
 
 update_design <- create_regimen_update_design(
   anchor = c(2, 3),
-  anchor_by = "dose"
+  anchor_by = "dose",
+  dose_optimization_method = map_adjust_dose
 )
 
 target_design <- create_target_design(
@@ -208,10 +209,7 @@ for (i in ids) {
     est_model = model,
     parameters = parameters,
     omega = omega,
-    ruv = ruv,
-    target_time = conc_times,
-    target = target,
-    dose_optimization_method = map_adjust_dose
+    ruv = ruv
   )
     
   # get final asparaginase activity level
