@@ -1,0 +1,301 @@
+---
+title: "PEG Asparaginase"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PEG Asparaginase}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE
+)
+```
+
+```{r echo=FALSE,results='hide'}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+}
+if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+  PKPDsim::install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
+}
+```
+
+
+```{r setup}
+library(mipdtrial)
+library(PKPDsim) # for working with models
+if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+  install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
+}
+library(NHANES) # for example data
+
+# For data handling/plotting
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+
+```
+
+## 1. Define simulation parameters
+
+PEG-asparaginase has a long half-life. In this simulation trial patients 
+will receive 4 doses separated by 14 days levels collected every 14 days just 
+prior to the next dose. We will adjust doses 2 and 3 to achieve a steady state 
+asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
+
+```{r}
+tdm_design <- create_sampling_design(
+  time = c( 13.9*24,  27.9*24,  41.9*24)
+)
+
+update_design <- create_regimen_update_design(
+  anchor = c(2, 3),
+  anchor_by = "dose"
+)
+
+target_design <- create_target_design(
+  targettype = "cmin", 
+  targetvalue = 300,
+  anchor_by = "dose",
+  anchor = 4
+)
+
+```
+
+## 2. Create a set of digital patient covariates
+
+Synthetic dataset based on CDC growth curves of children.
+
+```{r}
+dat <- NHANES::NHANES %>%
+  # take just the first record per patient
+  group_by(ID) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # convert columns to numeric
+  mutate(Sex = ifelse(Gender == "male", 1, 0)) %>% # as defined in models
+  filter(Age<18) %>%
+  select(ID, Sex, Age, Weight, Height) %>%
+  # include only patients with all information available
+  filter(!is.na(Sex), !is.na(Weight), !is.na(Height), !is.na(Age)) %>%
+  mutate(BSA = sqrt(Weight * Height / 3600))
+dat <- na.omit(dat)
+head(dat)
+```
+
+Here are the first few rows of our data set:
+
+```{r}
+head(dat)
+```
+
+While our data set is much larger, for this example let's take just the first
+20 patients. 
+
+```{r}
+ids <- sample(dat$ID,20)
+```
+
+## 3. Load model definitions
+
+We need to define the model parameters and variability terms for our simulation.
+For this study, we will use the ones defined in the models.
+
+```{r}
+# Set up simulation model 
+model <- pkpegasparaginasemodifiedwurthwein::model()
+parameters <- pkpegasparaginasemodifiedwurthwein::parameters()
+omega <- pkpegasparaginasemodifiedwurthwein::omega_matrix()
+ruv <- pkpegasparaginasemodifiedwurthwein::ruv()
+```
+
+We also need to link the covariates in our data set to the covariates expected
+in the model.
+
+```{r}
+# check which covariates are required for your model using 
+# `attr(model, "covariates")`
+
+# check which covariates are in your data set using `colnames(dat)`
+cov_mapping <- c(
+  AGE = "Age", 
+  WT = "Weight", 
+  HT = "Height", 
+  BSA = "BSA",
+  SEX = "Sex"
+)
+```
+
+## 4. Initialize output metrics of interest
+
+We will pre-populate a data frame rather than iteratively binding rows, since
+that is more performent.
+
+```{r}
+results <- data.frame(
+  id = rep(ids,each=3),
+  iter = c(1,2,3),
+  day = c(14,28,42),
+  amt = rep(NA_real_,each=3),
+  conc = rep(NA_real_,each=3)
+)
+```
+
+
+## 5. Simulate a trial!
+
+Patients will start at a dose of 2000 IU/m2 if <22 yo and 2500 IU/m2 if >22 yo, 
+with doses capped at a maximum total dose of 3750 IU. We will then use
+`mipdtrial::dose_grid_search` to optimize doses to attain a target concentration 
+of 0.3 IU/mL.
+
+For inter-individual variability terms, we will use the inter-individual
+variability described by our model, since this should reflect the distribution 
+in patient pharmacokinetics. Later, we will estimate the individual PK 
+parameters using our estimation model and the measured TDMs we "collect".
+
+For residual error terms, we will use the residual error of our  model,
+since this is supposed to reflect the unexplained error (assay error, 
+etc.). This function creates a data frame of error to add to each simulated 
+concentrations to produced a measured therapeutic drug monitoring sample.
+
+```{r}
+set.seed(1) # important for reproducibility
+
+for (i in ids) {
+  # get patient covariates
+  covs <- create_cov_object(
+    dat[dat$ID == i,],
+    mapping = cov_mapping
+  )
+  # use age-based nomogram
+  dose <- ifelse(covs$AGE$value >= 22, 2500*covs$BSA$value, 2000*covs$BSA$value)
+  # capt dose to a maximum of 3750
+  dose <- pmin(dose, 3750)
+  
+  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
+  reg <- new_regimen(
+    amt = dose, 
+    interval = 14*24,
+    n = 4,
+    t_inf = 1,
+    type = "infusion"
+  )
+  
+  # randomly draw individual PK parameters
+  pars_true_i <- generate_iiv(
+    sim_model = model,
+    omega = omega,
+    parameters = parameters
+  )
+  
+  treatment_summary <- sample_and_adjust_by_dose(
+    sampling_design = tdm_design,
+    regimen_update_design = update_design,
+    target_design = target_design,
+    regimen = reg,
+    covariates = covs,
+    pars_true_i = pars_true_i,
+    sim_model = model,
+    sim_ruv = ruv,
+    est_model = model,
+    parameters = parameters,
+    omega = omega,
+    ruv = ruv,
+    target_time = conc_times,
+    target = target,
+    dose_optimization_method = map_adjust_dose
+  )
+    
+  # get final asparaginase activity level
+  sim <- PKPDsim::sim(
+    model,
+    parameters = as.list(pars_true_i), # true patient parameters
+    regimen = treatment_summary$final_regimen,
+    covariates = covs,
+    ruv = ruv,
+    t_obs = tdm_design$offset,
+    only_obs = TRUE
+  )
+  conc  <- sim$y
+  results$conc[results$id == i] <- conc
+  
+  #Add amounts
+  amt <- treatment_summary$final_regimen$dose_amts
+  results$amt[results$id == i] <- amt[-1]
+}
+```
+
+Here are the first few rows of our simulation results:
+
+```{r}
+head(results)
+```
+
+## 6. Analyze results
+
+How well did our patients get to target?
+
+```{r}
+results %>%
+  filter(day %in% c(14,28,42)) %>%
+  filter(!is.na(conc)) %>%
+  mutate(
+    below_flag = conc < 100,
+    within_flag = conc >= 100 & conc <= 500,
+    above_flag = conc > 500
+  ) %>%
+  group_by(day) %>%
+  summarize(
+    below_per = mean(below_flag),
+    within_per = mean(within_flag),
+    above_per = mean(above_flag)
+  ) %>%
+  ungroup() %>%
+  pivot_longer(
+    c(below_per,within_per,above_per),
+    names_to = "per_type",
+    values_to = "per"
+  ) %>%
+  mutate(
+    per_type = case_when(
+      per_type == "below_per" ~ "C. < 0.1 IU/mL",
+      per_type == "within_per" ~ "B. 0.1 - 0.5 IU/mL",
+      per_type == "above_per" ~ "A. > 0.5 IU/mL"
+    )
+  ) %>%
+  select(day, per, per_type) %>%
+  ggplot(
+    aes(
+      x = day,
+      y = per*100,
+      group = per_type,
+      fill = per_type,
+      label = ifelse(round(per * 100,1) == 0, "" , round(per*100, 1)))
+  ) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3, position = position_stack(vjust = 0.6), color="black") +
+  theme_minimal() +
+  ylab("Percent (%)") +
+  xlab("Time (d)") +
+  theme(
+    legend.title = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_x_continuous(breaks = c(14,28,42), labels = c(14,28,42)) +
+  scale_fill_manual(values = c("#3870FA", "#35BCB1", "#FF8C00"))
+```
+
+While further work is needed to establish a realistic upper toxicity threshold
+to inform the therapeutic window of PEG-asparaginase, an MIPD approach informed
+by AAL levels which are already germane to therapeutic care with
+PEG-asparaginase may translate to better target attainment and cost savings. For
+further details, see [Brooks et al., PAGE Meeting; June 26-28, 2024, Rome,
+Italy. (https://www.page-meeting.org/default.asp?abstract=10796)].
