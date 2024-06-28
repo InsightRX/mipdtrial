@@ -13,9 +13,9 @@ Returns a character vector of accepted target types.
 Model-based dose-finding is currently implemented for the following target
 types:
 \itemize{
-\item cmax: Peak concentration
+\item peak / cmax: Peak concentration
 \item cmax_1hr: Peak concentration 1hr after dose
-\item ctrough, cmin: Trough concentration
+\item trough, cmin: Trough concentration
 \item conc: generic concentration
 \item cum_auc: Cumulative AUC
 \item auc: auc over a dosing interval

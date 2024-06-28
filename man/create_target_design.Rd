@@ -10,8 +10,8 @@ create_target_design(
   targetmax = NULL,
   targetvalue = NULL,
   single_point_variation = 0.2,
-  time,
-  offset_from = rep("dose", length(time)),
+  time = NULL,
+  offset_from = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")
 )
@@ -31,12 +31,13 @@ default 20\%. Considered for assessment of target attainment a posteriori,
 not used for dose-finding logic.}
 
 \item{time}{a vector of numeric values at which to measure and optimize the
-target. If no \code{anchor} values are specified, these will be used as the
-fixed target times in the simulated trial.
-If \code{anchor} values are supplied, the target times  will be calculated
+target. In most cases \code{time} is not required as argument, and will be inferred
+from the the \code{targettype}.
+If \code{anchor} values are supplied, the target times will be calculated
 adaptively during the trial. The \code{anchor} determine which dose is
-used as reference anchor, and \code{time} will be relative to the specified
-\code{anchor}.}
+used as reference anchor. and \code{time} will be relative to the specified
+\code{anchor}. If no \code{anchor} values are specified, the \code{time} values will be
+used as the fixed absolute target times in the simulated trial.}
 
 \item{offset_from}{character vector of same length as \code{time} (or single
 value) determining how to interpret the provided target \code{time}. If \code{NULL}
@@ -61,9 +62,10 @@ point. Alternatively, a single midpoint can be supplied.
 }
 \examples{
 
-## Target cumulative AUC at 72 hours:
+## Target cumulative AUC, alwasy exactly at 72 hours:
 create_target_design(
-  targettype = "cum_auc", targetvalue = 90,
+  targettype = "cum_auc",
+  targetvalue = 90,
   time = 72
 )
 
@@ -71,10 +73,16 @@ create_target_design(
 create_target_design(
   targettype = "cmin",
   targetvalue = 15,
-  time = 0,
-  offset_from = "trough",
   anchor = 4,
   anchor_by = "dose"
+)
+
+## Target AUC24 over day 4
+create_target_design(
+  targettype = "auc24",
+  targetvalue = 500,
+  anchor = 4,
+  anchor_by = "day"
 )
 
 }

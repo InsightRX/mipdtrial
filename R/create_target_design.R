@@ -13,12 +13,13 @@
 #'   default 20%. Considered for assessment of target attainment a posteriori,
 #'   not used for dose-finding logic.
 #' @param time a vector of numeric values at which to measure and optimize the
-#' target. If no `anchor` values are specified, these will be used as the
-#' fixed target times in the simulated trial.
-#' If `anchor` values are supplied, the target times  will be calculated
+#' target. In most cases `time` is not required as argument, and will be inferred
+#' from the the `targettype`.
+#' If `anchor` values are supplied, the target times will be calculated
 #' adaptively during the trial. The `anchor` determine which dose is
-#' used as reference anchor, and `time` will be relative to the specified
-#' `anchor`.
+#' used as reference anchor. and `time` will be relative to the specified
+#' `anchor`. If no `anchor` values are specified, the `time` values will be
+#' used as the fixed absolute target times in the simulated trial.
 #' @param offset_from character vector of same length as `time` (or single
 #' value) determining how to interpret the provided target `time`. If `NULL`
 #' will use the dose time as offset (default). Other options are `cmax` or
@@ -37,9 +38,10 @@
 #'
 #' @examples
 #'
-#' ## Target cumulative AUC at 72 hours:
+#' ## Target cumulative AUC, alwasy exactly at 72 hours:
 #' create_target_design(
-#'   targettype = "cum_auc", targetvalue = 90,
+#'   targettype = "cum_auc",
+#'   targetvalue = 90,
 #'   time = 72
 #' )
 #'
@@ -47,10 +49,16 @@
 #' create_target_design(
 #'   targettype = "cmin",
 #'   targetvalue = 15,
-#'   time = 0,
-#'   offset_from = "trough",
 #'   anchor = 4,
 #'   anchor_by = "dose"
+#' )
+#'
+#' ## Target AUC24 over day 4
+#' create_target_design(
+#'   targettype = "auc24",
+#'   targetvalue = 500,
+#'   anchor = 4,
+#'   anchor_by = "day"
 #' )
 #'
 create_target_design <- function(
@@ -59,13 +67,32 @@ create_target_design <- function(
     targetmax = NULL,
     targetvalue = NULL,
     single_point_variation = 0.20,
-    time,
-    offset_from = rep("dose", length(time)),
+    time = NULL,
+    offset_from = NULL,
     anchor = NULL,
     anchor_by = c("day", "dose")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
   anchor_by <- match.arg(anchor_by)
+
+  ## Infer `time` and `offset_from` from targettype
+  if(is.null(offset_from)) {
+    if(!is.null(time)) { # assume user wants to specify timepoint manually
+      offset_from <- "dose"
+    } else {
+      time <- 0
+      if(targettype %in% c("cmin", "trough")) {
+        offset_from <- "cmin"
+      } else if (targettype %in% c("cmax", "peak")) {
+        offset_from <- "cmax"
+      } else if (targettype %in% c("auc24")) {
+        time <- 24
+        offset_from <- "dose"
+      } else { # cum AUC
+        offset_from <- "dose"
+      }
+    }
+  }
 
   ## Leverage sampling scheme creation for target as well to anchor to dose/days
   scheme <- create_sampling_design(
@@ -112,9 +139,9 @@ create_target_design <- function(
 #'
 #' Model-based dose-finding is currently implemented for the following target
 #' types:
-#' - cmax: Peak concentration
+#' - peak / cmax: Peak concentration
 #' - cmax_1hr: Peak concentration 1hr after dose
-#' - ctrough, cmin: Trough concentration
+#' - trough, cmin: Trough concentration
 #' - conc: generic concentration
 #' - cum_auc: Cumulative AUC
 #' - auc: auc over a dosing interval
@@ -130,7 +157,7 @@ mipd_target_types <- function() {
 
 target_types_auc <- c("cum_auc", "auc", "auc24")
 target_types_time <- c("t_gt_mic","t_gt_4mic","t_gt_mic_free","t_gt_4mic_free")
-target_types_conc <- c("cmax", "cmax_1hr", "ctrough", "cmin", "conc")
+target_types_conc <- c("peak", "cmax", "cmax_1hr", "trough", "cmin", "conc")
 
 #' Checks if a value (or vector of values) is within the specified target range
 #'

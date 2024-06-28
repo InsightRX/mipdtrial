@@ -49,7 +49,6 @@ target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
   targetmax = 600,
-  time = 0,
   anchor = 6,
   anchor_by = "day"
 )
