@@ -52,7 +52,7 @@ asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
 
 ```{r}
 tdm_design <- create_sampling_design(
-  time = c( 13.9*24,  27.9*24,  41.9*24)
+  time = c(13.9*24,  27.9*24,  41.9*24)
 )
 
 update_design <- create_regimen_update_design(
@@ -67,7 +67,6 @@ target_design <- create_target_design(
   anchor_by = "dose",
   anchor = 4
 )
-
 ```
 
 ## 2. Create a set of digital patient covariates
