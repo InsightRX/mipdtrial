@@ -62,7 +62,7 @@ point. Alternatively, a single midpoint can be supplied.
 }
 \examples{
 
-## Target cumulative AUC, alwasy exactly at 72 hours:
+## Target cumulative AUC, always exactly at 72 hours:
 create_target_design(
   targettype = "cum_auc",
   targetvalue = 90,
