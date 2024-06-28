@@ -13,7 +13,6 @@ sample_and_adjust_by_dose(
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  dose_optimization_method = map_adjust_dose,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -40,12 +39,6 @@ and when to update the regimen in the MIPD trial. Schemes are created using
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
 
-\item{dose_optimization_method}{A function that determines how doses should
-be adjusted given the collected drug levels. The function must return a
-named list of the structure \code{list(regimen = reg, additional_info = x)},
-where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
-another other information useful for post-processing of trial results.}
-
 \item{verbose}{verbose output?}
 
 \item{accumulate_data}{if \code{TRUE}, will use all available data up until the
@@ -59,7 +52,7 @@ function.}
 a named list containing \code{final_regimen} (all doses after
 adjustment), \code{tdms} (all collected levels, both true and measured, that is,
 both with and without residual variability), and \code{additional_info}, which
-varies by \code{dose_optimization_method}. See selected function for details.
+varies by dose_optimization_method. See selected function for details.
 }
 \description{
 Doses are iteratively adjusted for the specified dose numbers. Estimation is

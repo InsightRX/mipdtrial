@@ -42,7 +42,9 @@ tdm_design1 <- create_sampling_design(
 ```
 
 We assume that we can update the dose amount or dosing interval
-at dose 3 and 5 and aim for an AUC24 of 400-600 mg*h/L by day 6.
+at dose 3 and 5 and aim for an AUC24 of 400-600 mg*h/L by day 6. We create
+different regimen update designs for dose-optimization and interval-
+optimization.
 
 ```{r}
 target_design <- create_target_design(
@@ -55,7 +57,14 @@ target_design <- create_target_design(
 dose_update_design <- create_regimen_update_design(
   anchor = c(3, 5),
   anchor_by = "dose",
-  update_type = "dose"
+  update_type = "dose",
+  dose_optimization_method = map_adjust_dose
+)
+interval_update_design <- create_regimen_update_design(
+  anchor = c(3, 5),
+  anchor_by = "dose",
+  update_type = "interval",
+  dose_optimization_method = map_adjust_interval
 )
 ```
 
@@ -180,9 +189,7 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     omega = omega,
-    ruv = ruv,
-    target_time = auc_time,
-    dose_optimization_method = map_adjust_dose
+    ruv = ruv
   )
   
   #################################################################################
@@ -276,8 +283,9 @@ for (i in dat$ID) {
   ## Main patient-level loop: run through regimen optimization
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
-    regimen_update_design = interval_update_design,
-    sampling_design = tdm_design1, # arm 1
+    regimen_update_design = interval_update_design, # <-- use interval update design now!
+    grid = c(6, 8, 12, 16, 24, 36), # <-- passed on to the optimization function as possible interval options
+    sampling_design = tdm_design1,
     target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
@@ -288,9 +296,6 @@ for (i in dat$ID) {
     parameters = pop_parameters,
     omega = omega,
     ruv = ruv,
-    target_time = auc_time,
-    dose_optimization_method = map_adjust_interval,
-    grid = c(6, 8, 12, 16, 24, 36),
     verbose = F
   )
   

@@ -8,7 +8,8 @@ create_regimen_update_design(
   time = NULL,
   anchor,
   anchor_by,
-  update_type = c("dose", "interval")
+  update_type = c("dose", "interval"),
+  dose_optimization_method = map_adjust_dose
 )
 }
 \arguments{
@@ -30,6 +31,12 @@ second half of the 1st day.}
 types cannot be mixed.}
 
 \item{update_type}{update either future \code{dose} (default) or \code{interval}.}
+
+\item{dose_optimization_method}{A function that determines how doses should
+be adjusted given the collected drug levels. The function must return a
+named list of the structure \code{list(regimen = reg, additional_info = x)},
+where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
+another other information useful for post-processing of trial results.}
 }
 \description{
 Create scheme for updating dose or interval during dose optimization trial

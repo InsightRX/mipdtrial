@@ -78,7 +78,8 @@ target_design <- create_target_design(
 )
 update_design <- create_regimen_update_design(
   anchor = c(2, 3, 4),
-  anchor_by = "dose"
+  anchor_by = "dose",
+  dose_optimization_method = map_adjust_dose
 )
 ```
 
@@ -245,8 +246,7 @@ for (i in ids) {
     est_model = model_est,
     parameters = parameters_est,
     omega = omega_est,
-    ruv = ruv_est,
-    dose_optimization_method = map_adjust_dose
+    ruv = ruv_est
   )
   # extract metrics of interest
   results$true_auc[results$id == i] <- calc_auc_from_regimen(

@@ -24,11 +24,6 @@
 #' @param sim_model model to use for simulating "true" patient response.
 #' @param sim_ruv residual variability for `sim_model`. Named list for
 #'   proportional (`prop`) and additive (`add`) error.
-#' @param dose_optimization_method A function that determines how doses should
-#'   be adjusted given the collected drug levels. The function must return a
-#'   named list of the structure `list(regimen = reg, additional_info = x)`,
-#'   where `reg` is the updated PKPDsim regimen for the patient and `x` can be
-#'   another other information useful for post-processing of trial results.
 #' @param accumulate_data if `TRUE`, will use all available data up until the
 #' adjustment timepoint. If set to `FALSE`, will use only the data since the
 #' last adjustment timepoint and the current one.
@@ -38,7 +33,8 @@
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `tdms` (all collected levels, both true and measured, that is,
 #' both with and without residual variability), and `additional_info`, which
-#' varies by `dose_optimization_method`. See selected function for details.
+#' varies by dose_optimization_method. See selected function for details.
+#'
 #' @export
 sample_and_adjust_by_dose <- function(
   regimen_update_design,
@@ -49,7 +45,6 @@ sample_and_adjust_by_dose <- function(
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  dose_optimization_method = map_adjust_dose,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -57,7 +52,7 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
 
-  adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_design, regimen)
+  adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
   tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
   if (!any(tdm_times < first_adjust_time)) {
@@ -137,7 +132,7 @@ sample_and_adjust_by_dose <- function(
     )
 
     # update regimen based on specified algorithm
-    out <- dose_optimization_method(
+    out <- regimen_update_design$dose_optimization_method(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
@@ -151,7 +146,10 @@ sample_and_adjust_by_dose <- function(
     }
 
     ## update the vector of dose_udpate numbers, if needed
-    adjust_at_dose <- get_dose_update_numbers_from_scheme(regimen_update_design, regimen)
+    adjust_at_dose <- get_dose_update_numbers_from_design(
+      regimen_update_design,
+      regimen
+    )
 
     additional_info <- c(
       additional_info,

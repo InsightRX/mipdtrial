@@ -1,16 +1,17 @@
 #' Get dose number to update dose/interval at from the regime update scheme
 #' and a provided regimen.
 #'
-#' @param scheme regimen update schema created using `create_regimen_update_schema()`
+#' @param design regimen update design created using
+#' `create_regimen_update_design()`
 #' @param regimen a `PKPDsim` regimen object
 #'
 #' @returns vector of dose numbers to update at
 #'
 #' @export
-get_dose_update_numbers_from_scheme <- function(scheme, regimen) {
+get_dose_update_numbers_from_design <- function(design, regimen) {
   adjust_at_dose <- c()
-  for(i in 1:length(scheme$anchor)) {
-    adjust_at_dose <- c(adjust_at_dose, get_dose_update_core(scheme[i,], regimen))
+  for(i in 1:length(design$scheme$anchor)) {
+    adjust_at_dose <- c(adjust_at_dose, get_dose_update_core(design$scheme[i,], regimen))
   }
   adjust_dose_checks(adjust_at_dose, regimen)
   sort(adjust_at_dose)

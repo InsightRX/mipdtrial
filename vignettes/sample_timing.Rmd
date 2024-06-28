@@ -62,7 +62,8 @@ We will adjust the fifth dose based on these levels, aiming for a daily AUC of
 ```{r}
 update_design <- create_regimen_update_design(
   anchor = 5,
-  anchor_by = "dose"
+  anchor_by = "dose",
+  dose_optimization_method = map_adjust_dose
 )
 target_design <- create_target_design(
   targettype = "auc24", 
@@ -219,8 +220,7 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     omega = omega,
-    ruv = ruv,
-    dose_optimization_method = map_adjust_dose
+    ruv = ruv
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
     regimen_update_design = update_design, 
@@ -234,8 +234,7 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     omega = omega,
-    ruv = ruv,
-    dose_optimization_method = map_adjust_dose
+    ruv = ruv
   )
   
   # get steady-state AUC at end of treatment course
