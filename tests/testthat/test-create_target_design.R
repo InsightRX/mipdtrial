@@ -130,10 +130,4 @@ test_that("Simpler interface using less arguments correctly infers arguments", {
       )
     )
   )
-  create_target_design( # peak at dose 6
-    targettype = "auc24",
-    targetvalue = 400,
-    anchor = 5,
-    anchor_by = "day"
-  )
 })

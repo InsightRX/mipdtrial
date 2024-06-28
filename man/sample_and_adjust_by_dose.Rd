@@ -5,22 +5,28 @@
 \title{Adjust dosing using MIPD on TDMs at specified dose numbers}
 \usage{
 sample_and_adjust_by_dose(
-  adjust_at_dose,
-  tdm_times,
+  regimen_update_design,
+  sampling_design,
+  target_design,
   regimen,
   covariates = NULL,
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  dose_optimization_method = dose_adjust_map,
+  verbose = FALSE,
+  accumulate_data = TRUE,
   ...
 )
 }
 \arguments{
-\item{adjust_at_dose}{vector of integers indicating which doses to adjust}
+\item{regimen_update_design}{a data.frame with scheme with details on how
+and when to update the regimen in the MIPD trial. Schemes are created using
+\code{create_regimen_update_design()}.}
 
-\item{tdm_times}{vector of times to sample at, in hours starting from the
-time of first dose.}
+\item{sampling_design}{a data.frame with a sampling scheme, created using
+\code{create_sampling_design()}.}
+
+\item{target_design}{target design created using \code{create_target_design()}}
 
 \item{regimen}{PKPDsim regimen object, containing initial dosing regimen.}
 
@@ -33,11 +39,11 @@ time of first dose.}
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
 
-\item{dose_optimization_method}{A function that determines how doses should
-be adjusted given the collected drug levels. The function must return a
-named list of the structure \code{list(regimen = reg, additional_info = x)},
-where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
-another other information useful for post-processing of trial results.}
+\item{verbose}{verbose output?}
+
+\item{accumulate_data}{if \code{TRUE}, will use all available data up until the
+adjustment timepoint. If set to \code{FALSE}, will use only the data since the
+last adjustment timepoint and the current one.}
 
 \item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
 function.}
@@ -46,7 +52,7 @@ function.}
 a named list containing \code{final_regimen} (all doses after
 adjustment), \code{tdms} (all collected levels, both true and measured, that is,
 both with and without residual variability), and \code{additional_info}, which
-varies by \code{dose_optimization_method}. See selected function for details.
+varies by dose_optimization_method. See selected function for details.
 }
 \description{
 Doses are iteratively adjusted for the specified dose numbers. Estimation is

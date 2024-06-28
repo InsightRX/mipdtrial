@@ -4,12 +4,19 @@
 \alias{update_regimen}
 \title{Update a regimen with a new dose}
 \usage{
-update_regimen(regimen, new_dose, dose_update_number)
+update_regimen(
+  regimen,
+  new_dose = NULL,
+  new_interval = NULL,
+  dose_update_number
+)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}
 
 \item{new_dose}{value of new dose}
+
+\item{new_interval}{value of new interval}
 
 \item{dose_update_number}{integer indicating which dose and onwards should
 be updated}
