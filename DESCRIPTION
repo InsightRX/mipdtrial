@@ -22,6 +22,7 @@ Suggests:
     tidyr
 Config/testthat/edition: 3
 Imports: 
+    clinPK,
     PKPDmap,
     PKPDsim
 Remotes: InsightRX/PKPDsim, InsightRX/PKPDmap

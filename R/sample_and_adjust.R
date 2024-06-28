@@ -81,7 +81,7 @@ sample_and_adjust_by_dose <- function(
 
   for (j in adjust_at_dose) {
     # collect TDMs from today (use model for simulation!)
-    adjust_time <- regimen$dose_times[j]
+   adjust_time <- regimen$dose_times[j]
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     last_adjust_time <- adjust_time
     new_tdms <- collect_tdms(
@@ -100,6 +100,7 @@ sample_and_adjust_by_dose <- function(
       dose_update = j,
       regimen = regimen,
       covariates = covariates,
+      additional_info = additional_info,
       ...
     )
     regimen <- out$regimen
@@ -108,6 +109,7 @@ sample_and_adjust_by_dose <- function(
       setNames(list(out$additional_info), paste0("dose_", j))
     )
   }
+
   list(
     final_regimen = regimen,
     tdms = tdms_i,
@@ -178,4 +180,73 @@ dose_adjust_map <- function(
   # return new regimen
   regimen <- update_regimen(regimen, new_dose, dose_update)
   list(regimen = regimen, additional_info = est_par)
+}
+
+
+#' Adjust doses to achieve a target metric using NCA
+#'
+#' Given a set of levels calculates the AUC for a given dose, and adjusts the
+#' subsequent doses to achieve either the target AUC per dosing interval
+#' (`create_target_object(targettype = 'auc')`), AUC24
+#' (`create_target_object(targettype = 'auc24')`) or cumulative AUC
+#' (`create_target_object(targettype = 'cum_auc')`). Uses the most recently
+#' sampled dosing interval to estimate AUC, extrapolating that over all doses
+#' between the dose to be updated and the last sampled dose. Note that in order
+#' to consider AUC contributions from previous doses, a baseline TDM collected
+#' within 30 minutes of the dose administration is required. This is a
+#' limitation of the algorithm, and not of the function. See [dose_from_auc()]
+#' for more information about dose selection logic.
+#'
+#' @inheritParams dose_adjust_map
+#' @param additional_info object returned and iteratively built in
+#'   `sample_and_adjust_by_dose`. See `returns`
+#' @param ... arguments passed on to `clinPK::nca`
+#' @returns Returns a named list: `regimen`: the updated regimen;
+#'   `additional_info`: output of clinPK::nca with a field for cumulative auc by
+#'   that dose.
+#' @export
+dose_adjust_nca <- function(
+  tdms,
+  regimen,
+  target,
+  dose_update,
+  additional_info,
+  ...
+) {
+  # perform NCA,
+  nca_res <- perform_nca(
+    tdms = tdms,
+    regimen = regimen,
+    ...
+  )
+
+  # calculate new AUC since last NCA calculation, necessary for e.g., busulfan,
+  # where might dose Q6 but sample only 1 interval
+  intv_auc <- nca_res$descriptive$auc_tau
+  if (length(additional_info) > 0) {
+    last_dose_updated <- as.numeric(gsub(
+      "dose_", "",
+      names(additional_info[length(additional_info)])
+    ))
+    cumulative_auc <- additional_info[[length(additional_info)]]$cumulative_auc
+  } else {
+    last_dose_updated <- 1
+    cumulative_auc <- 0
+  }
+  auc_since_last_update <- intv_auc * (dose_update - last_dose_updated)
+  nca_res$cumulative_auc <- cumulative_auc + auc_since_last_update
+
+
+  # calculate new dose, using a ratio of AUC to dose
+  new_dose <- dose_from_auc(
+    target = target,
+    intv_auc = nca_res$descriptive$auc_tau,
+    regimen = regimen,
+    dose_update = dose_update,
+    cum_auc = nca_res$cumulative_auc
+  )
+
+  # return new regimen
+  regimen <- update_regimen(regimen, new_dose, dose_update)
+  list(regimen = regimen, additional_info = nca_res)
 }
