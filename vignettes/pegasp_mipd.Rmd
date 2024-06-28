@@ -51,15 +51,22 @@ prior to the next dose. We will adjust doses 2 and 3 to achieve a steady state
 asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
 
 ```{r}
-tdm_times <- c( 13.9*24,  27.9*24,  41.9*24) 
-adjust_at_dose <- c(2, 3) 
-
-target <- create_target_object(
-  targettype = "conc", 
-  targetvalue = 300
+tdm_design <- create_sampling_design(
+  time = c( 13.9*24,  27.9*24,  41.9*24)
 )
 
-conc_times <- 1344
+update_design <- create_regimen_update_design(
+  anchor = c(2, 3),
+  anchor_by = "dose"
+)
+
+target_design <- create_target_design(
+  targettype = "ctrough", 
+  targetvalue = 300,
+  anchor_by = "dose",
+  anchor = 3
+)
+
 ```
 
 ## 2. Create a set of digital patient covariates
@@ -190,8 +197,9 @@ for (i in ids) {
   )
   
   treatment_summary <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose,
-    tdm_times = tdm_times,
+    sampling_design = tdm_design,
+    regimen_update_design = update_design,
+    target_design = target_design,
     regimen = reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -203,7 +211,7 @@ for (i in ids) {
     ruv = ruv,
     target_time = conc_times,
     target = target,
-    dose_optimization_method = dose_adjust_map
+    dose_optimization_method = map_adjust_dose
   )
     
   # get final asparaginase activity level
@@ -213,7 +221,7 @@ for (i in ids) {
     regimen = treatment_summary$final_regimen,
     covariates = covs,
     ruv = ruv,
-    t_obs = c(14, 28, 42) * 24,
+    t_obs = tdm_design$offset,
     only_obs = TRUE
   )
   conc  <- sim$y
