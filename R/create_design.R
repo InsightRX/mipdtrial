@@ -17,7 +17,7 @@
 #' `peak`, which will use the end of infusion as the base for the `time`, or
 #' `cmin` or `trough`, which will use the time of next dose as the offset.
 #' @param anchor numeric vector of the dose or day number to "anchor"
-#' the sampling times to. Vector needs to be of same length as `t`.
+#' the sampling times to. Vector needs to be of same length as `time`.
 #' If `anchor_by` is set to `day`, then the first dose in that day is used.
 #' If later doses in the day are preferred, the anchor can also be specified
 #' fractionally, e.g. `1.5` will use the time of the first dose in the

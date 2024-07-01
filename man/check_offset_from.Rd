@@ -21,7 +21,7 @@ used as reference anchor, and \code{time} will be relative to the specified
 \code{anchor}.}
 
 \item{anchor}{numeric vector of the dose or day number to "anchor"
-the sampling times to. Vector needs to be of same length as \code{t}.
+the sampling times to. Vector needs to be of same length as \code{time}.
 If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the

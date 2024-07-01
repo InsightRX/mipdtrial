@@ -27,7 +27,7 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 \code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
 
 \item{anchor}{numeric vector of the dose or day number to "anchor"
-the sampling times to. Vector needs to be of same length as \code{t}.
+the sampling times to. Vector needs to be of same length as \code{time}.
 If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the

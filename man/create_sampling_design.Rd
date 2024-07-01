@@ -26,7 +26,7 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 \code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
 
 \item{anchor}{numeric vector of the dose or day number to "anchor"
-the sampling times to. Vector needs to be of same length as \code{t}.
+the sampling times to. Vector needs to be of same length as \code{time}.
 If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
@@ -40,9 +40,22 @@ Sampling times can usually be pre-specified if the dosing schedule is fixed.
 In that case a scheme can be specified with static timepoints e.g.
 \code{time = c(1, 7.5, 25, 31.5)} for taking peak-trough samples at dose
 1 and 4 for an 8-hour regimen.
-}
-\details{
 However, when the dosing interval is adaptive, the peak and trough sampling
 times cannot stay static and have to be adapted on-the-fly during
 simulations.
+}
+\examples{
+create_sampling_design(c(1.5, 11.5, 23.5))
+create_sampling_design(
+  time = c(0.5, -0.5),
+  offset_from = c("peak", "trough"),
+  anchor = c(1, 1)
+)
+create_sampling_design(
+  time = c(0.5, -0.5, 0.5, -0.5),
+  offset_from = c("peak", "trough"),
+  anchor = c(1, 1, 3, 3),
+  anchor_by = "dose"
+)
+
 }
