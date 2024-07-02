@@ -12,14 +12,14 @@ test_that("trial by dose change works", {
 
   out <- sample_and_adjust_by_dose(
     regimen_update_design = create_regimen_update_design(
-      anchor = c(2, 4),
-      anchor_by = "dose"
+      at = c(2, 4),
+      anchor = "dose"
     ),
     sampling_design = create_sampling_design(
       offset = c(20, 12),
       when = c("dose", "dose"),
-      anchor = c(1, 3),
-      anchor_by = "dose"
+      at = c(1, 3),
+      anchor = "dose"
     ),
     regimen = regimen,
     pars_true_i = generate_iiv(mod, omega, par, seed = 1),
@@ -32,8 +32,8 @@ test_that("trial by dose change works", {
     target = create_target_design(
       targettype = "conc",
       targetvalue = 15,
-      anchor = 5,
-      anchor_by = "dose"
+      at = 5,
+      anchor = "dose"
     ),
     dose_optimization_method = map_adjust_dose
   )
@@ -80,14 +80,14 @@ test_that("Supplying true pars as list also works", {
 
   out <- sample_and_adjust_by_dose(
     regimen_update_design = create_regimen_update_design(
-      anchor = c(2, 4),
-      anchor_by = "dose"
+      at = c(2, 4),
+      anchor = "dose"
     ),
     sampling_design = create_sampling_design(
       offset = c(20, 12),
       when = c("dose", "dose"),
-      anchor = c(1, 3),
-      anchor_by = "dose"
+      at = c(1, 3),
+      anchor = "dose"
     ),
     regimen = regimen,
     pars_true_i = list(CL = 1.5, V = 15),
@@ -99,8 +99,8 @@ test_that("Supplying true pars as list also works", {
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
       when = "trough",
-      anchor = 4,
-      anchor_by = "dose",
+      at = 4,
+      anchor = "dose",
       targettype = "conc",
       targetvalue = 10
     ),
@@ -153,14 +153,14 @@ test_that("Can use separate models for sim and est", {
   out <- sample_and_adjust_by_dose( # est and sim model are different
     tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
     regimen_update_design = create_regimen_update_design(
-      anchor = c(2, 4),
-      anchor_by = "dose"
+      at = c(2, 4),
+      anchor = "dose"
     ),
     sampling_design = create_sampling_design(
       offset = c(3, 5, 8, 12,
                  3, 5, 8, 12),
-      anchor = c(1, 1, 1, 1, 3, 3, 3, 3),
-      anchor_by = "dose"
+      at = c(1, 1, 1, 1, 3, 3, 3, 3),
+      anchor = "dose"
     ),
     regimen = regimen,
     covariates = covs,
@@ -225,14 +225,14 @@ test_that("errors if dose update includes dose 1", {
   expect_error(
     sample_and_adjust_by_dose(
       regimen_update_design = create_regimen_update_design(
-        anchor = c(1, 2, 4),
-        anchor_by = "dose"
+        at = c(1, 2, 4),
+        anchor = "dose"
       ),
       sampling_design = create_sampling_design(
         time = c(12, 12),
         when = c("dose", "dose"),
-        anchor = c(1, 3),
-        anchor_by = "dose"
+        at = c(1, 3),
+        anchor = "dose"
       ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
@@ -245,8 +245,8 @@ test_that("errors if dose update includes dose 1", {
       create_target_design(
         time = 4*24,
         when = "dose",
-        anchor = 1,
-        anchor_by = "dose",
+        at = 1,
+        anchor = "dose",
         targettype = "conc",
         targetvalue = 10
       )
@@ -259,14 +259,14 @@ test_that("errors if dose update before first TDM", {
   expect_error(
     sample_and_adjust_by_dose(
       regimen_update_design = create_regimen_update_design(
-        anchor = c(2, 3),
-        anchor_by = "dose"
+        at = c(2, 3),
+        anchor = "dose"
       ),
       sampling_design = create_sampling_design(
         when = c("dose", "dose"),
         offset = c(12, 12),
-        anchor = c(2, 2),
-        anchor_by = "dose"
+        at = c(2, 2),
+        anchor = "dose"
       ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
@@ -286,14 +286,14 @@ test_that("errors if update doses are longer than supplied regimen", {
   expect_error(
     sample_and_adjust_by_dose(
       regimen_update_design = create_regimen_update_design(
-        anchor = c(2, 4, 6),
-        anchor_by = "dose"
+        at = c(2, 4, 6),
+        anchor = "dose"
       ),
       sampling_design = create_sampling_design(
         when = c("dose", "dose"),
         offset = c(2, 12),
-        anchor = c(2, 2),
-        anchor_by = "dose"
+        at = c(2, 2),
+        anchor = "dose"
       ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),

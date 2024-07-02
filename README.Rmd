@@ -95,7 +95,8 @@ tdm_design <- create_sampling_design(
 	time = c(1.5, 11.5, 25.5, 35.5)
 )
 
-## To target an AUC4 of 400-600 at day 6
+## For targets, we follow broadly the same concept. To target an AUC4 of 
+## 400-600 at day 6, we can write:
 target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
@@ -104,7 +105,8 @@ target_design <- create_target_design(
   anchor = "day"
 )
 
-## Allow dose updates at dose #3 and #5
+## And for regimen update designs, it works similar as well. The following code
+## implements dose updates at dose #3 and #5, using a MAP-based optimization.
 dose_update_design <- create_regimen_update_design(
   at = c(3, 5),
   anchor = "dose",
@@ -114,8 +116,8 @@ dose_update_design <- create_regimen_update_design(
 ```
 
 The vignettes show various additional examples of how to set up the trial 
-simulations. If you find an example of an MIPD trial design that cannot be 
-captured yet using these functions, please let us know.
+simulations using designs. If you find an example of an MIPD trial design 
+that cannot be captured yet using these functions, please let us know.
 
 ## Roadmap
 

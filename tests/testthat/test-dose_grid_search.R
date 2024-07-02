@@ -85,8 +85,8 @@ test_that("peak concentration search works", {
       targettype = "conc",
       targetvalue = 10,
       when = "peak",
-      anchor_by = "dose",
-      anchor = 5
+      anchor = "dose",
+      at = 5
     )
   )
   expect_lt(abs(dose_cpeak - 77)/77, 0.01)
@@ -105,8 +105,8 @@ test_that("AUC search works", {
       targetvalue = 1500,
       targettype = "cum_auc",
       when = "dose",
-      anchor_by = "dose",
-      anchor = 6
+      anchor = "dose",
+      at = 6
     )
   )
   # probability of AUC>target (at 50% prob it should be same as before)
@@ -123,8 +123,8 @@ test_that("AUC search works", {
       targetvalue = 1500,
       targettype = "cum_auc",
       when = "dose",
-      anchor_by = "dose",
-      anchor = 6
+      anchor = "dose",
+      at = 6
     )
   )
   # probability of AUC>target (at 90% prob it should be higher)
@@ -140,8 +140,8 @@ test_that("AUC search works", {
       targetvalue = 1500,
       targettype = "cum_auc",
       when = "dose",
-      anchor_by = "dose",
-      anchor = 6
+      anchor = "dose",
+      at = 6
     )
   )
 
@@ -167,8 +167,8 @@ test_that("Probability: less than target", {
       targetvalue = 1500,
       targettype = "cum_auc",
       when = "dose",
-      anchor_by = "dose",
-      anchor = 6
+      anchor = "dose",
+      at = 6
     )
   )
   expect_lt(abs(dose_auc_prob3 - 240)/240, 0.01)
@@ -250,8 +250,8 @@ test_that("user-friendly error if no dose_grid", {
     targettype = "conc",
     targetvalue = 10,
     when = "peak",
-    anchor = 5,
-    anchor_by = "dose"
+    at = 5,
+    anchor = "dose"
   )
   expect_error(
     dose_grid_search(
