@@ -81,6 +81,95 @@
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"InsightRX/mipdtrial"</span><span class="op">)</span></span></code></pre></div>
 <p>For examples of how to use the package to answer questions about MIPD and target attainment, check out the vignettes listed under “Articles!”</p>
 </div>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
+<p>To use the <code>mipdtrial</code> package, it is crucial to understand the concept of “design” that is introduced in the package. The main goal of the designs is to allow configuration of flexible trials in which the sampling and regimen updates can depend on prior regimen changes, such as when the dosing interval is changed, but we still want to sample at dose 7 regardless of the dosing interval. Or, when infusion lengths are changed, but we still want to sample a peak sample. When times are pre-specified and fixed this flexibility is not possible.</p>
+<p>The following designs need to be configured for every trial simulation:</p>
+<ul>
+<li>
+<code>sampling_design</code> : determines at what timepoints samples are taken.</li>
+<li>
+<code>target_design</code>: determines at what timepoint the target should be measured, and what the target is.</li>
+<li>
+<code>regimen_update_design</code> : determines at what timepoint the dose can be updated in response to new information sampled using the <code>sampling_design</code>, and how to optimize the dosing regimen.</li>
+</ul>
+<p>All of these three designs can be “anchored” to a specific dose or day number. They can also be offset from the dosing time to e.g. sample at “peak” or “trough” times. Here is an example of how to set up a design for a simulated MIPD trial:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## sample at peak (at 1-hour infusion end), and at true trough</span></span>
+<span><span class="co">## do this at dose #1 and #3</span></span>
+<span><span class="va">tdm_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>  when <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak"</span>, <span class="st">"trough"</span>, <span class="st">"peak"</span>, <span class="st">"trough"</span><span class="op">)</span>,</span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Now sample slightly more realistically, half an hour after infusion end,</span></span>
+<span><span class="co">## and half an hour before true trough. We can use `offset` for this:</span></span>
+<span><span class="va">tdm_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>  when <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak"</span>, <span class="st">"trough"</span>, <span class="st">"peak"</span>, <span class="st">"trough"</span><span class="op">)</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span><span class="op">)</span>, </span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## If you know the sampling times and dosing intervals are not going </span></span>
+<span><span class="co">## to change during the trial, you could also specify this design simply</span></span>
+<span><span class="co">## using fixed times as: (assuming 12-hour intervals)</span></span>
+<span><span class="va">tdm_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">11.5</span>, <span class="fl">25.5</span>, <span class="fl">35.5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## For targets, we follow broadly the same concept. To target an AUC4 of </span></span>
+<span><span class="co">## 400-600 at day 6, we can write:</span></span>
+<span><span class="va">target_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_target_design.html">create_target_design</a></span><span class="op">(</span></span>
+<span>  targettype <span class="op">=</span> <span class="st">"auc24"</span>, </span>
+<span>  targetmin <span class="op">=</span> <span class="fl">400</span>,</span>
+<span>  targetmax <span class="op">=</span> <span class="fl">600</span>,</span>
+<span>  at <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"day"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## And for regimen update designs, it works similar as well. The following code</span></span>
+<span><span class="co">## implements dose updates at dose #3 and #5, using a MAP-based optimization.</span></span>
+<span><span class="va">dose_update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
+<span>  update_type <span class="op">=</span> <span class="st">"dose"</span>,</span>
+<span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_dose</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The vignettes show various additional examples of how to set up the trial simulations using designs. If you find an example of an MIPD trial design that cannot be captured yet using these functions, please let us know.</p>
+</div>
+<div class="section level2">
+<h2 id="roadmap">Roadmap<a class="anchor" aria-label="anchor" href="#roadmap"></a>
+</h2>
+<p>The <code>mipdtrial</code> package is currently under development, and there will likely be changes to core functionality in the upcoming months. The following features are on our short-term roadmap:</p>
+<ul>
+<li>Implement functionality to gather all relevant information during and at the end of the simulated trial, and include it in the output from <code>sample_and_adjust_by_dose</code>.</li>
+<li>Improve ease of use: implement a single function to run the trial</li>
+<li>Add more optimization functions, e.g. combined dose- and interval- optimization</li>
+<li>Add functionality to generate more realistic trial scenarios, e.g. allow some random scattering of TDM samples over time.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>We welcome input from the community:</p>
+<ul>
+<li><p>If you think you have encountered a bug, please <a href="https://github.com/InsightRX/clinPK/issues" class="external-link">submit an issue</a> on the GitHub page. Please include a reproducible example of the unexpected behavior.</p></li>
+<li><p>Please <a href="https://github.com/InsightRX/clinPK/pulls" class="external-link">open a pull request</a> if you have a fix or updates that would improve the package. If you’re not sure if your proposed changes are useful or within scope of the package, feel free to contact one of the authors of this package.</p></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="disclaimer">Disclaimer<a class="anchor" aria-label="anchor" href="#disclaimer"></a>
+</h2>
+<p>The functionality in this R package is provided “as is”. While its authors adhere to software development best practices, the software may still contain unintended errors.</p>
+<p>InsightRX Inc. and the authors of this package can not be held liable for any damages resulting from any use of this software. By the use of this software package, the user waives all warranties, expressed or implied, including any warranties to the accuracy, quality or suitability of InsightRX for any particular purpose, either medical or non-medical.</p>
+<hr>
+<div align="right">
+<p>© <img src="reference/figures/insightrx_logo_color.png" alt="InsightRX logo" width="120"></p>
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
