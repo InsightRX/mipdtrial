@@ -22,10 +22,10 @@ get_sampling_times_from_scheme <- function(
 #' @param row a single row from a sampling_time_design data.frame
 #' @param regimen PKPDsim regimen
 get_sampling_time_core <- function(row, regimen) {
-  if(row$anchor_by == "dose") {
-    dose_anchor <- row$anchor
+  if(row$anchor == "dose") {
+    dose_anchor <- row$at
   } else { ## find dose closest to specified day
-    t_aim <- (row$anchor-1) * 24
+    t_aim <- (row$at - 1) * 24
     dose_anchor <- which.min(abs(regimen$dose_times - t_aim))
   }
   if(row$base %in% c("peak", "cmax")) {

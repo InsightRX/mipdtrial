@@ -5,21 +5,21 @@
 \title{Create scheme for updating dose or interval during dose optimization trial}
 \usage{
 create_regimen_update_design(
+  at,
   anchor,
-  anchor_by,
   update_type = c("dose", "interval"),
   dose_optimization_method = map_adjust_dose
 )
 }
 \arguments{
-\item{anchor}{numeric vector of the dose or day number to "anchor"
+\item{at}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.
-If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
+If \code{anchor} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
 second half of the 1st day.}
 
-\item{anchor_by}{either \code{day} or \code{dose}. Single value required, i.e. anchor
+\item{anchor}{either \code{day} or \code{dose}. Single value required, i.e. anchor
 types cannot be mixed.}
 
 \item{update_type}{update either future \code{dose} (default) or \code{interval}.}
@@ -35,12 +35,12 @@ Create scheme for updating dose or interval during dose optimization trial
 }
 \examples{
 create_regimen_update_design(
-  anchor = c(2, 5, 8),
-  anchor_by = "dose"
+  at = c(2, 5, 8),
+  anchor = "dose"
 )
 create_regimen_update_design(
-  anchor = c(4, 8),
-  anchor_by = "day",
+  at = c(4, 8),
+  anchor = "day",
   update_type = "interval",
   dose_optimization_method = map_adjust_interval
 )

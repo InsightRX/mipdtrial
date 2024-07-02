@@ -4,7 +4,7 @@
 \alias{check_when}
 \title{Check / clean when element}
 \usage{
-check_when(when, offset, anchor)
+check_when(when, offset, at)
 }
 \arguments{
 \item{when}{character vector of same length as \code{time} (or single
@@ -15,9 +15,9 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 
 \item{offset}{offset from standardized PK moments specified in \code{when}.}
 
-\item{anchor}{numeric vector of the dose or day number to "anchor"
+\item{at}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.
-If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
+If \code{anchor} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
 second half of the 1st day.}

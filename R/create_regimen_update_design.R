@@ -10,29 +10,29 @@
 #'
 #' @examples
 #' create_regimen_update_design(
-#'   anchor = c(2, 5, 8),
-#'   anchor_by = "dose"
+#'   at = c(2, 5, 8),
+#'   anchor = "dose"
 #' )
 #' create_regimen_update_design(
-#'   anchor = c(4, 8),
-#'   anchor_by = "day",
+#'   at = c(4, 8),
+#'   anchor = "day",
 #'   update_type = "interval",
 #'   dose_optimization_method = map_adjust_interval
 #' )
 #'
 #' @export
 create_regimen_update_design <- function(
+    at,
     anchor,
-    anchor_by,
     update_type = c("dose", "interval"),
     dose_optimization_method = map_adjust_dose
 ) {
   update_type <- match.arg(update_type)
   scheme <- create_design(
-    offset = rep(0, length(anchor)),
-    when = rep("dose", length(anchor)),
-    anchor = anchor,
-    anchor_by = anchor_by
+    offset = rep(0, length(at)),
+    when = rep("dose", length(at)),
+    at = at,
+    anchor = anchor
   )
   scheme$update_type <- update_type
   list(

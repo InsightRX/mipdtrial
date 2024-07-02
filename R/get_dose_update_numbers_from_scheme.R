@@ -24,7 +24,7 @@ get_dose_update_numbers_from_design <- function(design, regimen) {
 #' @param regimen PKPDsim regimen
 #'
 get_dose_update_core <- function(row, regimen) {
-  if(row$anchor_by == "dose") {
+  if(row$anchor == "dose") {
     dose_anchor <- row$anchor
   } else { ## find dose closest to specified day
     t_aim <- (row$anchor-1) * 24

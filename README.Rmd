@@ -71,34 +71,43 @@ They can also be offset from the dosing time to e.g. sample at "peak" or "trough
 times. Here is an example of how to set up a design for a simulated MIPD trial:
 
 ```r
-# sample at peak (at 1-hour infusion end), and 1 hour before true trough
-# do this at dose #1 and #3
+## sample at peak (at 1-hour infusion end), and at true trough
+## do this at dose #1 and #3
 tdm_design <- create_sampling_design(
-  time = c(1, -1, 1, -1), 
   when = c("peak", "trough", "peak", "trough"),
-  anchor = c(1, 1, 3, 3),
-  anchor_by = "dose"
+  at = c(1, 1, 3, 3),
+  anchor = "dose"
 )
-## If you are sure the sampling times and dosing intervals are not going 
+
+## Now sample slightly more realistically, half an hour after infusion end,
+## and half an hour before true trough. We can use `offset` for this:
+tdm_design <- create_sampling_design(
+  when = c("peak", "trough", "peak", "trough"),
+  offset = c(0.5, -0.5, 0.5, -0.5), 
+  at = c(1, 1, 3, 3),
+  anchor = "dose"
+)
+
+## If you know the sampling times and dosing intervals are not going 
 ## to change during the trial, you could also specify this design simply
 ## using fixed times as: (assuming 12-hour intervals)
 tdm_design <- create_sampling_design(
-	time = c(1, 11, 25, 35)
+	time = c(1.5, 11.5, 25.5, 35.5)
 )
 
-## target auc24 of 400-600 at day 6
+## To target an AUC4 of 400-600 at day 6
 target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
   targetmax = 600,
-  anchor = 6,
-  anchor_by = "day"
+  at = 6,
+  anchor = "day"
 )
 
-## allow dose updates at dose #3 and #5
+## Allow dose updates at dose #3 and #5
 dose_update_design <- create_regimen_update_design(
-  anchor = c(3, 5),
-  anchor_by = "dose",
+  at = c(3, 5),
+  anchor = "dose",
   update_type = "dose",
   dose_optimization_method = map_adjust_dose
 )

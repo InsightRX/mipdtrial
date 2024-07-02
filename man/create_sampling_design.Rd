@@ -8,17 +8,16 @@ create_sampling_design(
   time = NULL,
   when = NULL,
   offset = NULL,
-  anchor = NULL,
-  anchor_by = c("day", "dose")
+  at = NULL,
+  anchor = c("day", "dose")
 )
 }
 \arguments{
-\item{time}{a vector of numeric values. If no \code{anchor} values are specified,
+\item{time}{a vector of numeric values. If no \code{at} values are specified,
 these will be used as the fixed sampling times in the simulated trial.
-If \code{anchor} values are supplied, the sampling times  will be calculated
-adaptively during the trial. The \code{anchor} determine which dose is
-used as reference anchor, and \code{time} will be relative to the specified
-\code{anchor}.}
+If \code{at} values are supplied, the sampling times  will be calculated
+adaptively during the trial. The \code{at} determine which dose or day is
+used as reference, and \code{time} will be relative to the specified \code{at} anchor.}
 
 \item{when}{character vector of same length as \code{time} (or single
 value) determining how to interpret the provided sampling \code{time}. If \code{NULL}
@@ -28,14 +27,14 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 
 \item{offset}{offset from standardized PK moments specified in \code{when}.}
 
-\item{anchor}{numeric vector of the dose or day number to "anchor"
+\item{at}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.
-If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
+If \code{anchor} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
 second half of the 1st day.}
 
-\item{anchor_by}{either \code{day} or \code{dose}. Single value required, i.e. anchor
+\item{anchor}{either \code{day} or \code{dose}. Single value required, i.e. anchor
 types cannot be mixed.}
 }
 \description{
@@ -59,13 +58,13 @@ create_sampling_design(
 create_sampling_design(
   when = c("peak", "trough"),
   offset = c(0.5, -0.5),
-  anchor = c(1, 1)
+  at = c(1, 1)
 )
 create_sampling_design(
   when = c("peak", "trough"),
   offset = c(0.5, -0.5, 0.5, -0.5),
-  anchor = c(1, 1, 3, 3),
-  anchor_by = "dose"
+  at = c(1, 1, 3, 3),
+  anchory = "dose"
 )
 
 }

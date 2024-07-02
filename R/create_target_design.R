@@ -15,23 +15,23 @@
 #' @param time a vector of numeric values at which to measure and optimize the
 #' target. In most cases `time` is not required as argument, and will be inferred
 #' from the the `targettype`.
-#' If `anchor` values are supplied, the target times will be calculated
-#' adaptively during the trial. The `anchor` determine which dose is
+#' If `at` values are supplied, the target times will be calculated
+#' adaptively during the trial. The `at` determine which dose is
 #' used as reference anchor. and `time` will be relative to the specified
-#' `anchor`. If no `anchor` values are specified, the `time` values will be
+#' `at`. If no `at` values are specified, the `time` values will be
 #' used as the fixed absolute target times in the simulated trial.
 #' @param when character vector of same length as `time` (or single
 #' value) determining how to interpret the provided target `time`. If `NULL`
 #' will use the dose time as offset (default). Other options are `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
 #' `cmin` or `trough`, which will use the time of next dose as the offset.
-#' @param anchor numeric vector of the dose or day number to "anchor"
+#' @param at numeric vector of the dose or day number to "anchor"
 #' the target times to. Vector needs to be of same length as `t`.
-#' If `anchor_by` is set to `day`, then the first dose in that day is used.
+#' If `anchor` is set to `day`, then the first dose in that day is used.
 #' If later doses in the day are preferred, the anchor can also be specified
 #' fractionally, e.g. `1.5` will use the time of the first dose in the
 #' second half of the 1st day.
-#' @param anchor_by either `day` or `dose`. Single value required, i.e. anchor
+#' @param anchor either `day` or `dose`. Single value required, i.e. anchor
 #' types cannot be mixed.
 #'
 #' @export
@@ -49,16 +49,16 @@
 #' create_target_design(
 #'   targettype = "cmin",
 #'   targetvalue = 15,
-#'   anchor = 4,
-#'   anchor_by = "dose"
+#'   at = 4,
+#'   anchor = "dose"
 #' )
 #'
 #' ## Target AUC24 over day 4
 #' create_target_design(
 #'   targettype = "auc24",
 #'   targetvalue = 500,
-#'   anchor = 4,
-#'   anchor_by = "day"
+#'   at = 4,
+#'   anchor = "day"
 #' )
 #'
 create_target_design <- function(
@@ -70,11 +70,11 @@ create_target_design <- function(
     time = NULL,
     when = NULL,
     offset = NULL,
-    anchor = NULL,
-    anchor_by = c("day", "dose")
+    at = NULL,
+    anchor = c("day", "dose")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
-  anchor_by <- match.arg(anchor_by)
+  anchor <- match.arg(anchor)
 
   ## Infer `time` and `when` from targettype
   if(is.null(when)) {
@@ -100,8 +100,8 @@ create_target_design <- function(
     time = time,
     when = when,
     offset = offset,
-    anchor = anchor,
-    anchor_by = anchor_by
+    at = at,
+    anchor = anchor
   )
 
   ## Parse targets

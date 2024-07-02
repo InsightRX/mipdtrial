@@ -22,13 +22,13 @@
 #' create_sampling_design(
 #'   when = c("peak", "trough"),
 #'   offset = c(0.5, -0.5),
-#'   anchor = c(1, 1)
+#'   at = c(1, 1)
 #' )
 #' create_sampling_design(
 #'   when = c("peak", "trough"),
 #'   offset = c(0.5, -0.5, 0.5, -0.5),
-#'   anchor = c(1, 1, 3, 3),
-#'   anchor_by = "dose"
+#'   at = c(1, 1, 3, 3),
+#'   anchory = "dose"
 #' )
 #'
 #' @export
@@ -36,8 +36,8 @@ create_sampling_design <- function(
     time = NULL,
     when = NULL,
     offset = NULL,
-    anchor = NULL,
-    anchor_by = c("day", "dose")
+    at = NULL,
+    anchor = c("day", "dose")
 ) {
   if(is.null(time)) {
     if(is.null(when)) when <- "dose"
@@ -46,7 +46,7 @@ create_sampling_design <- function(
     time = time,
     when = when,
     offset = offset,
-    anchor = anchor,
-    anchor_by = anchor_by
+    at = at,
+    anchor = anchor
   )
 }

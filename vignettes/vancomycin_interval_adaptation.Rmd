@@ -33,8 +33,8 @@ in dose 1 and 3.
 tdm_design <- create_sampling_design(
   offset = c(1, -1, 1, -1), # sample 1-hour before true trough, and at peak+1hr
   when = c("peak", "trough", "peak", "trough"),
-  anchor = c(1, 1, 3, 3),
-  anchor_by = "dose"
+  sample_at = c(1, 1, 3, 3),
+  anchor = "dose"
 )
 ```
 
@@ -48,18 +48,18 @@ target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
   targetmax = 600,
-  anchor = 6,
-  anchor_by = "day"
+  target_at = 6,
+  anchor = "day"
 )
 dose_update_design <- create_regimen_update_design(
-  anchor = c(3, 5),
-  anchor_by = "dose",
+  update_at = c(3, 5),
+  anchor = "dose",
   update_type = "dose",
   dose_optimization_method = map_adjust_dose
 )
 interval_update_design <- create_regimen_update_design(
-  anchor = c(3, 5),
-  anchor_by = "dose",
+  update_at = c(3, 5),
+  anchor = "dose",
   update_type = "interval",
   dose_optimization_method = map_adjust_interval
 )

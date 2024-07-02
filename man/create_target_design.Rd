@@ -13,8 +13,8 @@ create_target_design(
   time = NULL,
   when = NULL,
   offset = NULL,
-  anchor = NULL,
-  anchor_by = c("day", "dose")
+  at = NULL,
+  anchor = c("day", "dose")
 )
 }
 \arguments{
@@ -34,10 +34,10 @@ not used for dose-finding logic.}
 \item{time}{a vector of numeric values at which to measure and optimize the
 target. In most cases \code{time} is not required as argument, and will be inferred
 from the the \code{targettype}.
-If \code{anchor} values are supplied, the target times will be calculated
-adaptively during the trial. The \code{anchor} determine which dose is
+If \code{at} values are supplied, the target times will be calculated
+adaptively during the trial. The \code{at} determine which dose is
 used as reference anchor. and \code{time} will be relative to the specified
-\code{anchor}. If no \code{anchor} values are specified, the \code{time} values will be
+\code{at}. If no \code{at} values are specified, the \code{time} values will be
 used as the fixed absolute target times in the simulated trial.}
 
 \item{when}{character vector of same length as \code{time} (or single
@@ -46,14 +46,14 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 \code{peak}, which will use the end of infusion as the base for the \code{time}, or
 \code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
 
-\item{anchor}{numeric vector of the dose or day number to "anchor"
+\item{at}{numeric vector of the dose or day number to "anchor"
 the target times to. Vector needs to be of same length as \code{t}.
-If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
+If \code{anchor} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
 second half of the 1st day.}
 
-\item{anchor_by}{either \code{day} or \code{dose}. Single value required, i.e. anchor
+\item{anchor}{either \code{day} or \code{dose}. Single value required, i.e. anchor
 types cannot be mixed.}
 }
 \description{
@@ -74,16 +74,16 @@ create_target_design(
 create_target_design(
   targettype = "cmin",
   targetvalue = 15,
-  anchor = 4,
-  anchor_by = "dose"
+  at = 4,
+  anchor = "dose"
 )
 
 ## Target AUC24 over day 4
 create_target_design(
   targettype = "auc24",
   targetvalue = 500,
-  anchor = 4,
-  anchor_by = "day"
+  at = 4,
+  anchor = "day"
 )
 
 }
