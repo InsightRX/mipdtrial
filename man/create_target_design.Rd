@@ -46,6 +46,8 @@ will use the dose time as offset (default). Other options are \code{cmax} or
 \code{peak}, which will use the end of infusion as the base for the \code{time}, or
 \code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
 
+\item{offset}{offset from a \code{when} moment (dose, peak, or trough).}
+
 \item{at}{numeric vector of the dose or day number to "anchor"
 the target times to. Vector needs to be of same length as \code{t}.
 If \code{anchor} is set to \code{day}, then the first dose in that day is used.

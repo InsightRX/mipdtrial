@@ -25,6 +25,7 @@
 #' will use the dose time as offset (default). Other options are `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
 #' `cmin` or `trough`, which will use the time of next dose as the offset.
+#' @param offset offset from a `when` moment (dose, peak, or trough).
 #' @param at numeric vector of the dose or day number to "anchor"
 #' the target times to. Vector needs to be of same length as `t`.
 #' If `anchor` is set to `day`, then the first dose in that day is used.
