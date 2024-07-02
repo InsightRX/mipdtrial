@@ -22,7 +22,7 @@ must match the model used for simulation."><!-- mathjax --><script src="https://
     
     <a class="navbar-brand me-2" href="../index.html">mipdtrial</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@ must match the model used for simulation."><!-- mathjax --><script src="https://
     <a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a>
     <a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a>
     <a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a>
+    <a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -69,27 +70,35 @@ must match the model used for simulation.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sample_and_adjust_by_dose</span><span class="op">(</span></span>
-<span>  <span class="va">adjust_at_dose</span>,</span>
-<span>  <span class="va">tdm_times</span>,</span>
+<span>  <span class="va">regimen_update_design</span>,</span>
+<span>  <span class="va">sampling_design</span>,</span>
+<span>  <span class="va">target_design</span>,</span>
 <span>  <span class="va">regimen</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">pars_true_i</span>,</span>
 <span>  <span class="va">sim_model</span>,</span>
 <span>  sim_ruv <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  accumulate_data <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>adjust_at_dose</dt>
-<dd><p>vector of integers indicating which doses to adjust</p></dd>
+    <dl><dt>regimen_update_design</dt>
+<dd><p>a data.frame with scheme with details on how
+and when to update the regimen in the MIPD trial. Schemes are created using
+<code><a href="create_regimen_update_design.html">create_regimen_update_design()</a></code>.</p></dd>
 
 
-<dt>tdm_times</dt>
-<dd><p>vector of times to sample at, in hours starting from the
-time of first dose.</p></dd>
+<dt>sampling_design</dt>
+<dd><p>a data.frame with a sampling scheme, created using
+<code><a href="create_sampling_design.html">create_sampling_design()</a></code>.</p></dd>
+
+
+<dt>target_design</dt>
+<dd><p>target design created using <code><a href="create_target_design.html">create_target_design()</a></code></p></dd>
 
 
 <dt>regimen</dt>
@@ -113,12 +122,14 @@ time of first dose.</p></dd>
 proportional (<code>prop</code>) and additive (<code>add</code>) error.</p></dd>
 
 
-<dt>dose_optimization_method</dt>
-<dd><p>A function that determines how doses should
-be adjusted given the collected drug levels. The function must return a
-named list of the structure <code>list(regimen = reg, additional_info = x)</code>,
-where <code>reg</code> is the updated PKPDsim regimen for the patient and <code>x</code> can be
-another other information useful for post-processing of trial results.</p></dd>
+<dt>verbose</dt>
+<dd><p>verbose output?</p></dd>
+
+
+<dt>accumulate_data</dt>
+<dd><p>if <code>TRUE</code>, will use all available data up until the
+adjustment timepoint. If set to <code>FALSE</code>, will use only the data since the
+last adjustment timepoint and the current one.</p></dd>
 
 
 <dt>...</dt>
@@ -133,7 +144,7 @@ function.</p></dd>
 <p>a named list containing <code>final_regimen</code> (all doses after
 adjustment), <code>tdms</code> (all collected levels, both true and measured, that is,
 both with and without residual variability), and <code>additional_info</code>, which
-varies by <code>dose_optimization_method</code>. See selected function for details.</p>
+varies by dose_optimization_method. See selected function for details.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -147,7 +158,7 @@ designs, and may serve as a template for more complex designs.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jasmine Hughes, InsightRX.</p>
+  <p>Developed by Jasmine Hughes, Ron Keizer, InsightRX.</p>
 </div>
 
 <div class="pkgdown-footer-right">

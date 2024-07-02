@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">mipdtrial</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a>
     <a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a>
     <a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a>
+    <a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a>
   </div>
 </li>
       </ul>
@@ -84,7 +85,7 @@ sample at 5 hours post-dose.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># for plotting our results</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="define-simulation-parameters">1. Define simulation parameters<a class="anchor" aria-label="anchor" href="#define-simulation-parameters"></a>
+<h2 id="define-trial-design">1. Define trial design<a class="anchor" aria-label="anchor" href="#define-trial-design"></a>
 </h2>
 <p>This simulated trial will have two arms:</p>
 <ol style="list-style-type: decimal">
@@ -95,21 +96,34 @@ sample at 5 hours post-dose.</p>
 interval, and for simplicity, we will assume all patients are receiving
 vancomycin twice daily, infused over 2 hours.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">end_of_fourth_infusion</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">4</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">12</span> <span class="op">+</span> <span class="fl">2</span> <span class="co"># first dose at t=0, infusion is 2 hrs</span></span>
-<span><span class="va">tdm_times1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">9</span><span class="op">)</span> <span class="op">+</span> <span class="va">end_of_fourth_infusion</span></span>
-<span><span class="va">tdm_times2</span> <span class="op">&lt;-</span> <span class="fl">5</span> <span class="op">+</span> <span class="va">end_of_fourth_infusion</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># end_of_fourth_infusion &lt;- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs</span></span>
+<span><span class="co"># tdm_times1 &lt;- c(1, 9) + end_of_fourth_infusion</span></span>
+<span><span class="co"># tdm_times2 &lt;- 5 + end_of_fourth_infusion</span></span>
+<span><span class="va">tdm_design1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">9</span><span class="op">)</span>,</span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, </span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">tdm_design2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>  offset <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  at <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>We will adjust the fifth dose based on these levels, aiming for a
 daily AUC of 400-600 mg*h/L by day 6.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">adjust_at_dose</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
-<span></span>
-<span><span class="va">target</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_target_object.html">create_target_object</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
+<span>  at <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
+<span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_dose</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">target_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_target_design.html">create_target_design</a></span><span class="op">(</span></span>
 <span>  targettype <span class="op">=</span> <span class="st">"auc24"</span>, </span>
 <span>  targetmin <span class="op">=</span> <span class="fl">400</span>,</span>
-<span>  targetmax <span class="op">=</span> <span class="fl">600</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">auc_time</span> <span class="op">&lt;-</span> <span class="fl">6</span> <span class="op">*</span> <span class="fl">24</span> <span class="co"># day 6</span></span></code></pre></div>
+<span>  targetmax <span class="op">=</span> <span class="fl">600</span>,</span>
+<span>  at <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"day"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="create-a-set-of-digital-patient-covariates">2. Create a set of digital patient covariates<a class="anchor" aria-label="anchor" href="#create-a-set-of-digital-patient-covariates"></a>
@@ -206,20 +220,19 @@ described in the model.</p>
 <span>  <span class="op">)</span></span>
 <span>  <span class="co"># find initial starting dose: define basic regimen, then upda</span></span>
 <span>  <span class="va">initial_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_based_starting_dose.html">model_based_starting_dose</a></span><span class="op">(</span></span>
-<span>    <span class="co"># define dosing strategy</span></span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
+<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design1</span>,</span>
 <span>    n <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>    interval <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>    t_inf <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>    dose_resolution <span class="op">=</span> <span class="fl">250</span>, <span class="co"># round to nearest 250 mg</span></span>
-<span>    dose_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">6000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>,</span>
+<span>    grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">6000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>,</span>
+<span>    grid_type <span class="op">=</span> <span class="st">"dose"</span>,</span>
 <span>    <span class="co"># define model components</span></span>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    obs_comp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model</span>, <span class="st">"size"</span><span class="op">)</span>,</span>
-<span>    <span class="co"># define PK target</span></span>
-<span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span></span>
+<span>    auc_comp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model</span>, <span class="st">"size"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="co"># randomly draw individual PK parameters</span></span>
@@ -231,8 +244,9 @@ described in the model.</p>
 <span>  </span>
 <span>  <span class="co"># Summary of both MIPD approaches</span></span>
 <span>  <span class="va">treatment_summary1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    adjust_at_dose <span class="op">=</span> <span class="va">adjust_at_dose</span>, </span>
-<span>    tdm_times <span class="op">=</span> <span class="va">tdm_times1</span>, <span class="co"># arm 1</span></span>
+<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>, </span>
+<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design1</span>, <span class="co"># arm 1</span></span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
@@ -241,14 +255,12 @@ described in the model.</p>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
 <span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
-<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">treatment_summary2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    adjust_at_dose <span class="op">=</span> <span class="va">adjust_at_dose</span>, </span>
-<span>    tdm_times <span class="op">=</span> <span class="va">tdm_times2</span>, <span class="co"># arm 2</span></span>
+<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>, </span>
+<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design2</span>, <span class="co"># arm 1</span></span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
@@ -257,10 +269,7 @@ described in the model.</p>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
 <span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    target_time <span class="op">=</span> <span class="va">auc_time</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
-<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv</span></span>
 <span>  <span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="co"># get steady-state AUC at end of treatment course</span></span>
@@ -268,27 +277,27 @@ described in the model.</p>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary1</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    target_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">results</span><span class="op">$</span><span class="va">random</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary2</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    target_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_time</span> <span class="op">-</span> <span class="fl">24</span>, <span class="va">auc_time</span><span class="op">)</span>,</span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Here are the first few rows of our simulation results:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id peak_trough   random</span></span>
-<span><span class="co">#&gt; 1  1    495.1603 401.9273</span></span>
-<span><span class="co">#&gt; 2  2    598.3436 573.7184</span></span>
-<span><span class="co">#&gt; 3  3    598.4053 531.5867</span></span>
-<span><span class="co">#&gt; 4  4    402.9457 364.4148</span></span>
-<span><span class="co">#&gt; 5  5    723.1887 965.4022</span></span>
-<span><span class="co">#&gt; 6  6    486.0035 458.9506</span></span></code></pre></div>
+<span><span class="co">#&gt;   id peak_trough    random</span></span>
+<span><span class="co">#&gt; 1  1    500.3640  403.2282</span></span>
+<span><span class="co">#&gt; 2  2    606.9251  577.4495</span></span>
+<span><span class="co">#&gt; 3  3    592.2950  484.8727</span></span>
+<span><span class="co">#&gt; 4  4    404.5096  348.7749</span></span>
+<span><span class="co">#&gt; 5  5    729.9797 1018.3722</span></span>
+<span><span class="co">#&gt; 6  6    487.7377  476.6390</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">6. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
@@ -299,25 +308,25 @@ compare between the two arms of the trial?</p>
 <code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">peak_trough</span>, <span class="va">random</span><span class="op">)</span>,</span>
-<span>    names_to <span class="op">=</span> <span class="st">"sampling_scheme"</span>,</span>
+<span>    names_to <span class="op">=</span> <span class="st">"sampling_design"</span>,</span>
 <span>    values_to <span class="op">=</span> <span class="st">"steady_state_auc"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">steady_state_auc</span>, <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">sampling_scheme</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">steady_state_auc</span>, <span class="va">target_design</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">sampling_design</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>prop_on_target <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ontarget</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">target_attainment</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sampling_scheme</span>, y <span class="op">=</span> <span class="va">prop_on_target</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>    panel.grid.major.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Sampling strategy"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Percent on target (%)"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sampling_design</span>, y <span class="op">=</span> <span class="va">prop_on_target</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>      panel.grid.major.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="st">"Sampling strategy"</span>,</span>
+<span>      y <span class="op">=</span> <span class="st">"Percent on target (%)"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <p><img src="sample_timing_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
 <p>Target attainment was high and varied little between the two arms,
 providing evidence to support the move from collecting two samples to
@@ -328,19 +337,19 @@ strategy.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">peak_trough</span>, y <span class="op">=</span> <span class="va">random</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">400</span>, xmax <span class="op">=</span> <span class="fl">600</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span>, </span>
-<span>    fill <span class="op">=</span> <span class="st">"grey70"</span>,</span>
-<span>    alpha <span class="op">=</span> <span class="fl">0.05</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="fl">400</span>, ymax <span class="op">=</span> <span class="fl">600</span>, xmin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, xmax <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span>,</span>
-<span>    fill <span class="op">=</span> <span class="st">"grey70"</span>,</span>
-<span>    alpha <span class="op">=</span> <span class="fl">0.05</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">peak_trough</span>, y <span class="op">=</span> <span class="va">random</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">400</span>, xmax <span class="op">=</span> <span class="fl">600</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span>, </span>
+<span>      fill <span class="op">=</span> <span class="st">"grey70"</span>,</span>
+<span>      alpha <span class="op">=</span> <span class="fl">0.05</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="fl">400</span>, ymax <span class="op">=</span> <span class="fl">600</span>, xmin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, xmax <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span>,</span>
+<span>      fill <span class="op">=</span> <span class="st">"grey70"</span>,</span>
+<span>      alpha <span class="op">=</span> <span class="fl">0.05</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sample_timing_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <p>There is a strong correlation in final AUC between the two sampling
 strategies. Some patients were under-exposed or over-exposed in both
@@ -354,7 +363,7 @@ other.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jasmine Hughes, InsightRX.</p>
+  <p>Developed by Jasmine Hughes, Ron Keizer, InsightRX.</p>
 </div>
 
 <div class="pkgdown-footer-right">

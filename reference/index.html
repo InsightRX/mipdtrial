@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">mipdtrial</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@
     <a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a>
     <a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a>
     <a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a>
+    <a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -55,6 +56,11 @@
 
       <dl><dt>
           
+          <code><a href="adjust_dose_checks.html">adjust_dose_checks()</a></code> 
+        </dt>
+        <dd>Checks for dose_update_number obtained from dose_update scheme</dd>
+      </dl><dl><dt>
+          
           <code><a href="calc_auc_from_regimen.html">calc_auc_from_regimen()</a></code> 
         </dt>
         <dd>Get AUC from a regimen</dd>
@@ -63,6 +69,11 @@
           <code><a href="calc_auc_from_sim.html">calc_auc_from_sim()</a></code> 
         </dt>
         <dd>Get AUC from a simulation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="check_when.html">check_when()</a></code> 
+        </dt>
+        <dd>Check / clean when element</dd>
       </dl><dl><dt>
           
           <code><a href="collect_tdms.html">collect_tdms()</a></code> 
@@ -75,14 +86,24 @@
         <dd>Create a list of PKPDsim covariates for modeling</dd>
       </dl><dl><dt>
           
-          <code><a href="create_target_object.html">create_target_object()</a></code> 
+          <code><a href="create_design.html">create_design()</a></code> 
         </dt>
-        <dd>Create target object</dd>
+        <dd>Create timing designs (static or adaptive) for use in simulated trial, such as sampling designs, target designs etc.</dd>
       </dl><dl><dt>
           
-          <code><a href="dose_adjust_map.html">dose_adjust_map()</a></code> 
+          <code><a href="create_regimen_update_design.html">create_regimen_update_design()</a></code> 
         </dt>
-        <dd>Adjust doses to achieve a target metric using MAP Bayesian estimation.</dd>
+        <dd>Create scheme for updating dose or interval during dose optimization trial</dd>
+      </dl><dl><dt>
+          
+          <code><a href="create_sampling_design.html">create_sampling_design()</a></code> 
+        </dt>
+        <dd>Function for creating sampling designs.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="create_target_design.html">create_target_design()</a></code> 
+        </dt>
+        <dd>Create target object</dd>
       </dl><dl><dt>
           
           <code><a href="dose_grid_search.html">dose_grid_search()</a></code> 
@@ -100,9 +121,29 @@
         <dd>Generate variability terms</dd>
       </dl><dl><dt>
           
+          <code><a href="get_dose_update_core.html">get_dose_update_core()</a></code> 
+        </dt>
+        <dd>Core function to calculate the dose update number for a row in a regimen update data.frame</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_dose_update_numbers_from_design.html">get_dose_update_numbers_from_design()</a></code> 
+        </dt>
+        <dd>Get dose number to update dose/interval at from the regime update scheme and a provided regimen.</dd>
+      </dl><dl><dt>
+          
           <code><a href="get_quantity_from_variable.html">get_quantity_from_variable()</a></code> 
         </dt>
         <dd>Get quantities from variables in sim results</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_sampling_time_core.html">get_sampling_time_core()</a></code> 
+        </dt>
+        <dd>Core function to calculate the sampling time for a row in a sampling schema data.frame.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="get_sampling_times_from_scheme.html">get_sampling_times_from_scheme()</a></code> 
+        </dt>
+        <dd>Calculate sampling times based on a given sampling schema and a regimen.</dd>
       </dl><dl><dt>
           
           <code><a href="is_on_target.html">is_on_target()</a></code> 
@@ -113,6 +154,16 @@
           <code><a href="is_single_valid_number.html">is_single_valid_number()</a></code> 
         </dt>
         <dd>Checks that an object represents a single finite number</dd>
+      </dl><dl><dt>
+          
+          <code><a href="map_adjust_dose.html">map_adjust_dose()</a></code> 
+        </dt>
+        <dd>Adjust doses to achieve a target metric using MAP Bayesian estimation.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="map_adjust_interval.html">map_adjust_interval()</a></code> 
+        </dt>
+        <dd>Adjust intervals to achieve a target metric using MAP Bayesian estimation by adapting the dosing interval</dd>
       </dl><dl><dt>
           
           <code><a href="mipd_target_types.html">mipd_target_types()</a></code> 
@@ -140,9 +191,9 @@
         <dd>Adjust dosing using MIPD on TDMs at specified dose numbers</dd>
       </dl><dl><dt>
           
-          <code><a href="simulate_dose.html">simulate_dose()</a></code> 
+          <code><a href="simulate_dose_interval.html">simulate_dose_interval()</a></code> 
         </dt>
-        <dd>Simulate dose</dd>
+        <dd>Simulate different doses/intervals in a dose/interval grid</dd>
       </dl><dl><dt>
           
           <code><a href="simulate_fit.html">simulate_fit()</a></code> 
@@ -158,7 +209,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jasmine Hughes, InsightRX.</p>
+  <p>Developed by Jasmine Hughes, Ron Keizer, InsightRX.</p>
 </div>
 
 <div class="pkgdown-footer-right">

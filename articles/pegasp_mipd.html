@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">mipdtrial</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a>
     <a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a>
     <a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a>
+    <a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a>
   </div>
 </li>
       </ul>
@@ -93,15 +94,22 @@ every 14 days just prior to the next dose. We will adjust doses 2 and 3
 to achieve a steady state asparaginase activity level of of 300 IU/L
 (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tdm_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="fl">13.9</span><span class="op">*</span><span class="fl">24</span>,  <span class="fl">27.9</span><span class="op">*</span><span class="fl">24</span>,  <span class="fl">41.9</span><span class="op">*</span><span class="fl">24</span><span class="op">)</span> </span>
-<span><span class="va">adjust_at_dose</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="va">target</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_target_object.html">create_target_object</a></span><span class="op">(</span></span>
-<span>  targettype <span class="op">=</span> <span class="st">"conc"</span>, </span>
-<span>  targetvalue <span class="op">=</span> <span class="fl">300</span></span>
+<code class="sourceCode R"><span><span class="va">tdm_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<span>  time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">13.9</span><span class="op">*</span><span class="fl">24</span>,  <span class="fl">27.9</span><span class="op">*</span><span class="fl">24</span>,  <span class="fl">41.9</span><span class="op">*</span><span class="fl">24</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">conc_times</span> <span class="op">&lt;-</span> <span class="fl">1344</span></span></code></pre></div>
+<span><span class="va">update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
+<span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_dose</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">target_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_target_design.html">create_target_design</a></span><span class="op">(</span></span>
+<span>  targettype <span class="op">=</span> <span class="st">"cmin"</span>, </span>
+<span>  targetvalue <span class="op">=</span> <span class="fl">300</span>,</span>
+<span>  at <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="create-a-set-of-digital-patient-covariates">2. Create a set of digital patient covariates<a class="anchor" aria-label="anchor" href="#create-a-set-of-digital-patient-covariates"></a>
@@ -224,7 +232,7 @@ monitoring sample.</p>
 <span>  <span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/new_regimen.html" class="external-link">new_regimen</a></span><span class="op">(</span></span>
 <span>    amt <span class="op">=</span> <span class="va">dose</span>, </span>
 <span>    interval <span class="op">=</span> <span class="fl">14</span><span class="op">*</span><span class="fl">24</span>,</span>
-<span>    n <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    t_inf <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>    type <span class="op">=</span> <span class="st">"infusion"</span></span>
 <span>  <span class="op">)</span></span>
@@ -237,8 +245,9 @@ monitoring sample.</p>
 <span>  <span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="va">treatment_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    adjust_at_dose <span class="op">=</span> <span class="va">adjust_at_dose</span>,</span>
-<span>    tdm_times <span class="op">=</span> <span class="va">tdm_times</span>,</span>
+<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design</span>,</span>
+<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>,</span>
+<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    regimen <span class="op">=</span> <span class="va">reg</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
@@ -247,10 +256,7 @@ monitoring sample.</p>
 <span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">parameters</span>,</span>
 <span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    target_time <span class="op">=</span> <span class="va">conc_times</span>,</span>
-<span>    target <span class="op">=</span> <span class="va">target</span>,</span>
-<span>    dose_optimization_method <span class="op">=</span> <span class="va">dose_adjust_map</span></span>
+<span>    ruv <span class="op">=</span> <span class="va">ruv</span></span>
 <span>  <span class="op">)</span></span>
 <span>    </span>
 <span>  <span class="co"># get final asparaginase activity level</span></span>
@@ -260,26 +266,26 @@ monitoring sample.</p>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
 <span>    ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    t_obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14</span>, <span class="fl">28</span>, <span class="fl">42</span><span class="op">)</span> <span class="op">*</span> <span class="fl">24</span>,</span>
+<span>    t_obs <span class="op">=</span> <span class="va">tdm_design</span><span class="op">$</span><span class="va">offset</span>,</span>
 <span>    only_obs <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">conc</span>  <span class="op">&lt;-</span> <span class="va">sim</span><span class="op">$</span><span class="va">y</span></span>
 <span>  <span class="va">results</span><span class="op">$</span><span class="va">conc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">conc</span></span>
 <span>  </span>
 <span>  <span class="co">#Add amounts</span></span>
-<span>  <span class="va">amt</span> <span class="op">&lt;-</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span><span class="op">$</span><span class="va">dose_amts</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">amt</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">amt</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="va">amt</span> <span class="op">&lt;-</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span><span class="op">$</span><span class="va">dose_amts</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">results</span><span class="op">$</span><span class="va">amt</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">amt</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Here are the first few rows of our simulation results:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      id iter day  amt     conc</span></span>
-<span><span class="co">#&gt; 1 66117    1  14 1391 597.4713</span></span>
-<span><span class="co">#&gt; 2 66117    2  28 1488 375.0129</span></span>
-<span><span class="co">#&gt; 3 66117    3  42 1488 341.5836</span></span>
-<span><span class="co">#&gt; 4 68796    1  14  769 410.2427</span></span>
-<span><span class="co">#&gt; 5 68796    2  28  864 274.9013</span></span>
-<span><span class="co">#&gt; 6 68796    3  42  864 293.9840</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 66117    1  14 1391 600.0078</span></span>
+<span><span class="co">#&gt; 2 66117    2  28 1488 378.3576</span></span>
+<span><span class="co">#&gt; 3 66117    3  42 1488 343.8977</span></span>
+<span><span class="co">#&gt; 4 68796    1  14  769 413.9464</span></span>
+<span><span class="co">#&gt; 5 68796    2  28  864 277.9574</span></span>
+<span><span class="co">#&gt; 6 68796    3  42  864 296.9893</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">6. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
@@ -287,7 +293,7 @@ monitoring sample.</p>
 <p>How well did our patients get to target?</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">day</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14</span>,<span class="fl">28</span>,<span class="fl">42</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">day</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14</span>, <span class="fl">28</span>, <span class="fl">42</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">conc</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    below_flag <span class="op">=</span> <span class="va">conc</span> <span class="op">&lt;</span> <span class="fl">100</span>,</span>
@@ -348,7 +354,7 @@ June 26-28, 2024, Rome, Italy. (<a href="https://www.page-meeting.org/default.as
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jasmine Hughes, InsightRX.</p>
+  <p>Developed by Jasmine Hughes, Ron Keizer, InsightRX.</p>
 </div>
 
 <div class="pkgdown-footer-right">
