@@ -25,9 +25,9 @@ get_dose_update_numbers_from_design <- function(design, regimen) {
 #'
 get_dose_update_core <- function(row, regimen) {
   if(row$anchor == "dose") {
-    dose_anchor <- row$anchor
+    dose_anchor <- row$at
   } else { ## find dose closest to specified day
-    t_aim <- (row$anchor-1) * 24
+    t_aim <- (row$at-1) * 24
     dose_anchor <- which.min(abs(regimen$dose_times - t_aim))
   }
   dose_anchor

@@ -56,16 +56,16 @@ tdm_design <- create_sampling_design(
 )
 
 update_design <- create_regimen_update_design(
-  anchor = c(2, 3),
-  anchor_by = "dose",
+  at = c(2, 3),
+  anchor = "dose",
   dose_optimization_method = map_adjust_dose
 )
 
 target_design <- create_target_design(
   targettype = "cmin", 
   targetvalue = 300,
-  anchor_by = "dose",
-  anchor = 4
+  at = 4,
+  anchor = "dose"
 )
 ```
 
@@ -184,7 +184,7 @@ for (i in ids) {
   reg <- new_regimen(
     amt = dose, 
     interval = 14*24,
-    n = 4,
+    n = 5,
     t_inf = 1,
     type = "infusion"
   )
@@ -225,8 +225,8 @@ for (i in ids) {
   results$conc[results$id == i] <- conc
   
   #Add amounts
-  amt <- treatment_summary$final_regimen$dose_amts
-  results$amt[results$id == i] <- amt[-1]
+  amt <- treatment_summary$final_regimen$dose_amts[-c(1, 5)]
+  results$amt[results$id == i] <- amt
 }
 ```
 
@@ -242,7 +242,7 @@ How well did our patients get to target?
 
 ```{r}
 results %>%
-  filter(day %in% c(14,28,42)) %>%
+  filter(day %in% c(14, 28, 42)) %>%
   filter(!is.na(conc)) %>%
   mutate(
     below_flag = conc < 100,

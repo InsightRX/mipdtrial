@@ -9,7 +9,7 @@ create_sampling_design(
   when = NULL,
   offset = NULL,
   at = NULL,
-  anchor = c("day", "dose")
+  anchor = c("dose", "day")
 )
 }
 \arguments{
@@ -51,20 +51,28 @@ sample, use the \code{offset} parameter to sample e.g. an hour post-peak, or
 shortly before true troughs.
 }
 \examples{
+# to sample at 1.5/8.5/23.5 hours
 create_sampling_design(time = c(1.5, 11.5, 23.5))
+
+# to sample at the peak (end of infusion) and trough (start of
+# next dose) of each dose
 create_sampling_design(
   when = c("peak", "trough")
 )
+
+# to sample 30 min post-peak and 30-min pre-trough for the first dose
 create_sampling_design(
   when = c("peak", "trough"),
   offset = c(0.5, -0.5),
   at = c(1, 1)
 )
+
+# The same as above, but now for the first and third dose
 create_sampling_design(
-  when = c("peak", "trough"),
+  when = c("peak", "trough", "peak", "trough"),
   offset = c(0.5, -0.5, 0.5, -0.5),
   at = c(1, 1, 3, 3),
-  anchory = "dose"
+  anchor = "dose"
 )
 
 }

@@ -71,7 +71,7 @@ create_target_design <- function(
     when = NULL,
     offset = NULL,
     at = NULL,
-    anchor = c("day", "dose")
+    anchor = c("dose", "day")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
   anchor <- match.arg(anchor)

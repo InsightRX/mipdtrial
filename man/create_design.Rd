@@ -10,7 +10,7 @@ create_design(
   when = NULL,
   offset = NULL,
   at = NULL,
-  anchor = c("day", "dose")
+  anchor = c("dose", "day")
 )
 }
 \arguments{

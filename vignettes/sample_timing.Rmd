@@ -44,13 +44,13 @@ infused over 2 hours.
 # tdm_times2 <- 5 + end_of_fourth_infusion
 tdm_design1 <- create_sampling_design(
   offset = c(1, 9),
-  anchor = c(4, 4), 
-  anchor_by = "dose"
+  at = c(4, 4), 
+  anchor = "dose"
 )
 tdm_design2 <- create_sampling_design(
   offset = 5,
-  anchor = 4,
-  anchor_by = "dose"
+  at = 4,
+  anchor = "dose"
 )
 ```
 
@@ -59,16 +59,16 @@ We will adjust the fifth dose based on these levels, aiming for a daily AUC of
 
 ```{r}
 update_design <- create_regimen_update_design(
-  anchor = 5,
-  anchor_by = "dose",
+  at = 5,
+  anchor = "dose",
   dose_optimization_method = map_adjust_dose
 )
 target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
   targetmax = 600,
-  anchor = 6,
-  anchor_by = "day"
+  at = 6,
+  anchor = "day"
 )
 ```
 

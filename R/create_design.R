@@ -30,13 +30,19 @@ create_design <- function(
   when = NULL,
   offset = NULL,
   at = NULL,
-  anchor = c("day", "dose")
+  anchor = c("dose", "day")
 ) {
   if(!is.null(time) && (!is.null(when) | !is.null(offset))) {
     stop("`time` cannot be specified at the same with `when` and/or `offset` arguments.")
   }
   anchor <- match.arg(anchor)
-  if(!is.null(at)) {
+  if(is.null(time)) {
+    if(!is.null(when) && is.null(at)) {
+      at <- rep(1, length(when))
+    }
+    if(is.null(at) && !is.nu) {
+      at <- rep(1, length(when))
+    }
     if(is.null(offset)) {
       offset <- rep(0, length(at))
     }
