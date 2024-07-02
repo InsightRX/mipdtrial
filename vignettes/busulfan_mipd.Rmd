@@ -60,22 +60,28 @@ library(ggplot2)
 
 ```
 
-## 1. Define simulation parameters
+## 1. Define trial design
 
 In this simple trial, patients will be dosed once per day for four days, with 4
 levels collected per day, at 3.5, 4, 6 and 8 hours post-dose. We will adjust
 doses 2, 3, and 4 to achieve a target cumulative AUC of 90 by t = 192 hours.
 
 ```{r}
-tdm_times <- rep(c(3.5, 4, 6, 8), 4) + rep(c(0, 24, 48, 72), each = 4)
-adjust_at_dose <- c(2, 3, 4)
-
-target <- create_target_object(
-  targettype = "cum_auc", 
-  targetvalue = 90 * 1000       # unit conversion
+tdm_design <- create_sampling_design(
+  offset = rep(c(3.5, 4, 6, 8), 4),
+  at = rep(1:4, each = 4),
+  anchor = "dose"
 )
-auc_times <- 192
-
+target_design <- create_target_design(
+  targettype = "cum_auc", 
+  targetvalue = 90 * 1000,       # unit conversion
+  time = 192
+)
+update_design <- create_regimen_update_design(
+  at = c(2, 3, 4),
+  anchor = "dose",
+  dose_optimization_method = map_adjust_dose
+)
 ```
 
 ## 2. Create a set of digital patient covariates
@@ -134,7 +140,6 @@ interest of speed.
 
 ```{r}
 ids <- dat$ID[1:10]
-
 ```
 
 ## 3. Load model definitions
@@ -209,7 +214,6 @@ sample.
 
 ```{r}
 set.seed(1) # important for reproducibility
-
 for (i in ids) {
   # get patient covariates
   covs <- create_cov_object(
@@ -232,8 +236,9 @@ for (i in ids) {
   )
   
   treatment_summary <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose, 
-    tdm_times = tdm_times,
+    sampling_design = tdm_design,
+    regimen_update_design = update_design,
+    target_design = target_design,
     regimen = reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -242,17 +247,14 @@ for (i in ids) {
     est_model = model_est,
     parameters = parameters_est,
     omega = omega_est,
-    ruv = ruv_est,
-    target_time = auc_times,
-    target = target,
-    dose_optimization_method = dose_adjust_map
+    ruv = ruv_est
   )
   # extract metrics of interest
   results$true_auc[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model_sim,
-    target_time = auc_times,
+    target_design = target_design,
     covariates = covs
   )
   final_parameters <- treatment_summary$additional_info[[length(treatment_summary$additional_info)]]
@@ -260,11 +262,10 @@ for (i in ids) {
     regimen = treatment_summary$final_regimen,
     parameters = final_parameters, # estimated patient PK
     model = model_est,
-    target_time = auc_times,
+    target_design = target_design,
     covariates = covs
   )
 }
-
 ```
 
 Here are the first few rows of our simulation results:
@@ -288,16 +289,15 @@ results %>%
     values_to = "auc"
   ) %>%
   ggplot() +
-  aes(x = auc_type, y = auc/1000) +
-  geom_boxplot() +
-  geom_hline(yintercept = 90, color = "navyblue", linetype = "dashed") +
-  scale_y_continuous(limit = c(0, NA)) +
-  theme_minimal() +
-  labs(
-    y = "Cumulative AUC (mg\u00B7h/L)",
-    x = "AUC type"
-  )
-
+    aes(x = auc_type, y = auc/1000) +
+    geom_boxplot() +
+    geom_hline(yintercept = 90, color = "navyblue", linetype = "dashed") +
+    scale_y_continuous(limit = c(0, NA)) +
+    theme_minimal() +
+    labs(
+      y = "Cumulative AUC (mg\u00B7h/L)",
+      x = "AUC type"
+    )
 ```
 
 Even with some model misspecification, target attainment (within 20% of target 
@@ -306,10 +306,9 @@ AUC) was still high:
 ```{r}
 target_attainment <- results %>%
   mutate(
-    ontarget = is_on_target(true_auc,  target)) %>%
+    ontarget = is_on_target(true_auc, target_design)) %>%
   summarize(proportion_ontarget = mean(ontarget)) %>%
   pull(proportion_ontarget)
-
 target_attainment <- paste0(round(100 * target_attainment), "%")
 ```
 

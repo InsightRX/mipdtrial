@@ -5,11 +5,9 @@
 #'
 #' @param est_model model used for estimation ("clinician facing")
 #' @param regimen PKPDsim regimen object
-#' @param target list with arguments `type`, and `value`. `type` = observation
-#'   type, either "conc" or auc".
-#' @param target_time vector of observation times at which to evaluate the
-#'   target exposure.
-#' @param obs_comp auc compartment (starting from 1, R-style not C-style!)
+#' @param target_design object specifying target design, created using function
+#' `create_target_design()`
+#' @param auc_comp auc compartment (starting from 1, R-style not C-style!)
 #' @param pta probability of target attainment, list with arguments `type` and
 #'   `value`, also requires `omega` if non-NULL. If `NULL`, will just aim for
 #'   specific conc or auc.
@@ -19,8 +17,9 @@
 #'   `list(prop = 0.1, add = 1.5)`, for probability of target attainment target
 #'   types.
 #' @param dose_update update dose from which dose?
-#' @param dose_grid vector specifying doses to use as test grid, Example:
-#'   seq(from = 50, to = 500, by = (500 - 50) / 10 )
+#' @param grid vector specifying doses or intervals to use as test grid,
+#' Example: `seq(from = 50, to = 500, by = (500 - 50) / 10)`
+#' @param grid_type either "dose" or "interval"
 #' @param dose_resolution to which precision should the output be rounded
 #'   (e.g. 50), useful when in practice only a specific set of dose units.
 #'   Can of course also be controlled by altering the grid.
@@ -46,17 +45,18 @@
 dose_grid_search <- function(
     est_model = NULL,
     regimen,
-    target_time = 24,
-    target = list(
-      type = "conc",
-      value = 10
+    target_design = create_target_design(
+      targettype = "conc",
+      targetvalue = 10,
+      time = 24
     ),
-    obs_comp = NULL,
+    auc_comp = NULL,
     pta = NULL,
     omega = NULL,
     ruv = NULL,
     dose_update = 1,
-    dose_grid = seq(1, 6000, by = 10),
+    grid = seq(1, 6000, by = 10),
+    grid_type = "dose",
     dose_resolution = 1,
     refine = NULL,
     refine_range = c(0.7, 1.4),
@@ -69,40 +69,43 @@ dose_grid_search <- function(
     ...
 ) {
 
-  if(target$type %in% target_types_time) { #
-    if(min(target$range) >= 100) {
-      target$variable <- ifelse(
-        grepl("_free", target$type),
+  if(target_design$type %in% target_types_time) { #
+    if(min(target_design$range) >= 100) {
+      target_design$variable <- ifelse(
+        grepl("_free", target_design$type),
         "CONCF",
         "CONC"
       )
-      target$type <- "cmin"
-      target$value <- min(target$range)/100 * tail(covariates$MIC$value, 1)
-      target$range <- rep(target$value, 2)
+      target_design$type <- "cmin"
+      target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
+      target_design$range <- rep(target_design$value, 2)
     }
   }
 
-  if(length(target_time) > 1 && !target$type %in% c("auc", target_types_time)) {
+  target_time <- get_sampling_times_from_scheme(
+    target_design$scheme, regimen
+  )
+  if(length(target_time) > 1 && !target_design$type %in% c("auc", target_types_time)) {
     target_time <- target_time[1]
   }
 
-  if(target$type %in% c(target_types_conc, target_types_time)) {
+  if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
-  } else if(target$type %in% target_types_auc) {
-    if(is.null(obs_comp)) {
+  } else if(target_design$type %in% target_types_auc) {
+    if(is.null(auc_comp)) {
       stop("AUC compartment not specified")
     }
-    obs <- obs_comp
+    obs <- auc_comp
   } else {
     stop("Target type not recognized!")
   }
 
-  if(target$type %in% c("auc", target_types_time)) {
+  if(target_design$type %in% c("auc", target_types_time)) {
     if(length(target_time) != 2) {
       stop("Need start and end of observation interval as vector target_time.")
     }
   }
-  if (target$type == "auc" & !is.null(pta)) {
+  if (target_design$type == "auc" & !is.null(pta)) {
     stop("PTA method for AUC currently not supported.")
   }
   if (!is.null(pta)) {
@@ -110,10 +113,10 @@ dose_grid_search <- function(
       stop("PTA method requires specification of omega!")
     }
   }
-  if (is.null(dose_grid) || any(is.na(dose_grid)) || length(dose_grid) < 2) {
-    stop("Must supply grid search space in `dose_grid`")
+  if (is.null(grid) || any(is.na(grid)) || length(grid) < 2) {
+    stop("Must supply grid search space in `grid`")
   }
-  if(is.null(target$value) || length(target$value) == 0) {
+  if(is.null(target_design$value) || length(target_design$value) == 0) {
     stop("Target not specified!")
   }
   if (is.null(refine)){
@@ -121,17 +124,18 @@ dose_grid_search <- function(
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
     # time-based target methods also need to be refined since this target
     # is non-linear
-    refine <- target$type %in% target_types_time || refine
+    refine <- target_design$type %in% target_types_time || refine
   }
 
   y <- mclapply(
-    dose_grid,
-    simulate_dose,
+    grid,
+    simulate_dose_interval,
+    grid_type = grid_type,
     dose_update = dose_update,
     regimen = regimen,
     md = md,
     pta = pta,
-    target = target,
+    target_design = target_design,
     model = est_model,
     t_obs = target_time,
     omega = omega,
@@ -141,46 +145,54 @@ dose_grid_search <- function(
     covariates = covariates,
     ...
   )
-  tab <- data.frame(dose = dose_grid, y = unlist(y))
+
+  if(grid_type == "interval") {
+    tab <- data.frame(interval = grid, y = unlist(y))
+    if (target_design$type %in% target_types_time) {
+      tab <- filter_rows_0_100(tab)
+    }
+    interval <- tab[which.min(abs(tab$y - target_design$value)),]$interval
+    return(interval)
+  } else {
+    tab <- data.frame(dose = grid, y = unlist(y))
+  }
 
   ## get best dose:
-  if (target$type %in% target_types_time) {
+  if (target_design$type %in% target_types_time) {
     tab <- filter_rows_0_100(tab)
   }
 
   # Get two closest doses above and below target if possible, otherwise get
   # two closest doses (even if both are above or below)
-  if (any(tab$y < target$value) && any(tab$y >= target$value)) {
-    closest_below <- max(order(tab$y - target$value)[tab$y - target$value < 0])
-    closest_above <- min(order(tab$y - target$value)[tab$y - target$value >= 0])
+  if (any(tab$y < target_design$value) && any(tab$y >= target_design$value)) {
+    closest_below <- max(order(tab$y - target_design$value)[tab$y - target_design$value < 0])
+    closest_above <- min(order(tab$y - target_design$value)[tab$y - target_design$value >= 0])
     tmp <- tab[c(closest_below, closest_above),]
   } else {
-    tmp <- tab[order(abs(tab$y - target$value)),][1:2,]
+    tmp <- tab[order(abs(tab$y - target_design$value)),][1:2,]
   }
-
   fit <- lm(dose ~ y, data.frame(tmp))
-  dose <- as.numeric(predict(fit, list(y=target$value)))
-  fit_reverse <- lm(y ~ dose, data.frame(tmp))
+  dose <- as.numeric(predict(fit, list(y=target_design$value)))
 
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
-    if(dose == dose_grid[1] && dose > min_dose) {
-      dose_grid <- dose_grid / 4
+    if(dose == grid[1] && dose > min_dose) {
+      grid <- grid / 4
     } else {
-      if(dose == tail(dose_grid,1) && dose < max_dose) {
-        dose_grid <- dose_grid * 4
+      if(dose == tail(grid,1) && dose < max_dose) {
+        grid <- grid * 4
       }
     }
-    if(dose == dose_grid[1] || dose == tail(dose_grid,1)) {
+    if(dose == grid[1] || dose == tail(grid,1)) {
       dose <- dose_grid_search(
         est_model = est_model,
         regimen = regimen,
-        target_time = target_time,
-        target = target,
-        obs_comp = obs_comp,
+        target_design = target_design,
+        auc_comp = auc_comp,
         pta = pta,
         omega = omega, ruv = ruv,
         dose_update = dose_update,
-        dose_grid = dose_grid,
+        grid = grid,
+        grid_type = "dose",
         dose_resolution = NULL,
         refine = refine,
         check_boundaries = FALSE, # !!
@@ -199,14 +211,14 @@ dose_grid_search <- function(
     dose <- dose_grid_search(
       est_model = est_model,
       regimen = regimen,
-      target_time = target_time,
-      target = target,
-      obs_comp = obs_comp,
+      target_design = target_design,
+      auc_comp = auc_comp,
       pta = pta,
       omega = omega,
       ruv = ruv,
       dose_update = dose_update,
-      dose_grid = dose_grid, # updated under refined range
+      grid = dose_grid, # updated under refined range
+      grid_type = "dose",
       dose_resolution = NULL, # will round again below
       refine = FALSE, # !!
       check_boundaries = FALSE,
@@ -229,38 +241,48 @@ dose_grid_search <- function(
   return(dose)
 }
 
-#' Simulate dose
-#'
-#' Simulate a dose in the dose grid
+#' Simulate different doses/intervals in a dose/interval grid
 #'
 #' @inheritParams dose_grid_search
 #' @param model model for simulating dose (estimation model)
-#' @param dose_grid element of the dose grid
+#' @param value element of the dose/interval grid
+#' @param grid_type either `dose` grid or `interval` grid
 #' @param t_obs time at which observation should be calculated
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)
 #' @md
-simulate_dose <- function(dose_grid,
-                          dose_update,
-                          regimen,
-                          md,
-                          pta,
-                          target,
-                          model,
-                          t_obs,
-                          omega,
-                          obs,
-                          ruv,
-                          ...) {
-  reg <- regimen
-  reg$dose_amts[dose_update:length(reg$dose_amts)] <- rep(
-    dose_grid,
-    length(reg$dose_amts[dose_update:length(reg$dose_amts)])
-  )
+simulate_dose_interval <- function(value,
+                              grid_type = "dose",
+                              dose_update,
+                              regimen,
+                              md,
+                              pta,
+                              target_design,
+                              model,
+                              t_obs,
+                              omega,
+                              obs,
+                              ruv,
+                              ...) {
 
-  if (target$type %in% target_types_time || target$type == "auc") {
+  reg <- regimen
+  if(grid_type == "dose") {
+    reg <- update_regimen(
+      regimen = reg,
+      new_dose = value,
+      dose_update_number = dose_update
+    )
+  } else if(grid_type == "interval") {
+    reg <- update_regimen(
+      regimen = reg,
+      new_interval = value,
+      dose_update_number = dose_update
+    )
+  }
+
+  if (target_design$type %in% target_types_time || target_design$type == "auc") {
     # need two time points for time-based targets
     t_obs <- c(t_obs - regimen$interval, t_obs)
-  } else if (target$type == "auc24") {
+  } else if (target_design$type == "auc24") {
     # need 24 hours of dosing
     t_obs <- c(t_obs - 24, t_obs)
   }
@@ -275,17 +297,17 @@ simulate_dose <- function(dose_grid,
     ...
   )
   if (is.null(pta)) {
-    if (target$type %in% c("auc", "auc24")) {
-      if(!is.null(target$variable)) {
-        return(diff(tmp[[target$variable]][tmp$comp == obs]))
+    if (target_design$type %in% c("auc", "auc24")) {
+      if(!is.null(target_design$variable)) {
+        return(diff(tmp[[target_design$variable]][tmp$comp == obs]))
       } else {
         return(diff(tmp[tmp$comp == obs, ]$y))
       }
-    } else if (target$type %in% target_types_time) {
+    } else if (target_design$type %in% target_types_time) {
       return(
         tail(
           get_quantity_from_variable(
-            var = target$type,
+            var = target_design$type,
             sim = tmp,
             md = md,
             times = t_obs,
@@ -295,8 +317,8 @@ simulate_dose <- function(dose_grid,
         )
       )
     } else {
-      if(!is.null(target$variable)) {
-        return(tmp[[target$variable]][tmp$comp == obs])
+      if(!is.null(target_design$variable)) {
+        return(tmp[[target_design$variable]][tmp$comp == obs])
       } else {
         return(tmp[["y"]][tmp$comp == obs])
       }

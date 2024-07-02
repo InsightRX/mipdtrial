@@ -4,15 +4,23 @@ omega <- c(0.1, 0.05, 0.1)
 
 regimen <- PKPDsim::new_regimen(
   amt = 2000,
-  n = 4,
+  n = 5,
   interval = 24
 )
 
 test_that("trial by dose change works", {
 
   out <- sample_and_adjust_by_dose(
-    adjust_at_dose = c(2, 4), # adjust 2nd and 4th (last) dose
-    tdm_times = c(20, 64),
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose"
+    ),
     regimen = regimen,
     pars_true_i = generate_iiv(mod, omega, par, seed = 1),
     sim_model = mod,
@@ -21,9 +29,13 @@ test_that("trial by dose change works", {
     parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
-    target_time = 4 * 24,
-    target = list(type = "conc", value = 15),
-    dose_optimization_method = dose_adjust_map
+    target = create_target_design(
+      targettype = "conc",
+      targetvalue = 15,
+      at = 5,
+      anchor = "dose"
+    ),
+    dose_optimization_method = map_adjust_dose
   )
 
   # expected structure
@@ -67,8 +79,16 @@ test_that("trial by dose change works", {
 test_that("Supplying true pars as list also works", {
 
   out <- sample_and_adjust_by_dose(
-    adjust_at_dose = c(2, 4), # adjust 2nd and 4th (last) dose
-    tdm_times = c(12, 64),
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose"
+    ),
     regimen = regimen,
     pars_true_i = list(CL = 1.5, V = 15),
     sim_model = mod,
@@ -77,9 +97,14 @@ test_that("Supplying true pars as list also works", {
     parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
-    target_time = 4 * 24,
-    target = list(type = "conc", value = 10),
-    dose_optimization_method = dose_adjust_map
+    target = create_target_design(
+      when = "trough",
+      at = 4,
+      anchor = "dose",
+      targettype = "conc",
+      targetvalue = 10
+    ),
+    dose_optimization_method = map_adjust_dose
   )
 
   # expected structure
@@ -126,8 +151,17 @@ test_that("Can use separate models for sim and est", {
   )
 
   out <- sample_and_adjust_by_dose( # est and sim model are different
-    adjust_at_dose = c(2, 4),
     tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(3, 5, 8, 12,
+                 3, 5, 8, 12),
+      at = c(1, 1, 1, 1, 3, 3, 3, 3),
+      anchor = "dose"
+    ),
     regimen = regimen,
     covariates = covs,
     pars_true_i = par2,
@@ -137,11 +171,16 @@ test_that("Can use separate models for sim and est", {
     parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
-    target_time = 192,
-    target = list(type = "cum_auc", value = 90000),
-    dose_optimization_method = dose_adjust_map
+    target = create_target_design(
+      time = 192,
+      targettype = "cum_auc",
+      targetvalue = 90000
+    ),
+    # target_time = 192,
+    # target = list(type = "cum_auc", value = 90000),
+    dose_optimization_method = map_adjust_dose,
+    verbose = F
   )
-
 
   # expected structure
   expect_true(inherits(out, "list"))
@@ -185,8 +224,16 @@ test_that("Can use separate models for sim and est", {
 test_that("errors if dose update includes dose 1", {
   expect_error(
     sample_and_adjust_by_dose(
-      adjust_at_dose = c(1, 2, 4),
-      tdm_times = c(12, 64),
+      regimen_update_design = create_regimen_update_design(
+        at = c(1, 2, 4),
+        anchor = "dose"
+      ),
+      sampling_design = create_sampling_design(
+        time = c(12, 12),
+        when = c("dose", "dose"),
+        at = c(1, 3),
+        anchor = "dose"
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
@@ -195,7 +242,14 @@ test_that("errors if dose update includes dose 1", {
       est_parameters = par,
       est_omega = omega,
       est_ruv = list(prop = 0.1, add = 1),
-      target_time = 4 * 24
+      create_target_design(
+        time = 4*24,
+        when = "dose",
+        at = 1,
+        anchor = "dose",
+        targettype = "conc",
+        targetvalue = 10
+      )
     ),
     "TDM collection before the first dose is not yet supported"
   )
@@ -204,8 +258,16 @@ test_that("errors if dose update includes dose 1", {
 test_that("errors if dose update before first TDM", {
   expect_error(
     sample_and_adjust_by_dose(
-      adjust_at_dose = c(2, 4),
-      tdm_times = c(50, 64), # dose 2 is before 50 hours
+      regimen_update_design = create_regimen_update_design(
+        at = c(2, 3),
+        anchor = "dose"
+      ),
+      sampling_design = create_sampling_design(
+        when = c("dose", "dose"),
+        offset = c(12, 12),
+        at = c(2, 2),
+        anchor = "dose"
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
@@ -214,7 +276,7 @@ test_that("errors if dose update before first TDM", {
       est_parameters = par,
       est_omega = omega,
       est_ruv = list(prop = 0.1, add = 1),
-      target_time = 4 * 24
+      target = list()
     ),
     "At least one TDM must be collected before dose adjustment"
   )
@@ -223,8 +285,16 @@ test_that("errors if dose update before first TDM", {
 test_that("errors if update doses are longer than supplied regimen", {
   expect_error(
     sample_and_adjust_by_dose(
-      adjust_at_dose = c(2, 4, 6), # only 4 doses
-      tdm_times = c(50, 64),
+      regimen_update_design = create_regimen_update_design(
+        at = c(2, 4, 6),
+        anchor = "dose"
+      ),
+      sampling_design = create_sampling_design(
+        when = c("dose", "dose"),
+        offset = c(2, 12),
+        at = c(2, 2),
+        anchor = "dose"
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
@@ -233,7 +303,7 @@ test_that("errors if update doses are longer than supplied regimen", {
       est_parameters = par,
       est_omega = omega,
       est_ruv = list(prop = 0.1, add = 1),
-      target_time = 4 * 24
+      target_time = list()
     ),
     "Insufficient doses in `regimen` for all dose adjustments specified."
   )

@@ -21,9 +21,8 @@ test_that("trough concentration search works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 50% should be the same thing
   dose_ctr_prob1 <- dose_grid_search(
@@ -33,9 +32,10 @@ test_that("trough concentration search works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .5, type="gt"),
+    auc_comp = 1,
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% should require a higher dose
   dose_ctr_prob2 <- dose_grid_search(
@@ -47,7 +47,7 @@ test_that("trough concentration search works", {
     pta = list(prob = .9, type="gt"),
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% + ruv should require an even higher dose
   dose_ctr_prob3 <- dose_grid_search(
@@ -60,7 +60,7 @@ test_that("trough concentration search works", {
     ruv = list(prop = .1, add = .5),
     target_time = intv * n,
     return_obj = FALSE,
-    target = list(value = 5, type = "conc", method = "nearest_value")
+    target_design= create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
 
   expect_lt(abs(dose_ctr - 105)/105, 0.01)
@@ -81,7 +81,13 @@ test_that("peak concentration search works", {
     refine = FALSE,
     target_time = intv * (n-1) + t_inf,
     return_obj = FALSE,
-    target = list(value = 10, type = "conc", method = "nearest_value")
+    target = create_target_design(
+      targettype = "conc",
+      targetvalue = 10,
+      when = "peak",
+      anchor = "dose",
+      at = 5
+    )
   )
   expect_lt(abs(dose_cpeak - 77)/77, 0.01)
 })
@@ -92,13 +98,15 @@ test_that("AUC search works", {
     dose_grid = dose_grid,
     parameters = par,
     regimen = reg,
-    obs_comp = 2,
+    auc_comp = 2,
     refine = FALSE,
     target_time = 5*intv,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_design(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      when = "dose",
+      anchor = "dose",
+      at = 6
     )
   )
   # probability of AUC>target (at 50% prob it should be same as before)
@@ -108,14 +116,15 @@ test_that("AUC search works", {
     parameters = par,
     regimen = reg,
     pta = list(prob = .5, type="gt"),
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     ruv = list(prop = .1, add = .5),
-    target_time = intv * n,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_design(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      when = "dose",
+      anchor = "dose",
+      at = 6
     )
   )
   # probability of AUC>target (at 90% prob it should be higher)
@@ -125,13 +134,14 @@ test_that("AUC search works", {
     parameters = par,
     regimen = reg,
     pta = list(prob = .9, type="gt"),
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
-    target_time = intv * n,
-    target = list(
-      value = 1500,
-      type = "cum_auc",
-      method = "nearest_value"
+    target = create_target_design(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      when = "dose",
+      anchor = "dose",
+      at = 6
     )
   )
 
@@ -149,26 +159,26 @@ test_that("Probability: less than target", {
     regimen = reg,
     pta = list(prob = .9,
                type="lt"), ## less than!
-    obs_comp = 2,  # take AUC, not conc!
+    auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     dose_resolution = 5,
-    target_time = intv * n,
     return_obj = FALSE,
-    target = list(
-      value = 1500,
-      type = "cum_auc"
+    target = create_target_design(
+      targetvalue = 1500,
+      targettype = "cum_auc",
+      when = "dose",
+      anchor = "dose",
+      at = 6
     )
   )
   expect_lt(abs(dose_auc_prob3 - 240)/240, 0.01)
 })
 
-
-
 test_that('nonlinear models have refining activated rather than defaulting to linear interpolation', {
 
   # mock a highly non-linear model: x ** 2
   local_mocked_bindings(
-    simulate_dose = function(dose_grid, ...) dose_grid ** 2
+    simulate_dose_interval = function(dose_grid, ...) dose_grid ** 2
   )
 
   # placeholder model + set-up
@@ -183,15 +193,17 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     type = "infusion"
   )
 
-  target_def <- list(
-    value = 225,
-    range = c(200, 250),
-    type = "conc"
+  target <- create_target_design(
+    targetvalue = 225,
+    targetmin = 200,
+    targetmax = 250,
+    time = 24,
+    targettype = "conc"
   )
 
   no_refine <- dose_grid_search(
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
+    grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
     refine = FALSE,
     refine_range = c(0.2, 5),
@@ -200,8 +212,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     dose_update = 1,
     parameters = ind_est,
     obs_comp = 2,
-    target = target_def,
-    target_time = 24,
+    target = target,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -210,7 +221,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
   )
   refine <- dose_grid_search( # uses default `refine` argument (not specified)
     est_model = model,
-    dose_grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
+    grid = seq(from = 0.5, to = 1000, by = (1000 - 0.5) / 10 ),
     check_boundaries = TRUE,
     refine_range = c(0.2, 5),
     regimen = regimen,
@@ -218,8 +229,7 @@ test_that('nonlinear models have refining activated rather than defaulting to li
     dose_update = 1,
     parameters = ind_est,
     obs_comp = 2,
-    target = target_def,
-    target_time = 24,
+    target = target,
     iov_bins = NULL,
     dose_resolution = 0.1,
     max_dose = 1000,
@@ -235,43 +245,48 @@ test_that('nonlinear models have refining activated rather than defaulting to li
 })
 
 test_that("user-friendly error if no dose_grid", {
-  dose_grid_error <- "Must supply grid search space in `dose_grid`"
+  dose_grid_error <- "Must supply grid search space in `grid`"
+  target <- create_target_design(
+    targettype = "conc",
+    targetvalue = 10,
+    when = "peak",
+    at = 5,
+    anchor = "dose"
+  )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = NULL,
+      grid = NULL,
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_time = intv * (n-1) + t_inf,
-      return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target_design = target,
+      return_obj = FALSE
     ),
     dose_grid_error
   )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = c(1000),
+      grid = c(1000),
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target_design = target
     ),
     dose_grid_error
   )
   expect_error(
     dose_grid_search(
       est_model = mod,
-      dose_grid = c(1000, NA),
+      grid = c(1000, NA),
       parameters = par,
       regimen = reg,
       refine = FALSE,
       target_time = intv * (n-1) + t_inf,
       return_obj = FALSE,
-      target = list(value = 10, type = "conc", method = "nearest_value")
+      target_design = target
     ),
     dose_grid_error
   )

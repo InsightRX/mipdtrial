@@ -28,7 +28,7 @@ library(tidyr)
 library(ggplot2) # for plotting our results
 ```
 
-## 1. Define simulation parameters
+## 1. Define trial design
 
 This simulated trial will have two arms: 
 
@@ -39,25 +39,37 @@ In each case, we will collect the samples in the fourth dosing interval, and for
 infused over 2 hours.
 
 ```{r}
-end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
-tdm_times1 <- c(1, 9) + end_of_fourth_infusion
-tdm_times2 <- 5 + end_of_fourth_infusion
+# end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
+# tdm_times1 <- c(1, 9) + end_of_fourth_infusion
+# tdm_times2 <- 5 + end_of_fourth_infusion
+tdm_design1 <- create_sampling_design(
+  offset = c(1, 9),
+  at = c(4, 4), 
+  anchor = "dose"
+)
+tdm_design2 <- create_sampling_design(
+  offset = 5,
+  at = 4,
+  anchor = "dose"
+)
 ```
 
 We will adjust the fifth dose based on these levels, aiming for a daily AUC of 
 400-600 mg*h/L by day 6.
 
 ```{r}
-adjust_at_dose <- 5
-
-target <- create_target_object(
+update_design <- create_regimen_update_design(
+  at = 5,
+  anchor = "dose",
+  dose_optimization_method = map_adjust_dose
+)
+target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
-  targetmax = 600
+  targetmax = 600,
+  at = 6,
+  anchor = "day"
 )
-
-auc_time <- 6 * 24 # day 6
-
 ```
 
 ## 2. Create a set of digital patient covariates
@@ -171,20 +183,19 @@ for (i in dat$ID) {
   )
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
-    # define dosing strategy
+    target_design = target_design,
+    sampling_design = tdm_design1,
     n = 12,
     interval = 12,
     t_inf = 2,
     dose_resolution = 250, # round to nearest 250 mg
-    dose_grid = seq(250, 6000, by = 250),
+    grid = seq(250, 6000, by = 250),
+    grid_type = "dose",
     # define model components
     est_model = model,
     parameters = pop_parameters,
     covariates = covs,
-    obs_comp = attr(model, "size"),
-    # define PK target
-    target_time = auc_time,
-    target = target
+    auc_comp = attr(model, "size")
   )
 
   # randomly draw individual PK parameters
@@ -196,8 +207,9 @@ for (i in dat$ID) {
   
   # Summary of both MIPD approaches
   treatment_summary1 <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose, 
-    tdm_times = tdm_times1, # arm 1
+    regimen_update_design = update_design, 
+    sampling_design = tdm_design1, # arm 1
+    target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -206,14 +218,12 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     omega = omega,
-    ruv = ruv,
-    target_time = auc_time,
-    target = target,
-    dose_optimization_method = dose_adjust_map
+    ruv = ruv
   )
   treatment_summary2 <- sample_and_adjust_by_dose(
-    adjust_at_dose = adjust_at_dose, 
-    tdm_times = tdm_times2, # arm 2
+    regimen_update_design = update_design, 
+    sampling_design = tdm_design2, # arm 1
+    target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
     pars_true_i = pars_true_i,
@@ -222,10 +232,7 @@ for (i in dat$ID) {
     est_model = model,
     parameters = pop_parameters,
     omega = omega,
-    ruv = ruv,
-    target_time = auc_time,
-    target = target,
-    dose_optimization_method = dose_adjust_map
+    ruv = ruv
   )
   
   # get steady-state AUC at end of treatment course
@@ -233,19 +240,17 @@ for (i in dat$ID) {
     regimen = treatment_summary1$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    target_time = c(auc_time - 24, auc_time),
+    target_design = target_design,
     covariates = covs
   )
   results$random[results$id == i] <- calc_auc_from_regimen(
     regimen = treatment_summary2$final_regimen,
     parameters = pars_true_i, # true patient parameters
     model = model,
-    target_time = c(auc_time - 24, auc_time),
+    target_design = target_design,
     covariates = covs
   )
 }
-
-
 ```
 
 Here are the first few rows of our simulation results:
@@ -263,26 +268,25 @@ between the two arms of the trial?
 target_attainment <- results %>%
   pivot_longer(
     c(peak_trough, random),
-    names_to = "sampling_scheme",
+    names_to = "sampling_design",
     values_to = "steady_state_auc"
   ) %>%
-  mutate(ontarget = is_on_target(steady_state_auc, target)) %>%
-  group_by(sampling_scheme) %>%
+  mutate(ontarget = is_on_target(steady_state_auc, target_design)) %>%
+  group_by(sampling_design) %>%
   summarize(prop_on_target = 100 * mean(ontarget))
 
 target_attainment %>%
   ggplot() +
-  aes(x = sampling_scheme, y = prop_on_target) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  theme(
-    panel.grid.major.x = element_blank()
-  ) +
-  labs(
-    x = "Sampling strategy",
-    y = "Percent on target (%)"
-  )
-
+    aes(x = sampling_design, y = prop_on_target) +
+    geom_bar(stat = "identity") +
+    theme_minimal() +
+    theme(
+      panel.grid.major.x = element_blank()
+    ) +
+    labs(
+      x = "Sampling strategy",
+      y = "Percent on target (%)"
+    )
 ```
 
 Target attainment was high and varied little between the two arms, providing
@@ -295,20 +299,19 @@ look at how each patient responded to each sampling strategy.
 ```{r}
 results %>%
   ggplot() +
-  aes(x = peak_trough, y = random) +
-  geom_rect(
-    aes(xmin = 400, xmax = 600, ymin = -Inf, ymax = Inf), 
-    fill = "grey70",
-    alpha = 0.05
-  ) +
-  geom_rect(
-    aes(ymin = 400, ymax = 600, xmin = -Inf, xmax = Inf),
-    fill = "grey70",
-    alpha = 0.05
-  ) +
-  geom_point() +
-  theme_minimal()
-
+    aes(x = peak_trough, y = random) +
+    geom_rect(
+      aes(xmin = 400, xmax = 600, ymin = -Inf, ymax = Inf), 
+      fill = "grey70",
+      alpha = 0.05
+    ) +
+    geom_rect(
+      aes(ymin = 400, ymax = 600, xmin = -Inf, xmax = Inf),
+      fill = "grey70",
+      alpha = 0.05
+    ) +
+    geom_point() +
+    theme_minimal()
 ```
 
 There is a strong correlation in final AUC between the two sampling strategies.
