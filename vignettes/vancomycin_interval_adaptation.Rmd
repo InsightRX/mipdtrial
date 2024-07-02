@@ -30,12 +30,9 @@ This simulated trial will have two samples, with a peak and trough collected
 in dose 1 and 3.
 
 ```{r}
-# end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
-# tdm_times1 <- c(1, 9) + end_of_fourth_infusion
-# tdm_times2 <- 5 + end_of_fourth_infusion
-tdm_design1 <- create_sampling_design(
-  time = c(1, -1, 1, -1), # sample 1-hour before next dose, and at peak
-  offset_from = c("peak", "trough", "peak", "trough"),
+tdm_design <- create_sampling_design(
+  offset = c(1, -1, 1, -1), # sample 1-hour before true trough, and at peak+1hr
+  when = c("peak", "trough", "peak", "trough"),
   anchor = c(1, 1, 3, 3),
   anchor_by = "dose"
 )
@@ -160,7 +157,7 @@ for (i in dat$ID) {
   #################################################################################
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
-    sampling_design = tdm_design1,
+    sampling_design = tdm_design,
     target_design = target_design,
     n = 12,
     interval = 12,
@@ -179,7 +176,7 @@ for (i in dat$ID) {
   #################################################################################
   treatment_summary <- sample_and_adjust_by_dose(
     regimen_update_design = dose_update_design, 
-    sampling_design = tdm_design1, # arm 1
+    sampling_design = tdm_design,
     target_design = target_design,
     regimen = initial_reg,
     covariates = covs,
@@ -264,7 +261,7 @@ for (i in dat$ID) {
   #################################################################################
   # find initial starting dose: define basic regimen, then upda
   initial_reg <- model_based_starting_dose(
-    sampling_design = tdm_design1,
+    sampling_design = tdm_design,
     target_design = target_design,
     n = 30,
     interval = 12,
@@ -285,7 +282,7 @@ for (i in dat$ID) {
   treatment_summary <- sample_and_adjust_by_dose(
     regimen_update_design = interval_update_design, # <-- use interval update design now!
     grid = c(6, 8, 12, 16, 24, 36), # <-- passed on to the optimization function as possible interval options
-    sampling_design = tdm_design1,
+    sampling_design = tdm_design,
     target_design = target_design,
     regimen = initial_reg,
     covariates = covs,

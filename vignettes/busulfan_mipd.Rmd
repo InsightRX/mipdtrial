@@ -68,8 +68,7 @@ doses 2, 3, and 4 to achieve a target cumulative AUC of 90 by t = 192 hours.
 
 ```{r}
 tdm_design <- create_sampling_design(
-  time = rep(c(3.5, 4, 6, 8), 4),
-  offset_from = "dose",
+  offset = rep(c(3.5, 4, 6, 8), 4),
   anchor = rep(1:4, each = 4),
   anchor_by = "dose"
 )

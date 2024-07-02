@@ -11,7 +11,8 @@ create_target_design(
   targetvalue = NULL,
   single_point_variation = 0.2,
   time = NULL,
-  offset_from = NULL,
+  when = NULL,
+  offset = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")
 )
@@ -39,7 +40,7 @@ used as reference anchor. and \code{time} will be relative to the specified
 \code{anchor}. If no \code{anchor} values are specified, the \code{time} values will be
 used as the fixed absolute target times in the simulated trial.}
 
-\item{offset_from}{character vector of same length as \code{time} (or single
+\item{when}{character vector of same length as \code{time} (or single
 value) determining how to interpret the provided target \code{time}. If \code{NULL}
 will use the dose time as offset (default). Other options are \code{cmax} or
 \code{peak}, which will use the end of infusion as the base for the \code{time}, or

@@ -84,8 +84,7 @@ test_that("peak concentration search works", {
     target = create_target_design(
       targettype = "conc",
       targetvalue = 10,
-      time = 0,
-      offset_from = "peak",
+      when = "peak",
       anchor_by = "dose",
       anchor = 5
     )
@@ -105,8 +104,7 @@ test_that("AUC search works", {
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
-      time = 0,
-      offset_from = "dose",
+      when = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -124,8 +122,7 @@ test_that("AUC search works", {
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
-      time = 0,
-      offset_from = "dose",
+      when = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -142,8 +139,7 @@ test_that("AUC search works", {
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
-      time = 0,
-      offset_from = "dose",
+      when = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -170,8 +166,7 @@ test_that("Probability: less than target", {
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
-      time = 0,
-      offset_from = "dose",
+      when = "dose",
       anchor_by = "dose",
       anchor = 6
     )
@@ -254,8 +249,7 @@ test_that("user-friendly error if no dose_grid", {
   target <- create_target_design(
     targettype = "conc",
     targetvalue = 10,
-    time = 0,
-    offset_from = "peak",
+    when = "peak",
     anchor = 5,
     anchor_by = "dose"
   )

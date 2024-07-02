@@ -11,11 +11,12 @@
 #' adaptively during the trial. The `anchor` determine which dose is
 #' used as reference anchor, and `time` will be relative to the specified
 #' `anchor`.
-#' @param offset_from character vector of same length as `time` (or single
+#' @param when character vector of same length as `time` (or single
 #' value) determining how to interpret the provided sampling `time`. If `NULL`
 #' will use the dose time as offset (default). Other options are `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
 #' `cmin` or `trough`, which will use the time of next dose as the offset.
+#' @param offset offset from standardized PK moments specified in `when`.
 #' @param anchor numeric vector of the dose or day number to "anchor"
 #' the sampling times to. Vector needs to be of same length as `time`.
 #' If `anchor_by` is set to `day`, then the first dose in that day is used.
@@ -26,17 +27,24 @@
 #' types cannot be mixed.
 #'
 create_design <- function(
-  time,
-  offset_from = NULL,
+  time = NULL,
+  when = NULL,
+  offset = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")
 ) {
+  if(!is.null(time) && (!is.null(when) | !is.null(offset))) {
+    stop("`time` cannot be specified at the same with `when` and/or `offset` arguments.")
+  }
   anchor_by <- match.arg(anchor_by)
   if(!is.null(anchor)) {
-    offset_from <- check_offset_from(offset_from, time, anchor)
+    if(is.null(offset)) {
+      offset <- rep(0, length(anchor))
+    }
+    when <- check_when(when, offset, anchor)
     scheme <- data.frame(
-      base = offset_from,
-      offset = time,
+      base = when,
+      offset = offset,
       anchor = anchor,
       anchor_by = anchor_by
     )
@@ -54,24 +62,24 @@ create_design <- function(
   scheme
 }
 
-#' Check / clean offset_from element
+#' Check / clean when element
 #'
 #' @inheritParams create_design
 #'
-check_offset_from <- function(offset_from, time, anchor) {
-  if(length(anchor) != length(time)) {
-    stop("Please specify `anchor` with same length as `time`")
+check_when <- function(when, offset, anchor) {
+  if(length(anchor) != length(offset)) {
+    stop("Please specify `anchor` with same length as `offset`")
   }
-  if(length(offset_from) == 1) offset_from <- rep(offset_from, length(time))
-  if(length(offset_from) != length(time)) {
-    stop("Please specify `offset_from` with same length as `time`, or as single value.")
+  if(length(when) == 1) when <- rep(when, length(offset))
+  if(length(when) != length(offset)) {
+    stop("Please specify `when` with same length as `offset`, or as single value.")
   }
   allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
-  if(any(! unique(offset_from) %in% c(allowed_bases))) {
+  if(!all(unique(when) %in% c(allowed_bases))) {
     stop(
       "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
       " when using adaptive times."
     )
   }
-  offset_from
+  when
 }

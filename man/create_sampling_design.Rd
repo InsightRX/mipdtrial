@@ -5,8 +5,9 @@
 \title{Function for creating sampling designs.}
 \usage{
 create_sampling_design(
-  time,
-  offset_from = NULL,
+  time = NULL,
+  when = NULL,
+  offset = NULL,
   anchor = NULL,
   anchor_by = c("day", "dose")
 )
@@ -19,11 +20,13 @@ adaptively during the trial. The \code{anchor} determine which dose is
 used as reference anchor, and \code{time} will be relative to the specified
 \code{anchor}.}
 
-\item{offset_from}{character vector of same length as \code{time} (or single
+\item{when}{character vector of same length as \code{time} (or single
 value) determining how to interpret the provided sampling \code{time}. If \code{NULL}
 will use the dose time as offset (default). Other options are \code{cmax} or
 \code{peak}, which will use the end of infusion as the base for the \code{time}, or
 \code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
+
+\item{offset}{offset from standardized PK moments specified in \code{when}.}
 
 \item{anchor}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.
@@ -42,18 +45,25 @@ In that case a scheme can be specified with static timepoints e.g.
 1 and 4 for an 8-hour regimen.
 However, when the dosing interval is adaptive, the peak and trough sampling
 times cannot stay static and have to be adapted on-the-fly during
-simulations.
+simulations. In that case, it is possible to use \code{when} to specify
+sampling at \code{peak}, \code{trough} or \code{dose} concentrations. In that case, the
+\code{time} is not allowed. If not exact peak and trough concentrations should be
+sample, use the \code{offset} parameter to sample e.g. an hour post-peak, or
+shortly before true troughs.
 }
 \examples{
-create_sampling_design(c(1.5, 11.5, 23.5))
+create_sampling_design(time = c(1.5, 11.5, 23.5))
 create_sampling_design(
-  time = c(0.5, -0.5),
-  offset_from = c("peak", "trough"),
+  when = c("peak", "trough")
+)
+create_sampling_design(
+  when = c("peak", "trough"),
+  offset = c(0.5, -0.5),
   anchor = c(1, 1)
 )
 create_sampling_design(
-  time = c(0.5, -0.5, 0.5, -0.5),
-  offset_from = c("peak", "trough"),
+  when = c("peak", "trough"),
+  offset = c(0.5, -0.5, 0.5, -0.5),
   anchor = c(1, 1, 3, 3),
   anchor_by = "dose"
 )

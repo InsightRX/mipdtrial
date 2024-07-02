@@ -43,14 +43,12 @@ infused over 2 hours.
 # tdm_times1 <- c(1, 9) + end_of_fourth_infusion
 # tdm_times2 <- 5 + end_of_fourth_infusion
 tdm_design1 <- create_sampling_design(
-  time = c(1, 9),
-  offset_from = c("dose", "dose"), 
+  offset = c(1, 9),
   anchor = c(4, 4), 
   anchor_by = "dose"
 )
 tdm_design2 <- create_sampling_design(
-  time = 5, 
-  offset_from = "dose", 
+  offset = 5,
   anchor = 4,
   anchor_by = "dose"
 )

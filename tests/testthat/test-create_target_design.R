@@ -131,3 +131,16 @@ test_that("Simpler interface using less arguments correctly infers arguments", {
     )
   )
 })
+
+test_that("target design works for absolute time", {
+  expect_equal(
+    create_target_design(
+      time = 192,
+      targettype = "cum_auc",
+      targetvalue = 90000
+    ),
+    list(type = "cum_auc", value = 90000, min = 72000, max = 108000,
+         scheme = data.frame(base = "dose", offset = 192, anchor = 1, anchor_by = "dose"))
+  )
+})
+

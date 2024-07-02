@@ -8,19 +8,29 @@
 #'   where `reg` is the updated PKPDsim regimen for the patient and `x` can be
 #'   another other information useful for post-processing of trial results.
 #'
+#' @examples
+#' create_regimen_update_design(
+#'   anchor = c(2, 5, 8),
+#'   anchor_by = "dose"
+#' )
+#' create_regimen_update_design(
+#'   anchor = c(4, 8),
+#'   anchor_by = "day",
+#'   update_type = "interval",
+#'   dose_optimization_method = map_adjust_interval
+#' )
+#'
 #' @export
 create_regimen_update_design <- function(
-    time = NULL,
     anchor,
     anchor_by,
     update_type = c("dose", "interval"),
     dose_optimization_method = map_adjust_dose
 ) {
-  if(is.null(time)) time <- rep(0, length(anchor))
   update_type <- match.arg(update_type)
   scheme <- create_design(
-    time = time,
-    offset_from = rep("dose", length(anchor)),
+    offset = rep(0, length(anchor)),
+    when = rep("dose", length(anchor)),
     anchor = anchor,
     anchor_by = anchor_by
   )

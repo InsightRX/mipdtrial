@@ -12,13 +12,12 @@ test_that("trial by dose change works", {
 
   out <- sample_and_adjust_by_dose(
     regimen_update_design = create_regimen_update_design(
-      time = c(0, 0),
       anchor = c(2, 4),
       anchor_by = "dose"
     ),
     sampling_design = create_sampling_design(
-      time = c(20, 12),
-      offset_from = c("dose", "dose"),
+      offset = c(20, 12),
+      when = c("dose", "dose"),
       anchor = c(1, 3),
       anchor_by = "dose"
     ),
@@ -31,12 +30,10 @@ test_that("trial by dose change works", {
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
-      time = 0,
-      offset_from = "trough",
-      anchor = 4,
-      anchor_by = "dose",
       targettype = "conc",
-      targetvalue = 15
+      targetvalue = 15,
+      anchor = 5,
+      anchor_by = "dose"
     ),
     dose_optimization_method = map_adjust_dose
   )
@@ -83,13 +80,12 @@ test_that("Supplying true pars as list also works", {
 
   out <- sample_and_adjust_by_dose(
     regimen_update_design = create_regimen_update_design(
-      time = c(0, 0),
       anchor = c(2, 4),
       anchor_by = "dose"
     ),
     sampling_design = create_sampling_design(
-      time = c(20, 12),
-      offset_from = c("dose", "dose"),
+      offset = c(20, 12),
+      when = c("dose", "dose"),
       anchor = c(1, 3),
       anchor_by = "dose"
     ),
@@ -102,8 +98,7 @@ test_that("Supplying true pars as list also works", {
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
-      time = 0,
-      offset_from = "trough",
+      when = "trough",
       anchor = 4,
       anchor_by = "dose",
       targettype = "conc",
@@ -158,14 +153,12 @@ test_that("Can use separate models for sim and est", {
   out <- sample_and_adjust_by_dose( # est and sim model are different
     tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
     regimen_update_design = create_regimen_update_design(
-      time = c(0, 0),
       anchor = c(2, 4),
       anchor_by = "dose"
     ),
     sampling_design = create_sampling_design(
-      time = c(3, 5, 8, 12,
-               3, 5, 8, 12),
-      offset_from = rep("dose", 8),
+      offset = c(3, 5, 8, 12,
+                 3, 5, 8, 12),
       anchor = c(1, 1, 1, 1, 3, 3, 3, 3),
       anchor_by = "dose"
     ),
@@ -180,9 +173,6 @@ test_that("Can use separate models for sim and est", {
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
       time = 192,
-      offset_from = "dose",
-      anchor = 1,
-      anchor_by = "day",
       targettype = "cum_auc",
       targetvalue = 90000
     ),
@@ -240,7 +230,7 @@ test_that("errors if dose update includes dose 1", {
       ),
       sampling_design = create_sampling_design(
         time = c(12, 12),
-        offset_from = c("dose", "dose"),
+        when = c("dose", "dose"),
         anchor = c(1, 3),
         anchor_by = "dose"
       ),
@@ -254,7 +244,7 @@ test_that("errors if dose update includes dose 1", {
       est_ruv = list(prop = 0.1, add = 1),
       create_target_design(
         time = 4*24,
-        offset_from = "dose",
+        when = "dose",
         anchor = 1,
         anchor_by = "dose",
         targettype = "conc",
@@ -273,8 +263,8 @@ test_that("errors if dose update before first TDM", {
         anchor_by = "dose"
       ),
       sampling_design = create_sampling_design(
-        time = c(12, 12),
-        offset_from = c("dose", "dose"),
+        when = c("dose", "dose"),
+        offset = c(12, 12),
         anchor = c(2, 2),
         anchor_by = "dose"
       ),
@@ -300,8 +290,8 @@ test_that("errors if update doses are longer than supplied regimen", {
         anchor_by = "dose"
       ),
       sampling_design = create_sampling_design(
-        time = c(2, 12),
-        offset_from = c("dose", "dose"),
+        when = c("dose", "dose"),
+        offset = c(2, 12),
         anchor = c(2, 2),
         anchor_by = "dose"
       ),

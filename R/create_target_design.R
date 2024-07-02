@@ -20,7 +20,7 @@
 #' used as reference anchor. and `time` will be relative to the specified
 #' `anchor`. If no `anchor` values are specified, the `time` values will be
 #' used as the fixed absolute target times in the simulated trial.
-#' @param offset_from character vector of same length as `time` (or single
+#' @param when character vector of same length as `time` (or single
 #' value) determining how to interpret the provided target `time`. If `NULL`
 #' will use the dose time as offset (default). Other options are `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
@@ -68,36 +68,38 @@ create_target_design <- function(
     targetvalue = NULL,
     single_point_variation = 0.20,
     time = NULL,
-    offset_from = NULL,
+    when = NULL,
+    offset = NULL,
     anchor = NULL,
     anchor_by = c("day", "dose")
 ) {
   targettype <- match.arg(tolower(targettype), mipd_target_types())
   anchor_by <- match.arg(anchor_by)
 
-  ## Infer `time` and `offset_from` from targettype
-  if(is.null(offset_from)) {
+  ## Infer `time` and `when` from targettype
+  if(is.null(when)) {
     if(!is.null(time)) { # assume user wants to specify timepoint manually
-      offset_from <- "dose"
+      when <- NULL
     } else {
-      time <- 0
+      offset <- 0
+      time <- NULL
       if(targettype %in% c("cmin", "trough")) {
-        offset_from <- "cmin"
+        when <- "cmin"
       } else if (targettype %in% c("cmax", "peak")) {
-        offset_from <- "cmax"
+        when <- "cmax"
       } else if (targettype %in% c("auc24")) {
-        time <- 24
-        offset_from <- "dose"
+        offset <- 24
+        when <- "dose"
       } else { # cum AUC
-        offset_from <- "dose"
+        when <- "dose"
       }
     }
   }
 
-  ## Leverage sampling scheme creation for target as well to anchor to dose/days
-  scheme <- create_sampling_design(
+  scheme <- create_design(
     time = time,
-    offset_from = offset_from,
+    when = when,
+    offset = offset,
     anchor = anchor,
     anchor_by = anchor_by
   )

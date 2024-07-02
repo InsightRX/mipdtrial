@@ -5,7 +5,6 @@
 \title{Create scheme for updating dose or interval during dose optimization trial}
 \usage{
 create_regimen_update_design(
-  time = NULL,
   anchor,
   anchor_by,
   update_type = c("dose", "interval"),
@@ -13,13 +12,6 @@ create_regimen_update_design(
 )
 }
 \arguments{
-\item{time}{a vector of numeric values. If no \code{anchor} values are specified,
-these will be used as the fixed sampling times in the simulated trial.
-If \code{anchor} values are supplied, the sampling times  will be calculated
-adaptively during the trial. The \code{anchor} determine which dose is
-used as reference anchor, and \code{time} will be relative to the specified
-\code{anchor}.}
-
 \item{anchor}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.
 If \code{anchor_by} is set to \code{day}, then the first dose in that day is used.
@@ -40,4 +32,17 @@ another other information useful for post-processing of trial results.}
 }
 \description{
 Create scheme for updating dose or interval during dose optimization trial
+}
+\examples{
+create_regimen_update_design(
+  anchor = c(2, 5, 8),
+  anchor_by = "dose"
+)
+create_regimen_update_design(
+  anchor = c(4, 8),
+  anchor_by = "day",
+  update_type = "interval",
+  dose_optimization_method = map_adjust_interval
+)
+
 }

@@ -75,7 +75,7 @@ times. Here is an example of how to set up a design for a simulated MIPD trial:
 # do this at dose #1 and #3
 tdm_design <- create_sampling_design(
   time = c(1, -1, 1, -1), 
-  offset_from = c("peak", "trough", "peak", "trough"),
+  when = c("peak", "trough", "peak", "trough"),
   anchor = c(1, 1, 3, 3),
   anchor_by = "dose"
 )

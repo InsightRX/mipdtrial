@@ -1,14 +1,13 @@
 regimen <- PKPDsim::new_regimen(amt = 1, n = 10, interval = 12)
 
 test_that("simple usage works, anchoring to doses", {
-  scheme1 <- create_regimen_update_design(
-    time = c(0, 0, 0),
+  design1 <- create_regimen_update_design(
     anchor = c(1, 2, 3),
     anchor_by = "dose"
   )
-  times <- get_sampling_times_from_scheme(scheme1, regimen)
+  times <- get_sampling_times_from_scheme(design1$scheme, regimen)
   expect_equal(
-    scheme1,
+    design1$scheme,
     data.frame(
       base = c("dose", "dose", "dose"), offset = c(0, 0, 0),
       anchor = c(1, 2, 3), anchor_by = c("dose", "dose", "dose" ),
@@ -19,21 +18,20 @@ test_that("simple usage works, anchoring to doses", {
 })
 
 test_that("simple usage works, anchoring to days, different `time` values", {
-  scheme2 <- create_regimen_update_design(
-    time = c(0, 12, 0),
+  design2 <- create_regimen_update_design(
     anchor = c(1, 2, 5),
     anchor_by = "day"
   )
-  times <- get_sampling_times_from_scheme(scheme2, regimen)
+  times <- get_sampling_times_from_scheme(design2$scheme, regimen)
   expect_equal(
-    scheme2,
+    design2$scheme,
     data.frame(
       base = c("dose", "dose", "dose"),
-      offset = c(0, 12, 0),
+      offset = c(0, 0, 0),
       anchor = c(1, 2, 5),
       anchor_by = c("day", "day", "day"),
       update_type = c("dose", "dose", "dose")
     )
   )
-  expect_equal(times, c(0, 36, 96))
+  expect_equal(times, c(0, 24, 96))
 })
