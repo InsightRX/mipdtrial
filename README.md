@@ -133,14 +133,15 @@ following features are on our short-term roadmap:
 We welcome input from the community:
 
 - If you think you have encountered a bug, please [submit an
-  issue](https://github.com/InsightRX/clinPK/issues) on the GitHub page.
-  Please include a reproducible example of the unexpected behavior.
+  issue](https://github.com/InsightRX/mipdtrial/issues) on the GitHub
+  page. Please include a reproducible example of the unexpected
+  behavior.
 
 - Please [open a pull
-  request](https://github.com/InsightRX/clinPK/pulls) if you have a fix
-  or updates that would improve the package. If you’re not sure if your
-  proposed changes are useful or within scope of the package, feel free
-  to contact one of the authors of this package.
+  request](https://github.com/InsightRX/mipdtrial/pulls) if you have a
+  fix or updates that would improve the package. If you’re not sure if
+  your proposed changes are useful or within scope of the package, feel
+  free to contact one of the authors of this package.
 
 ## Disclaimer
 
