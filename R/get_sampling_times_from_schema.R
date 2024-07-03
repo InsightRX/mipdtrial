@@ -30,6 +30,17 @@ get_sampling_time_core <- function(row, regimen) {
   }
   if(row$base %in% c("peak", "cmax")) {
     t_anchor <- regimen$dose_times[dose_anchor] + regimen$t_inf[dose_anchor]
+  } else if(row$base %in% c("middle", "cmid")) {
+    t_anchor <- round(mean(c(
+      regimen$dose_times[dose_anchor] + regimen$t_inf[dose_anchor],
+      regimen$dose_times[dose_anchor + 1]
+    )), 2)
+  } else if(row$base %in% c("random")) {
+    t_anchor <- round(runif(
+      1,
+      regimen$dose_times[dose_anchor] + regimen$t_inf[dose_anchor],
+      regimen$dose_times[dose_anchor + 1]
+    ), 2)
   } else if(row$base %in% c("trough", "cmin")) {
     t_anchor <- regimen$dose_times[dose_anchor + 1]
   } else { # dose
@@ -38,9 +49,13 @@ get_sampling_time_core <- function(row, regimen) {
   if(is.na(t_anchor)) {
     msg <- "Not enough doses in regimen to update, please increase initial regimen length."
     if(row$base %in% c("trough", "cmin")) {
-      msg <- c(msg, " For `cmin` calculation, you will need one more dose in the regimen than the dose for which the `cmin` is calculated.")
+      msg <- c(msg, " For `cmin`, `middle`, or `random` calculation, you will need one more dose in the regimen than the dose for which the `cmin` is calculated.")
     }
     stop(msg)
   }
-  t_anchor + row$offset
+  scatter <- 0
+  if(!is.null(row$scatter)) {
+    scatter <- round(rnorm(1, 0, row$scatter), 2)
+  }
+  t_anchor + row$offset + scatter
 }

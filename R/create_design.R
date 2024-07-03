@@ -12,10 +12,22 @@
 #' used as reference, and `time` will be relative to the specified `at` anchor.
 #' @param when character vector of same length as `time` (or single
 #' value) determining how to interpret the provided sampling `time`. If `NULL`
-#' will use the dose time as offset (default). Other options are `cmax` or
+#' will use the dose time as offset (default). Other options are: `cmax` or
 #' `peak`, which will use the end of infusion as the base for the `time`, or
-#' `cmin` or `trough`, which will use the time of next dose as the offset.
-#' @param offset offset from standardized PK moments specified in `when`.
+#' `cmin` or `trough`, which will use the time of next dose as the offset, or
+#' `middle` or `cmid` which will use the middle between the anchored dose and
+#' the next, or `random` which takes a random time point between the anchored
+#' dose and the next.
+#' @param offset offset from standardized PK moments specified in `when`, e.g.
+#' `c(1, -1)` with `when = c("peak", "trough")` to sample 1 hour after peak and
+#' 1 hour before trough.
+#' @param scatter optional random variation in time, specified as the standard
+#' deviation, e.g. `scatter = 0.1` to allow for variation in sampling time with
+#' an SD of 0.1 hours. Only relevant for sampling times, not for
+#' regimen_update designs or target designs. Random variation does not protect
+#' for peaks or troughs becoming sampled during infusion or in previous / next
+#' dose. So value for `scatter` should be chosen appropriately and probably
+#' used in conjunction with approriate `offset` values.
 #' @param at numeric vector of the dose or day number to "anchor"
 #' the sampling times to. Vector needs to be of same length as `time`.
 #' If `anchor` is set to `day`, then the first dose in that day is used.
@@ -29,6 +41,7 @@ create_design <- function(
   time = NULL,
   when = NULL,
   offset = NULL,
+  scatter = NULL,
   at = NULL,
   anchor = c("dose", "day")
 ) {
@@ -45,13 +58,25 @@ create_design <- function(
     }
     if(is.null(offset)) {
       offset <- rep(0, length(at))
+    } else {
+      if(length(offset) == 1) {
+        offset <- rep(offset, length(at))
+      }
+    }
+    if(is.null(scatter)) {
+      scatter <- rep(0, length(at))
+    } else {
+      if(length(scatter) == 1) {
+        scatter <- rep(scatter, length(at))
+      }
     }
     when <- check_when(when, offset, at)
     scheme <- data.frame(
       base = when,
       offset = offset,
       at = at,
-      anchor = anchor
+      anchor = anchor,
+      scatter = scatter
     )
   } else {
     if(! all(is.numeric(time))) {
@@ -79,7 +104,7 @@ check_when <- function(when, offset, at) {
   if(length(when) != length(offset)) {
     stop("Please specify `when` with same length as `offset`, or as single value.")
   }
-  allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin")
+  allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin", "middle", "cmid", "random")
   if(!all(unique(when) %in% c(allowed_bases))) {
     stop(
       "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
