@@ -1,10 +1,11 @@
 Package: mipdtrial
 Title: Simulate MIPD trials
-Version: 0.0.0.1
+Version: 0.0.0.2
 Authors@R: c(
     person("Jasmine", "Hughes", email = "jasmine@insight-rx.com", role = c("aut", "cre")),
+    person("Ron", "Keizer", email = "ron@insight-rx.com", role = c("aut")),
     person("InsightRX", role = c("cph", "fnd")))
-Author: Jasmine Hughes
+Author: Jasmine Hughes, Ron Keizer
 Maintainer: Jasmine Hughes <jasmine@insight-rx.com>
 Description: Functions for simulating dose adjustments given PKPD models, 
     sampling times, covariate distributions, etc.

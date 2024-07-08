@@ -4,10 +4,11 @@
 \alias{dose_from_auc}
 \title{Calculate a new dose given an estimated AUC and target AUC}
 \usage{
-dose_from_auc(target, intv_auc, regimen, dose_update, cum_auc = 0)
+dose_from_auc(target_design, intv_auc, regimen, dose_update, cum_auc = 0)
 }
 \arguments{
-\item{target}{object describing exposure targets, see \code{create_target_object}.}
+\item{target_design}{object describing exposure targets, see
+\code{create_target_design}.}
 
 \item{intv_auc}{AUC estimated for a sampled dosing interval}
 

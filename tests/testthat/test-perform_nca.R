@@ -39,7 +39,7 @@ test_that("NCA based on correct dosing interval", {
 })
 
 test_that("dose_from_auc errors on unsupported target types", {
-  target <- create_target_object(targettype = "cmin", targetvalue = 100)
+  target <- create_target_design(targettype = "cmin", targetvalue = 100)
   regimen <- PKPDsim::new_regimen(interval = 24)
   expect_error(
     dose_from_auc(target, intv_auc = 5, regimen = regimen, dose_update = 2),
@@ -48,8 +48,8 @@ test_that("dose_from_auc errors on unsupported target types", {
 })
 
 test_that("dose_from_auc computes dose for 'auc' and 'auc24' target types", {
-  target1 <- create_target_object(targettype = "auc", targetvalue = 10)
-  target2 <- create_target_object(targettype = "auc24", targetvalue = 10)
+  target1 <- create_target_design(targettype = "auc", targetvalue = 10)
+  target2 <- create_target_design(targettype = "auc24", targetvalue = 10)
   regimen <- PKPDsim::new_regimen(
     interval = 12,
     n = 8,
@@ -79,7 +79,7 @@ test_that("dose_from_auc computes dose for 'cum_auc' target type", {
     n = 8,
     amt = c(rep(100, 4), rep(200, 4))
   )
-  target <- create_target_object(targettype = "cum_auc", targetvalue = 100)
+  target <- create_target_design(targettype = "cum_auc", targetvalue = 100)
   # have given 40 AUC, need to give 60 AUC over 6 doses, and 100 mg -> 20 AUC
   # so need to give 10 AUC per dose and 50 mg -> 10 AUC
   overdosed1 <- dose_from_auc(

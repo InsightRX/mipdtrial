@@ -7,14 +7,14 @@
 dose_grid_search(
   est_model = NULL,
   regimen,
-  target_time = 24,
-  target = list(type = "conc", value = 10),
-  obs_comp = NULL,
+  target_design = create_target_design(targettype = "conc", targetvalue = 10, time = 24),
+  auc_comp = NULL,
   pta = NULL,
   omega = NULL,
   ruv = NULL,
   dose_update = 1,
-  dose_grid = seq(1, 6000, by = 10),
+  grid = seq(1, 6000, by = 10),
+  grid_type = "dose",
   dose_resolution = 1,
   refine = NULL,
   refine_range = c(0.7, 1.4),
@@ -32,13 +32,10 @@ dose_grid_search(
 
 \item{regimen}{PKPDsim regimen object}
 
-\item{target_time}{vector of observation times at which to evaluate the
-target exposure.}
+\item{target_design}{object specifying target design, created using function
+\code{create_target_design()}}
 
-\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
-type, either "conc" or auc".}
-
-\item{obs_comp}{auc compartment (starting from 1, R-style not C-style!)}
+\item{auc_comp}{auc compartment (starting from 1, R-style not C-style!)}
 
 \item{pta}{probability of target attainment, list with arguments \code{type} and
 \code{value}, also requires \code{omega} if non-NULL. If \code{NULL}, will just aim for
@@ -53,8 +50,10 @@ types.}
 
 \item{dose_update}{update dose from which dose?}
 
-\item{dose_grid}{vector specifying doses to use as test grid, Example:
-seq(from = 50, to = 500, by = (500 - 50) / 10 )}
+\item{grid}{vector specifying doses or intervals to use as test grid,
+Example: \code{seq(from = 50, to = 500, by = (500 - 50) / 10)}}
+
+\item{grid_type}{either "dose" or "interval"}
 
 \item{dose_resolution}{to which precision should the output be rounded
 (e.g. 50), useful when in practice only a specific set of dose units.

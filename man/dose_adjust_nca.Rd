@@ -4,15 +4,22 @@
 \alias{dose_adjust_nca}
 \title{Adjust doses to achieve a target metric using NCA}
 \usage{
-dose_adjust_nca(tdms, regimen, target, dose_update, additional_info, ...)
+dose_adjust_nca(
+  tdms,
+  regimen,
+  target_design,
+  dose_update,
+  additional_info,
+  ...
+)
 }
 \arguments{
 \item{tdms}{observations to be included in MAP estimates}
 
 \item{regimen}{PKPDsim regimen object}
 
-\item{target}{list with arguments \code{type}, and \code{value}. \code{type} = observation
-type, either "conc" or auc".}
+\item{target_design}{object specifying target design, created using function
+\code{create_target_design()}}
 
 \item{dose_update}{update dose from which dose?}
 
@@ -29,9 +36,9 @@ that dose.
 \description{
 Given a set of levels calculates the AUC for a given dose, and adjusts the
 subsequent doses to achieve either the target AUC per dosing interval
-(\code{create_target_object(targettype = 'auc')}), AUC24
-(\code{create_target_object(targettype = 'auc24')}) or cumulative AUC
-(\code{create_target_object(targettype = 'cum_auc')}). Uses the most recently
+(\code{create_target_design(targettype = 'auc')}), AUC24
+(\code{create_target_design(targettype = 'auc24')}) or cumulative AUC
+(\code{create_target_design(targettype = 'cum_auc')}). Uses the most recently
 sampled dosing interval to estimate AUC, extrapolating that over all doses
 between the dose to be updated and the last sampled dose. Note that in order
 to consider AUC contributions from previous doses, a baseline TDM collected

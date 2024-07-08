@@ -53,7 +53,8 @@ perform_nca <- function(
 #' constant clearance) to identify a new dose. For cumulative AUC targets, takes
 #' into consideration previous AUC and number of doses remaining.
 #'
-#' @param target object describing exposure targets, see `create_target_object`.
+#' @param target_design object describing exposure targets, see
+#' `create_target_design`.
 #' @param intv_auc AUC estimated for a sampled dosing interval
 #' @param regimen PKPDsim regimen object
 #' @param dose_update index of dose that should be updated
@@ -67,28 +68,28 @@ perform_nca <- function(
 #' @export
 
 dose_from_auc <- function(
-  target,
+  target_design,
   intv_auc,
   regimen,
   dose_update,
   cum_auc = 0
 ) {
 
-  if (!target$type %in% c("auc24", "auc", "cum_auc")) {
-    stop(paste0("target type ", target$type, " not yet supported!"))
+  if (!target_design$type %in% c("auc24", "auc", "cum_auc")) {
+    stop(paste0("target type ", target_design$type, " not yet supported!"))
   }
   dose <- regimen$dose_amts[dose_update]
   intv <- tau_from_regimen(regimen, dose_update)
 
-  if (target$type == "auc") {
-    return(dose * target$value / intv_auc)
+  if (target_design$type == "auc") {
+    return(dose * target_design$value / intv_auc)
   }
-  if (target$type == "auc24") {
-    return(dose * target$value / (intv_auc * 24/intv))
+  if (target_design$type == "auc24") {
+    return(dose * target_design$value / (intv_auc * 24/intv))
   }
 
   remaining_doses <- length(regimen$dose_amts) + 1 - dose_update
-  remaining_auc <- target$value - cum_auc
+  remaining_auc <- target_design$value - cum_auc
 
   pmax(0, (dose/intv_auc) * (remaining_auc/remaining_doses))
 }
