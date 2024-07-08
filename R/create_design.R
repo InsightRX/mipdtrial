@@ -23,11 +23,11 @@
 #' 1 hour before trough.
 #' @param scatter optional random variation in time, specified as the standard
 #' deviation, e.g. `scatter = 0.1` to allow for variation in sampling time with
-#' an SD of 0.1 hours. Only relevant for sampling times, not for
-#' regimen_update designs or target designs. Random variation does not protect
-#' for peaks or troughs becoming sampled during infusion or in previous / next
-#' dose. So value for `scatter` should be chosen appropriately and probably
-#' used in conjunction with approriate `offset` values.
+#' an SD of 0.1 hours. Only implemented for sampling times (not for
+#' regimen_update designs), not applicable for or target designs. Random variation 
+#' does not protect for peaks or troughs becoming sampled during infusion or in 
+#' previous / next dose. So value for `scatter` should be chosen appropriately and
+#' probably used in conjunction with appropriate `offset` values.
 #' @param at numeric vector of the dose or day number to "anchor"
 #' the sampling times to. Vector needs to be of same length as `time`.
 #' If `anchor` is set to `day`, then the first dose in that day is used.
