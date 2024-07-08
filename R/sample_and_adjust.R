@@ -96,7 +96,7 @@ sample_and_adjust_by_dose <- function(
     if(verbose) {
       message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
     }
-    browser()
+
     new_tdms <- collect_tdms(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
