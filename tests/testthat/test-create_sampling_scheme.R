@@ -35,7 +35,8 @@ test_that("sampling on first dose of *day* 1 and 3, irrespective of dosing regim
       base = c("peak", "trough", "peak", "trough"),
       offset = c(0, 0, 0, 0),
       at = c(1, 1, 3, 3),
-      anchor = c("day", "day", "day", "day")
+      anchor = c("day", "day", "day", "day"),
+      scatter = c(0, 0, 0, 0)
     )
   )
   expect_equal(tdm2, c(0, 12, 48, 60))
@@ -55,7 +56,8 @@ test_that("sampling on first dose of *day* 1 and 3, irrespective of dosing regim
       base = c("peak", "trough", "peak", "trough"),
       offset = c(0.5, 0, 1.0, -0.5),
       at = c(1, 1, 3, 3),
-      anchor = c("day", "day", "day", "day")
+      anchor = c("day", "day", "day", "day"),
+      scatter = c(0, 0, 0, 0)
     )
   )
   expect_equal(tdm3, c(0.5, 12, 49, 59.5))
@@ -75,7 +77,8 @@ test_that("sampling on *dose* 1 and 3, irrespective of dosing regimen", {
       base = c("peak", "trough", "peak", "trough"),
       offset = c(0.5, 0, 1.0, -0.5),
       at = c(1, 1, 3, 3),
-      anchor = c("dose", "dose", "dose", "dose")
+      anchor = c("dose", "dose", "dose", "dose"),
+      scatter = c(0, 0, 0, 0)
     )
   )
   expect_equal(tdm4, c(0.5, 12, 25, 35.5))
@@ -90,7 +93,7 @@ test_that("can use 'middle', 'cmid' and 'random' timepoints", {
   )
   tdm5 <- get_sampling_times_from_scheme(scheme5, regimen)
   expect_equal(
-    scheme4,
+    scheme5,
     data.frame(
       base = c("peak", "middle", "random", "trough"),
       offset = c(0, 0, 0, 0),
@@ -123,3 +126,4 @@ test_that("'scatter' options works", {
   )
   expect_equal(tdm6, c(-0.11, 5.95, 10.95, 12.25))
 })
+
