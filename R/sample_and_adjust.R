@@ -76,7 +76,7 @@ sample_and_adjust_by_dose <- function(
   last_adjust_time <- 0
 
   additional_info <- c()
-  dose_updates <- c()
+  dose_updates <- data.frame()
   aucs_i <- c()
 
   if(verbose) {
@@ -88,7 +88,7 @@ sample_and_adjust_by_dose <- function(
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
     tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
-    collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
+    collect_idx <- (tdm_times > last_adjust_time & tdm_times <= adjust_time)
     if(!any(collect_idx)) {
       stop("No new samples in current adjustment interval, check target and sampling settings.")
     }
@@ -96,6 +96,7 @@ sample_and_adjust_by_dose <- function(
     if(verbose) {
       message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
     }
+
     new_tdms <- collect_tdms(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
@@ -119,13 +120,13 @@ sample_and_adjust_by_dose <- function(
     } else {
       tdms_i <- new_tdms
     }
-    dose_updates <- dplyr::bind_rows(
+    dose_updates <- rbind(
       dose_updates,
       data.frame(
         t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
         dose_update = adjust_at_dose[j],
         t_adjust = regimen$dose_times[adjust_at_dose[j]],
-        dose_before_update = regimen$dose_amts[adjust_at_dose[j]], # previous dose
+        dose_before_update = regimen$dose_amts[adjust_at_dose[j]], # prev dose
         interval_before_update = regimen$interval, # previous interval
         auc_before_update = auc_current_regimen
       )
@@ -138,11 +139,15 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       target_design = target_design,
       covariates = covariates,
+      additional_info = additional_info,
       ...
     )
     regimen <- out$regimen
     if(verbose) {
-      message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)
+      message(
+        "New dose / interval: ",
+        out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval
+      )
     }
 
     ## update the vector of dose_udpate numbers, if needed
@@ -166,7 +171,7 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
-  dose_updates <- dplyr::bind_rows(
+  dose_updates <- rbind(
     dose_updates,
     data.frame(
       t = regimen$dose_times[adjust_at_dose[j]],
@@ -333,5 +338,80 @@ map_adjust_interval <- function(
     new_dose = NA,
     new_interval = new_interval,
     additional_info = est_par
+  )
+}
+
+
+#' Adjust doses to achieve a target metric using NCA
+#'
+#' Given a set of levels calculates the AUC for a given dose, and adjusts the
+#' subsequent doses to achieve either the target AUC per dosing interval
+#' (`create_target_design(targettype = 'auc')`), AUC24
+#' (`create_target_design(targettype = 'auc24')`) or cumulative AUC
+#' (`create_target_design(targettype = 'cum_auc')`). Uses the most recently
+#' sampled dosing interval to estimate AUC, extrapolating that over all doses
+#' between the dose to be updated and the last sampled dose. Note that in order
+#' to consider AUC contributions from previous doses, a baseline TDM collected
+#' within 30 minutes of the dose administration is required. This is a
+#' limitation of the algorithm, and not of the function. See [dose_from_auc()]
+#' for more information about dose selection logic.
+#'
+#' @inheritParams map_adjust_dose
+#' @param additional_info object returned and iteratively built in
+#'   `sample_and_adjust_by_dose`. See `returns`
+#' @param ... arguments passed on to `clinPK::nca`
+#' @returns Returns a named list: `regimen`: the updated regimen;
+#'   `additional_info`: output of clinPK::nca with a field for cumulative auc by
+#'   that dose.
+#' @export
+dose_adjust_nca <- function(
+  tdms,
+  regimen,
+  target_design,
+  dose_update,
+  additional_info,
+  ...
+) {
+  # perform NCA,
+  nca_res <- perform_nca(
+    tdms = tdms,
+    regimen = regimen,
+    ...
+  )
+
+  # calculate new AUC since last NCA calculation, necessary for e.g., busulfan,
+  # where might dose Q6 but sample only 1 interval
+  intv_auc <- nca_res$descriptive$auc_tau
+  if (length(additional_info) > 0) {
+    last_dose_updated <- as.numeric(gsub(
+      "dose_", "",
+      names(additional_info[length(additional_info)])
+    ))
+    cumulative_auc <- additional_info[[length(additional_info)]]$cumulative_auc
+  } else {
+    last_dose_updated <- 1
+    cumulative_auc <- 0
+  }
+  auc_since_last_update <- intv_auc * (dose_update - last_dose_updated)
+  nca_res$cumulative_auc <- cumulative_auc + auc_since_last_update
+
+
+  # calculate new dose, using a ratio of AUC to dose
+  new_dose <- dose_from_auc(
+    target_design = target_design,
+    intv_auc = nca_res$descriptive$auc_tau,
+    regimen = regimen,
+    dose_update = dose_update,
+    cum_auc = nca_res$cumulative_auc
+  )
+
+  # return new regimen
+  regimen <- update_regimen(regimen, new_dose, dose_update_number = dose_update)
+  list(
+    regimen = regimen,
+    dose_update = dose_update,
+    new_dose = new_dose,
+    new_interval = NA,
+    additional_info = nca_res
   )
 }

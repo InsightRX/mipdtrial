@@ -234,22 +234,18 @@ test_that("errors if dose update includes dose 1", {
         at = c(1, 3),
         anchor = "dose"
       ),
+      target_design = create_target_object(
+        targettype = "cum_auc",
+        targetvalue = 500
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
-      create_target_design(
-        time = 4*24,
-        when = "dose",
-        at = 1,
-        anchor = "dose",
-        targettype = "conc",
-        targetvalue = 10
-      )
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1)
     ),
     "TDM collection before the first dose is not yet supported"
   )
@@ -268,15 +264,18 @@ test_that("errors if dose update before first TDM", {
         at = c(2, 2),
         anchor = "dose"
       ),
+      target_design = create_target_object(
+        targettype = "cum_auc",
+        targetvalue = 500
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
-      target = list()
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1)
     ),
     "At least one TDM must be collected before dose adjustment"
   )
@@ -295,16 +294,78 @@ test_that("errors if update doses are longer than supplied regimen", {
         at = c(2, 2),
         anchor = "dose"
       ),
+      target_design = create_target_object(
+        targettype = "cum_auc",
+        targetvalue = 500
+      ),
       regimen = regimen,
       pars_true_i = generate_iiv(mod, omega, par, seed = 1),
       sim_model = mod,
       sim_ruv = list(prop = 0.1, add = 1),
       est_model = mod,
-      est_parameters = par,
-      est_omega = omega,
-      est_ruv = list(prop = 0.1, add = 1),
-      target_time = list()
+      parameters = par,
+      omega = omega,
+      ruv = list(prop = 0.1, add = 1)
     ),
     "Insufficient doses in `regimen` for all dose adjustments specified."
   )
+})
+
+test_that("Can adjust by NCA AUC", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 150,
+    t_inf = 0.1,
+    interval = 6,
+    n = 4 * 4,
+    type = "infusion"
+  )
+
+  out <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(5, 9, 13),
+      anchor = "dose",
+      dose_optimization_method = dose_adjust_nca
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(1, 2, 3, 5, 6, 1, 2, 3, 5, 6, 1, 2, 3, 5, 6),
+      at = c(4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 12, 12, 12, 12, 12),
+      anchor = "dose"
+    ),
+    target_design = create_target_design(
+      targettype = "cum_auc",
+      targetvalue = 500,
+      time = 192
+    ),
+    regimen = regimen,
+    pars_true_i = list(CL = 6, V = 10),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.01, add = 0.1),
+    est_mod = mod
+  )
+  # expected structure
+  expect_true(inherits(out, "list"))
+  expect_true(
+    all(c("final_regimen", "tdms", "additional_info") %in% names(out))
+  )
+
+  # expected doses are changed
+  final_doses <- out$final_regimen
+  # first day (4 doses) unchanged
+  expect_equal(final_doses$dose_amts[1:4], regimen$dose_amts[1:4])
+  # other doses each change
+  expect_true(all(final_doses$dose_amts[5:8] != final_doses$dose_amts[1:4]))
+  expect_equal(
+    length(unique(final_doses$dose_amts[c(1,5,9,13)])),
+    length(final_doses$dose_amts[c(1,5,9,13)])
+  )
+
+  # expected tdm sampling structure
+  tdms <- out$tdms
+  expect_equal(nrow(tdms), 3 * 5) # 3 days, 5 * 3
+  expect_false(any(tdms$true_y == tdms$y))
+
+  # allow up to 1% error from goal of 500 mg-h/L over 4 days
+  cum_auc_dose3 <- out$additional_info[[3]]$cumulative_auc
+  # this is the cumulative auc after 3 days (4th day isn't sampled/calculated)
+  expect_true(abs((cum_auc_dose3 - 0.75 * 500)/(0.75 * 500)) < 0.05)
 })
