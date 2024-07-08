@@ -44,6 +44,7 @@ create_sampling_design <- function(
     time = NULL,
     when = NULL,
     offset = NULL,
+    scatter = NULL,
     at = NULL,
     anchor = c("dose", "day")
 ) {
@@ -54,6 +55,7 @@ create_sampling_design <- function(
     time = time,
     when = when,
     offset = offset,
+    scatter = scatter,
     at = at,
     anchor = anchor
   )

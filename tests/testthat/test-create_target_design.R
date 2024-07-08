@@ -112,7 +112,7 @@ test_that("Simpler interface using less arguments correctly infers arguments", {
     list(
       type = "trough", value = 10, min = 8, max = 12,
       scheme = data.frame(
-        base = "cmin", offset = 0, at = 6, anchor = "day"
+        base = "cmin", offset = 0, at = 6, anchor = "day", scatter = 0
       )
     )
   )
@@ -126,7 +126,7 @@ test_that("Simpler interface using less arguments correctly infers arguments", {
     list(
       type = "peak", value = 10, min = 8, max = 12,
       scheme = data.frame(
-        base = "cmax", offset = 0, at = 6, anchor = "dose"
+        base = "cmax", offset = 0, at = 6, anchor = "dose", scatter = 0
       )
     )
   )

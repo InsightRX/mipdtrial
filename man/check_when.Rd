@@ -9,11 +9,16 @@ check_when(when, offset, at)
 \arguments{
 \item{when}{character vector of same length as \code{time} (or single
 value) determining how to interpret the provided sampling \code{time}. If \code{NULL}
-will use the dose time as offset (default). Other options are \code{cmax} or
+will use the dose time as offset (default). Other options are: \code{cmax} or
 \code{peak}, which will use the end of infusion as the base for the \code{time}, or
-\code{cmin} or \code{trough}, which will use the time of next dose as the offset.}
+\code{cmin} or \code{trough}, which will use the time of next dose as the offset, or
+\code{middle} or \code{cmid} which will use the middle between the anchored dose and
+the next, or \code{random} which takes a random time point between the anchored
+dose and the next.}
 
-\item{offset}{offset from standardized PK moments specified in \code{when}.}
+\item{offset}{offset from standardized PK moments specified in \code{when}, e.g.
+\code{c(1, -1)} with \code{when = c("peak", "trough")} to sample 1 hour after peak and
+1 hour before trough.}
 
 \item{at}{numeric vector of the dose or day number to "anchor"
 the sampling times to. Vector needs to be of same length as \code{time}.

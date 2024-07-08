@@ -125,7 +125,7 @@ sample_and_adjust_by_dose <- function(
         t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
         dose_update = adjust_at_dose[j],
         t_adjust = regimen$dose_times[adjust_at_dose[j]],
-        dose_before_update = regimen$dose_amts[j], # previous dose
+        dose_before_update = regimen$dose_amts[adjust_at_dose[j]], # previous dose
         interval_before_update = regimen$interval, # previous interval
         auc_before_update = auc_current_regimen
       )
@@ -142,7 +142,7 @@ sample_and_adjust_by_dose <- function(
     )
     regimen <- out$regimen
     if(verbose) {
-      message("New dose / interval: ", out$regimen$dose_amts[j], " / ", out$regimen$interval)
+      message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)
     }
 
     ## update the vector of dose_udpate numbers, if needed
