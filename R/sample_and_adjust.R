@@ -112,7 +112,7 @@ sample_and_adjust_by_dose <- function(
       target_design = target_design,
       covariates = covariates
     )
-    trough_current_regimen <- calc_trough_from_regimen(
+    trough_current_regimen <- calc_concentration_from_regimen(
       regimen = regimen,
       parameters = pars_true_i, # true patient parameters
       model = sim_model,
@@ -175,7 +175,7 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
-  trough_final <- calc_trough_from_regimen(
+  trough_final <- calc_concentration_from_regimen(
     regimen = regimen,
     parameters = pars_true_i, # true patient parameters
     model = sim_model,

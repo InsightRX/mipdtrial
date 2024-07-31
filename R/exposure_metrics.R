@@ -6,7 +6,6 @@
 #'   time period over which AUC should be calculated using `target_time`
 #'   argument to `PKPDsim::sim`.
 #' @export
-
 calc_auc_from_sim <- function(sim_output, auc_comp) {
   aucs <- sim_output$y[sim_output$comp == auc_comp]
   if (length(aucs) == 1) {
@@ -15,25 +14,26 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
     diff(aucs)
   }
 }
-#' Get trough from a regimen
+
+#' Get concentration from a regimen
 #'
 #' Supply the final regimen and the final parameter estimates to get the final
-#' estimated AUC. Supply the final regimen and the true individual parameter
-#' estimates to get the final true AUC.
+#' estimated concentration. Supply the final regimen and the true individual
+#' parameter estimates to get the final true concentration.
 #'
 #' @param regimen PKPDsim regimen object
-#' @param parameters use MAP estimation to get estimated AUC, use true patient
-#'   parameters to get true AUC. Parameters must correspond to the model used.
-#'   Accepts parameters supplied as a data frame row, a named vector or as a
-#'   list.
-#' @param model model to use for AUC calculations.
+#' @param parameters use MAP estimation to get estimated concentration, use true
+#'   patient parameters to get true concentration. Parameters must correspond to
+#'   the model used. Accepts parameters supplied as a data frame row, a named
+#'   vector or as a list.
+#' @param model model to use for concentration calculations.
 #' @param target_design target design, created using `create_target_design()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
-#' @returns numeric vector of AUCs between each simulated time point. Control
-#'   time period over which AUC should be calculated using `target_time`.
+#' @returns numeric vector of concentrations between each simulated time point.
+#'   Control when concentration is estimated using `target_time`.
 #' @export
-calc_trough_from_regimen <- function(
+calc_concentration_from_regimen <- function(
     regimen,
     parameters,
     model,
