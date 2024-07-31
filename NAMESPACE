@@ -2,6 +2,7 @@
 
 export(calc_auc_from_regimen)
 export(calc_auc_from_sim)
+export(calc_trough_from_regimen)
 export(collect_tdms)
 export(create_cov_object)
 export(create_regimen_update_design)

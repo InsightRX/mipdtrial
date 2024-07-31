@@ -15,6 +15,55 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
     diff(aucs)
   }
 }
+#' Get trough from a regimen
+#'
+#' Supply the final regimen and the final parameter estimates to get the final
+#' estimated AUC. Supply the final regimen and the true individual parameter
+#' estimates to get the final true AUC.
+#'
+#' @param regimen PKPDsim regimen object
+#' @param parameters use MAP estimation to get estimated AUC, use true patient
+#'   parameters to get true AUC. Parameters must correspond to the model used.
+#'   Accepts parameters supplied as a data frame row, a named vector or as a
+#'   list.
+#' @param model model to use for AUC calculations.
+#' @param target_design target design, created using `create_target_design()`
+#' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
+#'   `covariates` or `iov_bins`
+#' @returns numeric vector of AUCs between each simulated time point. Control
+#'   time period over which AUC should be calculated using `target_time`.
+#' @export
+calc_trough_from_regimen <- function(
+    regimen,
+    parameters,
+    model,
+    target_design,
+    ...
+){
+  if (!all(attr(model, "parameters") %in% names(parameters))) {
+    stop("Model/parameter mismatch")
+  }
+  if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
+    parameters <- as.list(parameters)
+  }
+
+  iov <- PKPDsim::get_model_iov(model)
+  if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
+
+  target_time <- get_sampling_times_from_scheme(
+    target_design$scheme,
+    regimen
+  )
+  sim_output <- PKPDsim::sim(
+    model,
+    parameters = parameters,
+    regimen = regimen,
+    t_obs = target_time,
+    iov_bins = iov[["bins"]],
+    ...
+  )
+  sim_output[sim_output$comp == "obs",]$y
+}
 
 #' Get AUC from a regimen
 #'

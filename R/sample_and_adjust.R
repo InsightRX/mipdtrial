@@ -111,6 +111,13 @@ sample_and_adjust_by_dose <- function(
       target_design = target_design,
       covariates = covariates
     )
+    trough_current_regimen <- calc_trough_from_regimen(
+      regimen = regimen,
+      parameters = pars_true_i, # true patient parameters
+      model = sim_model,
+      target_design = target_design,
+      covariates = covariates
+    )
     if(verbose) {
       message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
     }
@@ -127,7 +134,8 @@ sample_and_adjust_by_dose <- function(
         t_adjust = regimen$dose_times[adjust_at_dose[j]],
         dose_before_update = regimen$dose_amts[adjust_at_dose[j]], # previous dose
         interval_before_update = regimen$interval, # previous interval
-        auc_before_update = auc_current_regimen
+        auc_before_update = auc_current_regimen,
+        trough_before_update = trough_current_regimen
       )
     )
 
@@ -166,6 +174,13 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
+  trough_final <- calc_trough_from_regimen(
+    regimen = regimen,
+    parameters = pars_true_i, # true patient parameters
+    model = sim_model,
+    target_design = target_design,
+    covariates = covariates
+  )
   dose_updates <- dplyr::bind_rows(
     dose_updates,
     data.frame(
@@ -174,7 +189,8 @@ sample_and_adjust_by_dose <- function(
       t_adjust = NA,
       dose_before_update = out$new_dose,
       interval_before_update = out$new_interval,
-      auc_before_update = auc_final
+      auc_before_update = auc_final,
+      trough_before_update = trough_final
     )
   )
 
