@@ -54,7 +54,7 @@ sample_and_adjust_by_dose <- function(
 
   adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
-  tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
+  tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
   if (!any(tdm_times < first_adjust_time)) {
     stop("At least one TDM must be collected before dose adjustment")
   }
@@ -87,7 +87,7 @@ sample_and_adjust_by_dose <- function(
     if(verbose) message("Adjustment of dose# ", adjust_at_dose[j])
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
-    tdm_times <- get_sampling_times_from_scheme(sampling_design, regimen)
+    tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
       stop("No new samples in current adjustment interval, check target and sampling settings.")
@@ -102,7 +102,8 @@ sample_and_adjust_by_dose <- function(
       res_var = ruv_i[collect_idx,],
       pars_i = pars_true_i,
       regimen = regimen,
-      covariates = covariates
+      covariates = covariates,
+      lloq = sampling_design$lloq
     )
     auc_current_regimen <- calc_auc_from_regimen(
       regimen = regimen,
