@@ -1,11 +1,27 @@
+#' Calculate exposure metrics
+#'
+#' Calculates drug concentration or area under the curve (AUC) for a MIPD
+#' trial run.
+#'
+#' This family of functions calculates the exposure metric for a given regimen,
+#' model, model parameters, and target design. Supply the final regimen and the
+#' final parameter estimates to get the final estimated exposure metric. Supply
+#' the final regimen and the true individual parameter estimates to get the
+#' final true exposure metric.
+#'
+#' @name exposure_metrics
+NULL
+
 #' Get AUC from a simulation
 #'
 #' @param sim_output output of a `PKPDsim::sim` call
 #' @param auc_comp auc compartment
-#' @returns numeric vector of AUCs between each simulated time point. Control
-#'   time period over which AUC should be calculated using `target_time`
-#'   argument to `PKPDsim::sim`.
+#' @returns `calc_auc_from_sim` a numeric vector of AUCs between each simulated
+#' time point. Control time period over which AUC should be calculated using
+#' `target_time` argument to `PKPDsim::sim`.
+#' @rdname exposure_metrics
 #' @export
+
 calc_auc_from_sim <- function(sim_output, auc_comp) {
   aucs <- sim_output$y[sim_output$comp == auc_comp]
   if (length(aucs) == 1) {
@@ -17,10 +33,6 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 
 #' Get concentration from a regimen
 #'
-#' Supply the final regimen and the final parameter estimates to get the final
-#' estimated concentration. Supply the final regimen and the true individual
-#' parameter estimates to get the final true concentration.
-#'
 #' @param regimen PKPDsim regimen object
 #' @param parameters use MAP estimation to get estimated concentration, use true
 #'   patient parameters to get true concentration. Parameters must correspond to
@@ -30,8 +42,10 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #' @param target_design target design, created using `create_target_design()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
-#' @returns numeric vector of concentrations between each simulated time point.
-#'   Control when concentration is estimated using `target_time`.
+#' @returns `calc_concentration_from_regimen` returns a numeric vector of
+#' concentrations between each simulated time point. Control when concentration
+#' is estimated using `target_time`.
+#' @rdname exposure_metrics
 #' @export
 calc_concentration_from_regimen <- function(
     regimen,
@@ -67,10 +81,6 @@ calc_concentration_from_regimen <- function(
 
 #' Get AUC from a regimen
 #'
-#' Supply the final regimen and the final parameter estimates to get the final
-#' estimated AUC. Supply the final regimen and the true individual parameter
-#' estimates to get the final true AUC.
-#'
 #' @param regimen PKPDsim regimen object
 #' @param parameters use MAP estimation to get estimated AUC, use true patient
 #'   parameters to get true AUC. Parameters must correspond to the model used.
@@ -80,8 +90,11 @@ calc_concentration_from_regimen <- function(
 #' @param target_design target design, created using `create_target_design()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
-#' @returns numeric vector of AUCs between each simulated time point. Control
-#'   time period over which AUC should be calculated using `target_time`.
+#' @returns `calc_auc_from_regimen` a numeric vector of AUCs between each
+#' simulated time point. Control time period over which AUC should be
+#' calculated using `target_time`.
+#'
+#' @rdname exposure_metrics
 #' @export
 
 calc_auc_from_regimen <- function(
