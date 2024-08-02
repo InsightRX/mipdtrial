@@ -10,6 +10,7 @@ create_sampling_design(
   offset = NULL,
   scatter = NULL,
   at = NULL,
+  lloq = 0,
   anchor = c("dose", "day")
 )
 }
@@ -47,6 +48,8 @@ If \code{anchor} is set to \code{day}, then the first dose in that day is used.
 If later doses in the day are preferred, the anchor can also be specified
 fractionally, e.g. \code{1.5} will use the time of the first dose in the
 second half of the 1st day.}
+
+\item{lloq}{lower limit of quantification for TDMs}
 
 \item{anchor}{either \code{day} or \code{dose}. Single value required, i.e. anchor
 types cannot be mixed.}
