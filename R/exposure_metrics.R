@@ -16,10 +16,9 @@ NULL
 #'
 #' @param sim_output output of a `PKPDsim::sim` call
 #' @param auc_comp auc compartment
-#' @returns `calc_auc_from_sim` a numeric vector of AUCs between each simulated
-#' time point. Control time period over which AUC should be calculated using
-#' `target_time` argument to `PKPDsim::sim`.
-#' @rdname exposure_metrics
+#' @returns `calc_auc_from_sim` returns a numeric vector of AUCs between each
+#'   simulated time point. Control time period over which AUC should be
+#'   calculated using `target_time` argument to `PKPDsim::sim`.
 #' @export
 
 calc_auc_from_sim <- function(sim_output, auc_comp) {
@@ -34,11 +33,11 @@ calc_auc_from_sim <- function(sim_output, auc_comp) {
 #' Get concentration from a regimen
 #'
 #' @param regimen PKPDsim regimen object
-#' @param parameters use MAP estimation to get estimated concentration, use true
-#'   patient parameters to get true concentration. Parameters must correspond to
-#'   the model used. Accepts parameters supplied as a data frame row, a named
-#'   vector or as a list.
-#' @param model model to use for concentration calculations.
+#' @param parameters use MAP estimation to get estimated exposure, use true
+#'   patient parameters to get true exposure. Parameters must correspond to the
+#'   model used. Accepts parameters supplied as a data frame row, a named vector
+#'   or as a list.
+#' @param model model to use for exposure calculations.
 #' @param target_design target design, created using `create_target_design()`
 #' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
 #'   `covariates` or `iov_bins`
@@ -81,18 +80,9 @@ calc_concentration_from_regimen <- function(
 
 #' Get AUC from a regimen
 #'
-#' @param regimen PKPDsim regimen object
-#' @param parameters use MAP estimation to get estimated AUC, use true patient
-#'   parameters to get true AUC. Parameters must correspond to the model used.
-#'   Accepts parameters supplied as a data frame row, a named vector or as a
-#'   list.
-#' @param model model to use for AUC calculations.
-#' @param target_design target design, created using `create_target_design()`
-#' @param ... arguments passed on to PKPDsim::sim. Typical arguments include
-#'   `covariates` or `iov_bins`
-#' @returns `calc_auc_from_regimen` a numeric vector of AUCs between each
-#' simulated time point. Control time period over which AUC should be
-#' calculated using `target_time`.
+#' @returns `calc_auc_from_regimen` returns a numeric vector of AUCs between
+#'   each simulated time point. Control time period over which AUC should be
+#'   calculated using `target_time`.
 #'
 #' @rdname exposure_metrics
 #' @export

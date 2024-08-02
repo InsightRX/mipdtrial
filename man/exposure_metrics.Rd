@@ -2,30 +2,23 @@
 % Please edit documentation in R/exposure_metrics.R
 \name{exposure_metrics}
 \alias{exposure_metrics}
-\alias{calc_auc_from_sim}
 \alias{calc_concentration_from_regimen}
 \alias{calc_auc_from_regimen}
 \title{Calculate exposure metrics}
 \usage{
-calc_auc_from_sim(sim_output, auc_comp)
-
 calc_concentration_from_regimen(regimen, parameters, model, target_design, ...)
 
 calc_auc_from_regimen(regimen, parameters, model, target_design, ...)
 }
 \arguments{
-\item{sim_output}{output of a \code{PKPDsim::sim} call}
-
-\item{auc_comp}{auc compartment}
-
 \item{regimen}{PKPDsim regimen object}
 
-\item{parameters}{use MAP estimation to get estimated AUC, use true patient
-parameters to get true AUC. Parameters must correspond to the model used.
-Accepts parameters supplied as a data frame row, a named vector or as a
-list.}
+\item{parameters}{use MAP estimation to get estimated exposure, use true
+patient parameters to get true exposure. Parameters must correspond to the
+model used. Accepts parameters supplied as a data frame row, a named vector
+or as a list.}
 
-\item{model}{model to use for AUC calculations.}
+\item{model}{model to use for exposure calculations.}
 
 \item{target_design}{target design, created using \code{create_target_design()}}
 
@@ -33,16 +26,12 @@ list.}
 \code{covariates} or \code{iov_bins}}
 }
 \value{
-\code{calc_auc_from_sim} a numeric vector of AUCs between each simulated
-time point. Control time period over which AUC should be calculated using
-\code{target_time} argument to \code{PKPDsim::sim}.
-
 \code{calc_concentration_from_regimen} returns a numeric vector of
 concentrations between each simulated time point. Control when concentration
 is estimated using \code{target_time}.
 
-\code{calc_auc_from_regimen} a numeric vector of AUCs between each
-simulated time point. Control time period over which AUC should be
+\code{calc_auc_from_regimen} returns a numeric vector of AUCs between
+each simulated time point. Control time period over which AUC should be
 calculated using \code{target_time}.
 }
 \description{
