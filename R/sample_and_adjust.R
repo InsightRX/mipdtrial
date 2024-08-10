@@ -24,6 +24,8 @@
 #' @param sim_model model to use for simulating "true" patient response.
 #' @param sim_ruv residual variability for `sim_model`. Named list for
 #'   proportional (`prop`) and additive (`add`) error.
+#' @param ltbs log-transformed model, if `TRUE` transforms included add error as
+#' prop
 #' @param accumulate_data if `TRUE`, will use all available data up until the
 #' adjustment timepoint. If set to `FALSE`, will use only the data since the
 #' last adjustment timepoint and the current one.
@@ -45,6 +47,7 @@ sample_and_adjust_by_dose <- function(
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
+  ltbs = FALSE,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -63,7 +66,8 @@ sample_and_adjust_by_dose <- function(
   ruv_i <- generate_ruv(
     tdm_sample_time = tdm_times,
     prop = sim_ruv$prop,
-    add = sim_ruv$add
+    add = sim_ruv$add,
+    ltbs=ltbs
   )
 
   # initialize objects for loop

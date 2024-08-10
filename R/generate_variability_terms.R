@@ -107,6 +107,7 @@ generate_iiv <- function(
 #'   `c(1, 24, 25, 48, 49, 73)`.
 #' @param prop proportional error
 #' @param add additive error
+#' @param ltbs log-transformed model
 #' @returns `generate_ruv` returns a data frame with identifier columns of
 #'   `tdm_number`, `iteration`, `id`, plus columns for proportional (`prop`) and
 #'   additive (`add`) error.
@@ -117,6 +118,7 @@ generate_ruv <- function(
   tdm_sample_time,
   prop,
   add,
+  ltbs = FALSE,
   ids = 1,
   n_iter = 1,
   seed = NULL
@@ -131,8 +133,13 @@ generate_ruv <- function(
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  ruv$prop <- 1 + rnorm(nrow(ruv), 0, prop)
-  ruv$add <- rnorm(nrow(ruv), 0, add)
+  if (!ltbs) {
+    ruv$prop <- 1 + rnorm(nrow(ruv), 0, prop)
+    ruv$add <- rnorm(nrow(ruv), 0, add)
+    } else {
+      ruv$prop <- 1 + rnorm(nrow(ruv), 0, add)
+      ruv$add <- 0
+    }
   ruv
 }
 
