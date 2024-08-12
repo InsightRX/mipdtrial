@@ -133,13 +133,15 @@ generate_ruv <- function(
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  if (!ltbs) {
+  if (ltbs) {
+    # data is returned from `PKPDsim::sim` in the linear domain already so
+    # apply additive error (log domain) as proportional error (linear domain).
+    ruv$prop <- 1 + rnorm(nrow(ruv), 0, add)
+    ruv$add <- 0  
+  } else {
     ruv$prop <- 1 + rnorm(nrow(ruv), 0, prop)
     ruv$add <- rnorm(nrow(ruv), 0, add)
-    } else {
-      ruv$prop <- 1 + rnorm(nrow(ruv), 0, add)
-      ruv$add <- 0
-    }
+  }
   ruv
 }
 
