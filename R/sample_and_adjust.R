@@ -24,8 +24,6 @@
 #' @param sim_model model to use for simulating "true" patient response.
 #' @param sim_ruv residual variability for `sim_model`. Named list for
 #'   proportional (`prop`) and additive (`add`) error.
-#' @param ltbs log-transformed model, if `TRUE` transforms included add error as
-#' prop
 #' @param accumulate_data if `TRUE`, will use all available data up until the
 #' adjustment timepoint. If set to `FALSE`, will use only the data since the
 #' last adjustment timepoint and the current one.
