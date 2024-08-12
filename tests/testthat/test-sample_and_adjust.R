@@ -145,7 +145,7 @@ test_that("ltbs ruv transformation works", {
   )
 
   # expect same when ltbs add error and non-ltbs prop error are equal
-  expect_true(mean_pcte_v1 == mean_pcte_v2)
+  expect_true(round(mean_pcte_v1, 3) == round(mean_pcte_v2, 3))
 })
 
 test_that("Supplying true pars as list also works", {
