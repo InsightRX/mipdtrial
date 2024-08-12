@@ -138,7 +138,7 @@ test_that("ltbs ruv transformation works", {
 
   mean_pcte_v1 <- mean(
     (out_ltbs_v1$tdms$y-out_ltbs_v1$tdms$true_y) / out_ltbs_v1$tdms$true_y
-    )
+  )
 
   mean_pcte_v2 <- mean(
     (out_ltbs_v2$tdms$y - out_ltbs_v2$tdms$true_y) / out_ltbs_v2$tdms$true_y
