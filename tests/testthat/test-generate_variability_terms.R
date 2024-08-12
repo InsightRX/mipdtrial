@@ -62,6 +62,24 @@ test_that("Generates RUV error for multiple individuals", {
   expect_true(abs(mean(out$add)) < 0.01)
 })
 
+test_that("Adds RUV to both ltbs models correctly", {
+  out <- generate_ruv(
+    ids = 1:30,
+    n_iter = 40,
+    tdm_sample_time = seq(2, 100, 2),
+    prop = 0.000,
+    add = 0.25,
+    ltbs=T,
+    seed = 2
+  )
+  expect_true(inherits(out, "data.frame"))
+  expect_equal(nrow(out), 30 * 40 * 50)
+  # test values are within 1% or so (large data set, law of large numbers)
+  # add error transformed to prop error in ltbs transformation
+  expect_true(abs(pct_err(mean(out$prop), 1)) < 0.01)
+  expect_true(abs(mean(out$add)) == 0.0)
+})
+
 test_that("Reproducible randomness: IIV", {
   out1 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 1)
   out2 <- generate_iiv(mod, omega, par, ids = 1, n_iter = 1, seed = 2)

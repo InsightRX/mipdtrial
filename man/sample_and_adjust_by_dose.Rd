@@ -47,6 +47,9 @@ last adjustment timepoint and the current one.}
 
 \item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
 function.}
+
+\item{ltbs}{log-transformed model, if \code{TRUE} transforms included add error as
+prop}
 }
 \value{
 a named list containing \code{final_regimen} (all doses after

@@ -76,6 +76,78 @@ test_that("trial by dose change works", {
   expect_true(abs((tmp$y - 15)/15) < 0.05)
 })
 
+test_that("ltbs ruv transformation works", {
+  attr(mod, "ltbs") <- TRUE
+  out_ltbs_v1 <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(19, 20, 21, 22, 11, 12, 13, 14),
+      when = rep("dose", 8),
+      at = c(1, 1, 1, 1, 3, 3, 3, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    pars_true_i = generate_iiv(mod, omega, par, seed = 1),
+    sim_model = mod,
+    sim_ruv = list(prop = 0, add = 0.1),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0, add = 0.1),
+    target = create_target_design(
+      targettype = "conc",
+      targetvalue = 15,
+      at = 5,
+      anchor = "dose"
+    ),
+    dose_optimization_method = map_adjust_dose
+  )
+
+
+  attr(mod, "ltbs") <- NULL
+  out_ltbs_v2 <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(19, 20, 21, 22, 11, 12, 13, 14),
+      when = rep("dose", 8),
+      at = c(1, 1, 1, 1, 3, 3, 3, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    pars_true_i = generate_iiv(mod, omega, par, seed = 1),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.1, add = 0),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 0),
+    target = create_target_design(
+      targettype = "conc",
+      targetvalue = 15,
+      at = 5,
+      anchor = "dose"
+    ),
+    dose_optimization_method = map_adjust_dose
+  )
+
+  mean_pcte_v1 <- mean(
+    (out_ltbs_v1$tdms$y-out_ltbs_v1$tdms$true_y) / out_ltbs_v1$tdms$true_y
+    )
+
+  mean_pcte_v2 <- mean(
+    (out_ltbs_v1$tdms$y - out_ltbs_v1$tdms$true_y) / out_ltbs_v1$tdms$true_y
+  )
+
+  # expect same when ltbs add error and non-ltbs prop error are equal
+  expect_true(mean_pcte_v1 == mean_pcte_v2)
+})
+
 test_that("Supplying true pars as list also works", {
 
   out <- sample_and_adjust_by_dose(
@@ -307,4 +379,44 @@ test_that("errors if update doses are longer than supplied regimen", {
     ),
     "Insufficient doses in `regimen` for all dose adjustments specified."
   )
+})
+
+
+test_that("ltbs RUV error terms are appropriately transformed", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 200,
+    n = 4,
+    interval = 24
+  )
+
+  out <- sample_and_adjust_by_dose( # est and sim model are different
+    tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(3, 5, 8, 12,
+                 3, 5, 8, 12),
+      at = c(1, 1, 1, 1, 3, 3, 3, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    covariates = covs,
+    pars_true_i = par,
+    sim_model = mod_ltbs,
+    sim_ruv = list(prop = 0, add = 0.15),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.15, add = 0),
+    target = create_target_design(
+      time = 12,
+      targettype = "conc",
+      targetvalue = 50
+    ),
+    dose_optimization_method = map_adjust_dose,
+    verbose = F
+  )
+  out
 })

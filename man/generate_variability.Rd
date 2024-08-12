@@ -16,7 +16,15 @@ generate_iiv(
   ...
 )
 
-generate_ruv(tdm_sample_time, prop, add, ids = 1, n_iter = 1, seed = NULL)
+generate_ruv(
+  tdm_sample_time,
+  prop,
+  add,
+  ltbs = FALSE,
+  ids = 1,
+  n_iter = 1,
+  seed = NULL
+)
 }
 \arguments{
 \item{sim_model}{model used for simulated patient response ("truth").}
@@ -43,6 +51,8 @@ days of daily dosing and peak-trough sample collection,
 \item{prop}{proportional error}
 
 \item{add}{additive error}
+
+\item{ltbs}{log-transformed model}
 }
 \value{
 \code{generate_iiv} a data frame with columns \code{id} (corresponding to
