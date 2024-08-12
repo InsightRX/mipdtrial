@@ -47,7 +47,6 @@ sample_and_adjust_by_dose <- function(
   pars_true_i,
   sim_model,
   sim_ruv = NULL,
-  ltbs = FALSE,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
