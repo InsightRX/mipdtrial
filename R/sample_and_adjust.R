@@ -66,7 +66,7 @@ sample_and_adjust_by_dose <- function(
     tdm_sample_time = tdm_times,
     prop = sim_ruv$prop,
     add = sim_ruv$add,
-    ltbs=ltbs
+    ltbs = isTRUE(attr(sim_model, "ltbs"))
   )
 
   # initialize objects for loop
