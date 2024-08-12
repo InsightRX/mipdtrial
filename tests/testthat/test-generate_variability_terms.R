@@ -69,7 +69,7 @@ test_that("Adds RUV to both ltbs models correctly", {
     tdm_sample_time = seq(2, 100, 2),
     prop = 0.000,
     add = 0.25,
-    ltbs=T,
+    ltbs = TRUE,
     seed = 2
   )
   expect_true(inherits(out, "data.frame"))
