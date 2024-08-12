@@ -136,16 +136,8 @@ test_that("ltbs ruv transformation works", {
     dose_optimization_method = map_adjust_dose
   )
 
-  mean_pcte_v1 <- mean(
-    (out_ltbs_v1$tdms$y-out_ltbs_v1$tdms$true_y) / out_ltbs_v1$tdms$true_y
-  )
-
-  mean_pcte_v2 <- mean(
-    (out_ltbs_v2$tdms$y - out_ltbs_v2$tdms$true_y) / out_ltbs_v2$tdms$true_y
-  )
-
-  # expect same when ltbs add error and non-ltbs prop error are equal
-  expect_true(round(mean_pcte_v1, 3) == round(mean_pcte_v2, 3))
+  # expect same when ltbs add error = non-ltbs prop error, given same seed
+  expect_true(all(out_ltbs_v1$tdms$y == out_ltbs_v1$tdms$y))
 })
 
 test_that("Supplying true pars as list also works", {
