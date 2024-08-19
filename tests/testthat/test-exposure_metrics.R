@@ -1,3 +1,53 @@
+test_that("calc_concentration_from_regimen: correct peak calculated", {
+  peak_target <- create_target_design(
+    targettype = "peak",
+    targetmin = 10,
+    targetmax = 20,
+    at = 6,
+    anchor = "day"
+  )
+  regimen <- PKPDsim::new_regimen(
+    amt = 200,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+  expect_equal(
+    calc_concentration_from_regimen(
+      regimen = regimen,
+      parameters = list(CL = 5, V = 50),
+      model = mod_1cmt_iv, # defined in setup
+      target = peak_target
+    ),
+    5.4471447
+  )
+})
+
+test_that("calc_concentration_from_regimen: correct trough calculated", {
+  trough_target <- create_target_design(
+    targettype = "trough",
+    targetmin = 1,
+    targetmax = 5,
+    at = 6,
+    anchor = "day"
+  )
+  regimen <- PKPDsim::new_regimen(
+    amt = 200,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+  expect_equal(
+    calc_concentration_from_regimen(
+      regimen = regimen,
+      parameters = list(CL = 5, V = 50),
+      model = mod_1cmt_iv,
+      target = trough_target
+    ),
+    1.81319695
+  )
+})
+
 test_that("calc_auc_from_sim gets AUC", {
   sim_output <- data.frame(
     t = rep(c(0, 24, 48), 4),
@@ -18,7 +68,7 @@ test_that("when passed one obs, calc_auc_from_sim give cumulative AUC", {
   expect_equal(calc_auc_from_sim(sim_output, 2), 50)
 })
 
-test_that("calc_auc_from_sim: parameter mismatch raises error", {
+test_that("calc_auc_from_regimen: parameter mismatch raises error", {
   expect_error(
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
@@ -30,7 +80,7 @@ test_that("calc_auc_from_sim: parameter mismatch raises error", {
   )
 })
 
-test_that("calc_auc_from_sim: correct AUC calculated", {
+test_that("calc_auc_from_regimen: correct AUC calculated", {
   # parameters as list
   target <- create_target_design(targettype = "conc", targetvalue = 10, time = c(48, 72))
   expect_equal(
@@ -75,8 +125,12 @@ test_that("handles IOV correctly", {
   mod <- pkbusulfanmccune::model()
   pars <- pkbusulfanmccune::parameters()
   covs <- list(AGE = 15, WT = 70, HT = 150, SEX = 0, T_CL_EFF = 0)
-  target_a <- create_target_design(targettype = "cum_auc", targetvalue = 10, time = c(0, 24))
-  target_b <- create_target_design(targettype = "cum_auc", targetvalue = 10, time = c(48, 72))
+  target_a <- create_target_design(
+    targettype = "cum_auc", targetvalue = 10, time = c(0, 24)
+  )
+  target_b <- create_target_design(
+    targettype = "cum_auc", targetvalue = 10, time = c(48, 72)
+  )
   result1a <- calc_auc_from_regimen(
     regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
     parameters = pars,
