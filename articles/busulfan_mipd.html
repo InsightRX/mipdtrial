@@ -277,7 +277,7 @@ therapeutic drug monitoring sample.</p>
 <span>    ruv <span class="op">=</span> <span class="va">ruv_est</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="co"># extract metrics of interest</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">true_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
+<span>  <span class="va">results</span><span class="op">$</span><span class="va">true_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model_sim</span>,</span>
@@ -285,7 +285,7 @@ therapeutic drug monitoring sample.</p>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="va">final_parameters</span> <span class="op">&lt;-</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">est_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
+<span>  <span class="va">results</span><span class="op">$</span><span class="va">est_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">final_parameters</span>, <span class="co"># estimated patient PK</span></span>
 <span>    model <span class="op">=</span> <span class="va">model_est</span>,</span>

@@ -155,7 +155,13 @@ your data set!</p>
 <p>We need to define the model parameters and variability terms for our
 simulation. For this study, we will use the ones defined in the
 models.</p>
-<pre><code><span><span class="co">#&gt; Loading required package: pkvancothomson</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Loading required package: pkvancothomson</span></span>
+<span><span class="co">#&gt; Warning in library(package, lib.loc = lib.loc, character.only = TRUE,</span></span>
+<span><span class="co">#&gt; logical.return = TRUE, : there is no package called 'pkvancothomson'</span></span>
+<span><span class="co">#&gt; - Retrieving model definition ()...</span></span>
+<span><span class="co">#&gt; - Package pkvancothomson not installed yet.</span></span>
+<span><span class="co">#&gt; - Compiling model.</span></span>
+<span><span class="co">#&gt; * Adding model definition to R package.</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up simulation model</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkvancothomson</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -266,14 +272,14 @@ described in the model.</p>
 <span>  <span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="co"># get steady-state AUC at end of treatment course</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">peak_trough</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
+<span>  <span class="va">results</span><span class="op">$</span><span class="va">peak_trough</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary1</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>
 <span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
 <span>  <span class="op">)</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">random</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_auc_from_regimen.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
+<span>  <span class="va">results</span><span class="op">$</span><span class="va">random</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
 <span>    regimen <span class="op">=</span> <span class="va">treatment_summary2</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
 <span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
 <span>    model <span class="op">=</span> <span class="va">model</span>,</span>

@@ -10,7 +10,6 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/adjust_dose_checks.html</loc></url>
-<url><loc>/reference/calc_auc_from_regimen.html</loc></url>
 <url><loc>/reference/calc_auc_from_sim.html</loc></url>
 <url><loc>/reference/check_when.html</loc></url>
 <url><loc>/reference/collect_tdms.html</loc></url>
@@ -20,6 +19,7 @@
 <url><loc>/reference/create_sampling_design.html</loc></url>
 <url><loc>/reference/create_target_design.html</loc></url>
 <url><loc>/reference/dose_grid_search.html</loc></url>
+<url><loc>/reference/exposure_metrics.html</loc></url>
 <url><loc>/reference/filter_rows_0_100.html</loc></url>
 <url><loc>/reference/generate_variability.html</loc></url>
 <url><loc>/reference/get_dose_update_core.html</loc></url>

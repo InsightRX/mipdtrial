@@ -80,6 +80,7 @@ shortly before true troughs.</p>
 <span>  offset <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scatter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  at <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lloq <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  anchor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dose"</span>, <span class="st">"day"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -132,6 +133,10 @@ fractionally, e.g. <code>1.5</code> will use the time of the first dose in the
 second half of the 1st day.</p></dd>
 
 
+<dt id="arg-lloq">lloq<a class="anchor" aria-label="anchor" href="#arg-lloq"></a></dt>
+<dd><p>lower limit of quantification for TDMs</p></dd>
+
+
 <dt id="arg-anchor">anchor<a class="anchor" aria-label="anchor" href="#arg-anchor"></a></dt>
 <dd><p>either <code>day</code> or <code>dose</code>. Single value required, i.e. anchor
 types cannot be mixed.</p></dd>
@@ -142,19 +147,29 @@ types cannot be mixed.</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># to sample at 1.5/8.5/23.5 hours</span></span></span>
 <span class="r-in"><span><span class="fu">create_sampling_design</span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">11.5</span>, <span class="fl">23.5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lloq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   base offset at anchor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 dose    1.5  1   dose</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 dose   11.5  1   dose</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 dose   23.5  1   dose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to sample at the peak (end of infusion) and trough (start of</span></span></span>
 <span class="r-in"><span><span class="co"># next dose) of each dose</span></span></span>
 <span class="r-in"><span><span class="fu">create_sampling_design</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  when <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak"</span>, <span class="st">"trough"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lloq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     base offset at anchor scatter</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   peak      0  1   dose       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 trough      0  1   dose       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to sample 30 min post-peak and 30-min pre-trough for the first dose</span></span></span>
 <span class="r-in"><span><span class="fu">create_sampling_design</span><span class="op">(</span></span></span>
@@ -162,9 +177,14 @@ types cannot be mixed.</p></dd>
 <span class="r-in"><span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lloq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     base offset at anchor scatter</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   peak    0.5  1   dose       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 trough   -0.5  1   dose       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The same as above, but now for the first and third dose</span></span></span>
 <span class="r-in"><span><span class="fu">create_sampling_design</span><span class="op">(</span></span></span>
@@ -173,11 +193,16 @@ types cannot be mixed.</p></dd>
 <span class="r-in"><span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lloq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     base offset at anchor scatter</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   peak    0.5  1   dose       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 trough   -0.5  1   dose       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3   peak    0.5  3   dose       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 trough   -0.5  3   dose       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
