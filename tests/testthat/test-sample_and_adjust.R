@@ -341,5 +341,6 @@ test_that("TDMs below LOQ are handled correctly", {
   )
 
   # if simulated TDM is below lower limit of quantification, set to half LOQ
-  expect_true(out$tdms |> filter(t == 20) |> pull(y) == 10)
+  expect_true(all(out$tdms$y > 20)) # lloq = 20
+  expect_equal(out$tdms$y[out$tdms$t == 20], 10)
 })
