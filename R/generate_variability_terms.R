@@ -140,8 +140,10 @@ generate_ruv <- function(
     ruv$add <- 0
   } else {
     ruv$prop <- rnorm(nrow(ruv), 1, PKPDsim::add_ruv(1, ruv = list(prop = prop, add = 0)))
-    ruv$add <- 1 - rnorm(nrow(ruv), 1, PKPDsim::add_ruv(1, ruv = list(prop = 0, add = add)))
+    ruv$add <- rnorm(nrow(ruv), 0.00001, PKPDsim::add_ruv(0, ruv = list(prop = 0.00001, add = add)))
   }
   ruv
 }
+
+#mean(rnorm(10000, 0.00001, PKPDsim::add_ruv(0, ruv = list(prop = 0.00001, add = 0.5))))
 
