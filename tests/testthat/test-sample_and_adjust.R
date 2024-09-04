@@ -373,3 +373,37 @@ test_that("errors if update doses are longer than supplied regimen", {
   )
 })
 
+test_that("TDMs below LOQ are handled correctly", {
+  out <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose",
+      lloq = 20
+    ),
+    regimen = regimen,
+    pars_true_i = list(CL = 1.5, V = 15),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.1, add = 1),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
+    target = create_target_design(
+      when = "trough",
+      at = 4,
+      anchor = "dose",
+      targettype = "conc",
+      targetvalue = 10
+    ),
+    dose_optimization_method = map_adjust_dose
+  )
+
+  # if simulated TDM is below lower limit of quantification, set to half LOQ
+  expect_equal(out$tdms$y[out$tdms$t == 20], 10)
+})
