@@ -163,3 +163,4 @@ test_that("Reasonable dummy regimen option selected", {
   expect_equal(nrow(out), 1)
   expect_true(all(names(par) %in% colnames(out)))
 })
+
