@@ -136,14 +136,13 @@ generate_ruv <- function(
   if (ltbs) {
     # data is returned from `PKPDsim::sim` in the linear domain already so
     # apply additive error (log domain) as proportional error (linear domain).
-    ruv$prop <- rnorm(nrow(ruv), 1, PKPDsim::add_ruv(1, ruv = list(prop = add, add = 0)))
-    ruv$add <- 0
+    ruv$prop <- PKPDsim::add_ruv(rep(1, nrow(ruv)), ruv = list(prop = add, add = 0))
+    ruv$add  <- 0
   } else {
-    ruv$prop <- rnorm(nrow(ruv), 1, PKPDsim::add_ruv(1, ruv = list(prop = prop, add = 0)))
-    ruv$add <- rnorm(nrow(ruv), 0.00001, PKPDsim::add_ruv(0, ruv = list(prop = 0.00001, add = add)))
+    ruv$prop <- PKPDsim::add_ruv(rep(1, nrow(ruv)), ruv = list(prop = prop, add = 0))
+    ruv$add  <- PKPDsim::add_ruv(rep(0, nrow(ruv)), ruv = list(prop = 0, add = add))
   }
   ruv
 }
 
-#mean(rnorm(10000, 0.00001, PKPDsim::add_ruv(0, ruv = list(prop = 0.00001, add = 0.5))))
 
