@@ -33,6 +33,7 @@ run_trial <- function(
   tdms <- c()
   dose_updates <- c()
   est_parameters <- c()
+  sim_parameters <- c()
   if(is.null(n_ids)) {
     n_ids <- nrow(data)
   } else {
@@ -113,14 +114,19 @@ run_trial <- function(
       bind_rows(lapply(res$est_parameters, data.frame)) %>%
         dplyr::mutate(id = i, dose_update = 1:nrow(.))
     )
+    sim_parameters <- dplyr::bind_rows(
+      sim_parameters,
+      pars_true_i %>% dplyr::mutate(id = i)
+    )
   }
 
-  list(
+  out <- list(
     tdms = tdms,
     dose_updates = dose_updates,
     est_parameters = est_parameters,
-    sim_parameters = pars_true_i,
+    sim_parameters = sim_parameters,
     design = design
   )
-
+  class(out) <- c("mipdtrial_results", "list")
+  out
 }
