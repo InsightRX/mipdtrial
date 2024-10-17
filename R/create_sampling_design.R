@@ -12,6 +12,7 @@
 #' sample, use the `offset` parameter to sample e.g. an hour post-peak, or
 #' shortly before true troughs.
 #'
+#' @param lloq lower limit of quantification for TDMs
 #' @inheritParams create_design
 #'
 #' @examples
@@ -46,17 +47,22 @@ create_sampling_design <- function(
     offset = NULL,
     scatter = NULL,
     at = NULL,
+    lloq = 0,
     anchor = c("dose", "day")
 ) {
   if(is.null(time)) {
     if(is.null(when)) when <- "dose"
   }
-  create_design(
+  scheme <- create_design(
     time = time,
     when = when,
     offset = offset,
     scatter = scatter,
     at = at,
     anchor = anchor
+  )
+  list(
+    lloq = lloq,
+    scheme = scheme
   )
 }

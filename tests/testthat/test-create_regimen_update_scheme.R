@@ -10,7 +10,9 @@ test_that("simple usage works, anchoring to doses", {
     design1$scheme,
     data.frame(
       base = c("dose", "dose", "dose"), offset = c(0, 0, 0),
-      at = c(1, 2, 3), anchor = c("dose", "dose", "dose" ),
+      at = c(1, 2, 3),
+      anchor = c("dose", "dose", "dose" ),
+      scatter = c(0, 0, 0),
       update_type = c("dose", "dose", "dose")
     )
   )
@@ -30,6 +32,7 @@ test_that("simple usage works, anchoring to days, different `time` values", {
       offset = c(0, 0, 0),
       at = c(1, 2, 5),
       anchor = c("day", "day", "day"),
+      scatter = c(0, 0, 0),
       update_type = c("dose", "dose", "dose")
     )
   )
