@@ -23,11 +23,7 @@
 #'
 run_trial <- function(
     data,
-    sampling_design,
-    target_design,
-    regimen_update_design,
-    sim_design,
-    est_design,
+    design,
     cov_mapping,
     n_ids = NULL,
     seed = NULL,
@@ -59,9 +55,9 @@ run_trial <- function(
     )
     # randomly draw individual PK parameters
     pars_true_i <- generate_iiv(
-      sim_model = sim_design$model,
-      omega = sim_design$omega_matrix,
-      parameters = sim_design$parameters
+      sim_model  = design$sim$model,
+      omega      = design$sim$omega_matrix,
+      parameters = design$sim$parameters
     )
 
     #################################################################################
@@ -69,36 +65,36 @@ run_trial <- function(
     #################################################################################
     # find initial starting dose: define basic regimen, then upda
     initial_reg <- model_based_starting_dose(
-      sampling_design = tdm_design,
-      target_design = target_design,
+      sampling_design = design$tdm,
+      target_design = design$target,
       n = 12,
       interval = 12,
       t_inf = 2,
       dose_resolution = 250, # round to nearest 250 mg
       grid = seq(250, 6000, by = 250),
       grid_type = "dose",
-      est_model = sim_design$model,
-      parameters = sim_design$parameters,
+      est_model = design$est$model,
+      parameters = design$est$parameters,
       covariates = covs,
-      auc_comp = attr(sim_design$model, "size")
+      auc_comp = attr(design$est$model, "size")
     )
 
     #################################################################################
     ## Main patient-level loop: run through regimen optimization
     #################################################################################
     res <- sample_and_adjust_by_dose(
-      regimen_update_design = dose_update_design,
-      sampling_design = tdm_design,
-      target_design = target_design,
-      regimen     = initial_reg,
-      covariates  = covs,
+      regimen_update_design = design$regimen_update,
+      sampling_design = design$sampling,
+      target_design = design$target,
+      regimen = initial_reg,
+      covariates = covs,
       pars_true_i = pars_true_i,
-      sim_model   = sim_design$model,
-      sim_ruv     = sim_design$ruv,
-      est_model   = est_design$model,
-      parameters  = est_design$parameters,
-      omega       = est_design$omega_matrix,
-      ruv         = est_design$ruv
+      sim_model = design$sim$model,
+      sim_ruv = design$sim$ruv,
+      est_model = design$est$model,
+      parameters = design$est$parameters,
+      omega = design$est$omega_matrix,
+      ruv = design$est$ruv
     )
 
     #################################################################################
@@ -123,7 +119,8 @@ run_trial <- function(
     tdms = tdms,
     dose_updates = dose_updates,
     est_parameters = est_parameters,
-    sim_parameters = pars_true_i
+    sim_parameters = pars_true_i,
+    design = design
   )
 
 }

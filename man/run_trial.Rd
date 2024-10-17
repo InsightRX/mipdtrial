@@ -6,11 +6,7 @@
 \usage{
 run_trial(
   data,
-  sampling_design,
-  target_design,
-  regimen_update_design,
-  sim_design,
-  est_design,
+  design,
   cov_mapping,
   n_ids = NULL,
   seed = NULL,
