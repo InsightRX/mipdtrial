@@ -32,7 +32,7 @@
 #' @param verbose verbose output?
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `tdms` (all collected levels, both true and measured, that is,
-#' both with and without residual variability), and `additional_info`, which
+#' both with and without residual variability), and `est_parameters`, which
 #' varies by dose_optimization_method. See selected function for details.
 #'
 #' @export
@@ -75,9 +75,10 @@ sample_and_adjust_by_dose <- function(
   )
   last_adjust_time <- 0
 
-  additional_info <- c()
+  est_parameters <- c()
   dose_updates <- c()
   aucs_i <- c()
+  gof <- c()
 
   if(verbose) {
     message("Starting dose: ", round(regimen$dose_amts[1]))
@@ -160,9 +161,14 @@ sample_and_adjust_by_dose <- function(
       regimen
     )
 
-    additional_info <- c(
-      additional_info,
-      setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
+    est_parameters <- c(
+      est_parameters,
+      setNames(list(out$est_parameters), paste0("dose_", adjust_at_dose[j]))
+    )
+
+    gof <- dplyr::bind_rows(
+      gof,
+      out$gof %>% mutate(update = j)
     )
 
   }
@@ -199,8 +205,9 @@ sample_and_adjust_by_dose <- function(
     final_regimen = regimen,
     tdms = tdms_i,
     aucs = aucs_i,
-    additional_info = additional_info,
-    dose_updates = dose_updates
+    dose_updates = dose_updates,
+    est_parameters = est_parameters,
+    gof = gof
   )
 }
 
@@ -216,7 +223,7 @@ sample_and_adjust_by_dose <- function(
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `additional_info`: the MAP parameter estimates
+#'   `est_parameters`: the MAP parameter estimates
 #' @export
 #'
 map_adjust_dose <- function(
@@ -233,7 +240,7 @@ map_adjust_dose <- function(
   ...
 ) {
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -243,6 +250,8 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -274,7 +283,8 @@ map_adjust_dose <- function(
     dose_update = dose_update,
     new_dose = new_dose,
     new_interval = NA,
-    additional_info = est_par
+    est_parameters = est_par,
+    gof = gof
   )
 }
 
@@ -291,7 +301,7 @@ map_adjust_dose <- function(
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `additional_info`: the MAP parameter estimates
+#'   `est_parameters`: the MAP parameter estimates
 #' @export
 map_adjust_interval <- function(
     tdms,
@@ -308,7 +318,7 @@ map_adjust_interval <- function(
 ) {
 
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -318,6 +328,8 @@ map_adjust_interval <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -349,6 +361,7 @@ map_adjust_interval <- function(
     dose_update = dose_update,
     new_dose = NA,
     new_interval = new_interval,
-    additional_info = est_par
+    est_parameters = est_par,
+    gof = gof
   )
 }

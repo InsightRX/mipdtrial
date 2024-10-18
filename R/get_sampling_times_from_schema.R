@@ -49,7 +49,7 @@ get_sampling_time_core <- function(row, regimen) {
   if(is.na(t_anchor)) {
     msg <- "Not enough doses in regimen to update, please increase initial regimen length."
     if(row$base %in% c("trough", "cmin")) {
-      msg <- c(msg, " For `cmin`, `middle`, `cmid`, or `random` calculation, you will need one more dose in the regimen than the dose for which the `cmin` is calculated.")
+      msg <- c(msg, " For `cmin`, `middle`, or `random` calculation, you will need one more dose in the regimen than the dose for which the `cmin` is calculated.")
     }
     stop(msg)
   }
