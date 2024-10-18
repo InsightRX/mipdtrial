@@ -78,6 +78,7 @@ sample_and_adjust_by_dose <- function(
   est_parameters <- c()
   dose_updates <- c()
   aucs_i <- c()
+  gof <- c()
 
   if(verbose) {
     message("Starting dose: ", round(regimen$dose_amts[1]))
@@ -165,6 +166,11 @@ sample_and_adjust_by_dose <- function(
       setNames(list(out$est_parameters), paste0("dose_", adjust_at_dose[j]))
     )
 
+    gof <- dplyr::bind_rows(
+      gof,
+      out$gof %>% mutate(update = j)
+    )
+
   }
 
   ## Calculate AUC for final regimen
@@ -199,8 +205,9 @@ sample_and_adjust_by_dose <- function(
     final_regimen = regimen,
     tdms = tdms_i,
     aucs = aucs_i,
+    dose_updates = dose_updates,
     est_parameters = est_parameters,
-    dose_updates = dose_updates
+    gof = gof
   )
 }
 
@@ -233,7 +240,7 @@ map_adjust_dose <- function(
   ...
 ) {
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -243,6 +250,8 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -274,7 +283,8 @@ map_adjust_dose <- function(
     dose_update = dose_update,
     new_dose = new_dose,
     new_interval = NA,
-    est_parameters = est_par
+    est_parameters = est_par,
+    gof = gof
   )
 }
 
@@ -308,7 +318,7 @@ map_adjust_interval <- function(
 ) {
 
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -318,6 +328,8 @@ map_adjust_interval <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -349,6 +361,7 @@ map_adjust_interval <- function(
     dose_update = dose_update,
     new_dose = NA,
     new_interval = new_interval,
-    est_parameters = est_par
+    est_parameters = est_par,
+    gof = gof
   )
 }

@@ -31,7 +31,7 @@ simulate_fit <- function(
 ){
   iov_obj <- get_iov_specification(est_model, parameters, omega)
 
-  x <- tryCatch({
+  fit <- tryCatch({
     get_map_estimates(
       model = est_model,
       error = ruv,
@@ -50,8 +50,8 @@ simulate_fit <- function(
     )},
     error = function(e) list(parameters = NULL)
   )
-  if (is.atomic(x) || !"parameters" %in% names(x)) return(NULL)
-  x[["parameters"]]
+  if (is.atomic(fit) || !"parameters" %in% names(fit)) return(NULL)
+  fit
 }
 
 #' Get inter-occasion variability specifications

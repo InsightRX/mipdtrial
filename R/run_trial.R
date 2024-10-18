@@ -29,11 +29,12 @@ run_trial <- function(
     seed = NULL,
     progress = TRUE
 ) {
-  if(!is.null(seed)) set.seed(12345) # important for reproducibility
+  if(!is.null(seed)) set.seed(seed) # important for reproducibility
   tdms <- c()
   dose_updates <- c()
   est_parameters <- c()
   sim_parameters <- c()
+  gof <- c()
   if(is.null(n_ids)) {
     n_ids <- nrow(data)
   } else {
@@ -64,7 +65,8 @@ run_trial <- function(
     #################################################################################
     ## Find initial starting dose
     #################################################################################
-    # find initial starting dose: define basic regimen, then upda
+    # find initial starting dose: define basic regimen, then update
+    ## TODO: read n / interval / t_inf from regimen!
     initial_reg <- model_based_starting_dose(
       sampling_design = design$tdm,
       target_design = design$target,
@@ -118,6 +120,10 @@ run_trial <- function(
       sim_parameters,
       pars_true_i %>% dplyr::mutate(id = i)
     )
+    gof <- dplyr::bind_rows(
+      gof,
+      res$gof %>% dplyr::mutate(id = i)
+    )
   }
 
   out <- list(
@@ -125,7 +131,8 @@ run_trial <- function(
     dose_updates = dose_updates,
     est_parameters = est_parameters,
     sim_parameters = sim_parameters,
-    design = design
+    design = design,
+    gof = gof
   )
   class(out) <- c("mipdtrial_results", "list")
   out

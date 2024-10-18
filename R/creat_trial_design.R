@@ -22,11 +22,11 @@ create_trial_design <- function(
     design <- parse_spec_file_to_trial_design(file)
   } else {
     design <- list(
-      sampling_design = tdm_design,
-      target_design = target_design,
-      regimen_update_design = dose_update_design,
-      sim_design = sim_design,
-      est_design = est_design
+      sampling = tdm_design,
+      target = target_design,
+      regimen_update = dose_update_design,
+      sim = sim_design,
+      est = est_design
     )
   }
 
