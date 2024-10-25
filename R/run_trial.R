@@ -30,11 +30,16 @@ run_trial <- function(
     progress = TRUE
 ) {
   if(!is.null(seed)) set.seed(seed) # important for reproducibility
+
+  ## Set up data collectors
   tdms <- c()
   dose_updates <- c()
   est_parameters <- c()
   sim_parameters <- c()
   gof <- c()
+  auc <- c()
+
+  ## Set up number of individuals to simulate
   if(is.null(n_ids)) {
     n_ids <- nrow(data)
   } else {
@@ -44,6 +49,8 @@ run_trial <- function(
       stop("`n_ids` cannot be larger than number of subjects in dataset.")
     }
   }
+
+  ## Main loop
   if(progress) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
   for (i in data$ID) {
     if(progress) setTxtProgressBar(pb, i)
@@ -63,23 +70,14 @@ run_trial <- function(
     )
 
     #################################################################################
-    ## Find initial starting dose
+    ## find initial starting dose: define basic regimen, then update
+    ## the function that is called should be ble to take `design`, `covariates`,
+    ## and `cov_mapping`.
     #################################################################################
-    # find initial starting dose: define basic regimen, then update
-    ## TODO: read n / interval / t_inf from regimen!
-    initial_reg <- model_based_starting_dose(
-      sampling_design = design$tdm,
-      target_design = design$target,
-      n = 12,
-      interval = 12,
-      t_inf = 2,
-      dose_resolution = 250, # round to nearest 250 mg
-      grid = seq(250, 6000, by = 250),
-      grid_type = "dose",
-      est_model = design$est$model,
-      parameters = design$est$parameters,
+    initial_reg <- design$initial_regimen$method(
+      design = design,
       covariates = covs,
-      auc_comp = attr(design$est$model, "size")
+      cov_mapping = cov_mapping
     )
 
     #################################################################################
@@ -124,6 +122,28 @@ run_trial <- function(
       gof,
       res$gof %>% dplyr::mutate(id = i)
     )
+    if(design$target$type %in% c("auc", "cumauc", "auc24")) {
+      # get true AUC at end of treatment course
+      # the estimated AUC is in
+      auc_true <- calc_auc_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      auc_est <- calc_auc_from_regimen(
+        regimen = res$final_regimen,
+        parameters = res$est_parameters[[1]],
+        model = design$est$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      auc <- dplyr::bind_rows(
+        auc,
+        data.frame(id = i, auc_true = auc_true, auc_est = auc_est)
+      )
+    }
   }
 
   out <- list(
@@ -132,7 +152,8 @@ run_trial <- function(
     est_parameters = est_parameters,
     sim_parameters = sim_parameters,
     design = design,
-    gof = gof
+    gof = gof,
+    auc = auc
   )
   class(out) <- c("mipdtrial_results", "list")
   out

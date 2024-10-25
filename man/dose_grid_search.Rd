@@ -22,7 +22,6 @@ dose_grid_search(
   max_dose = NULL,
   min_dose = NULL,
   n_cores = 1,
-  md = list(),
   covariates = NULL,
   ...
 )
@@ -77,12 +76,12 @@ should grid be expanded?}
 
 \item{n_cores}{Number of cores over which to simulate doses}
 
-\item{md}{metadata object (only needed if we have to use
-\code{get_quantity_from_variable()} to generate target value)}
-
 \item{covariates}{covariates object}
 
 \item{...}{passed on to PKPDsim function}
+
+\item{md}{metadata object (only needed if we have to use
+\code{get_quantity_from_variable()} to generate target value)}
 }
 \value{
 A numeric value indicating the recommended dose

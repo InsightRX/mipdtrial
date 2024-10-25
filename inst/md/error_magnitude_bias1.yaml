@@ -1,8 +1,6 @@
 name: test
 description: try out the functionality
 designs:
-  initial_regimen:
-    function: model_based_starting_dose
   target:
     targettype: auc24
     targetmin: 400
@@ -22,4 +20,4 @@ designs:
   sim:
     lib: pkvancothomson
   est:
-    lib: pkvancothomson
+    lib: pkvancouvm

@@ -8,6 +8,7 @@ create_trial_design(
   file = NULL,
   sampling_design = NULL,
   target_design = NULL,
+  initial_regimen_design = NULL,
   regimen_update_design = NULL,
   sim_design = NULL,
   est_design = NULL
@@ -20,6 +21,9 @@ create_trial_design(
 
 \item{target_design}{Design for target attainment, from
 \code{create_target_design()}}
+
+\item{initial_regimen_design}{Design for initial regimen, from
+\code{create_initial_regimen_design()}}
 
 \item{regimen_update_design}{Design for dose/regimen optimization, from
 \code{create_regimen_update_design()}}

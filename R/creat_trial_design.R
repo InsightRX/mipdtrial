@@ -4,6 +4,8 @@
 #' @param sampling_design Design for sampling, from `create_sampling_design()`
 #' @param target_design Design for target attainment, from
 #' `create_target_design()`
+#' @param initial_regimen_design Design for initial regimen, from
+#' `create_initial_regimen_design()`
 #' @param regimen_update_design Design for dose/regimen optimization, from
 #' `create_regimen_update_design()`
 #' @param sim_design Design for simulation model, from `create_model_design()`
@@ -14,6 +16,7 @@ create_trial_design <- function(
     file = NULL,
     sampling_design = NULL,
     target_design = NULL,
+    initial_regimen_design = NULL,
     regimen_update_design = NULL,
     sim_design = NULL,
     est_design = NULL
@@ -24,6 +27,7 @@ create_trial_design <- function(
     design <- list(
       sampling = tdm_design,
       target = target_design,
+      initial_regimen = initial_regimen_design,
       regimen_update = dose_update_design,
       sim = sim_design,
       est = est_design
@@ -31,10 +35,15 @@ create_trial_design <- function(
   }
 
   ## Design checks / parsing:
-  ##  - `dose_optimization_method` can be passed as reference to function, not a
-  ##    function itself, in that case we need to get() the actual function.
-  if(inherits(design$regimen_update_design$dose_optimization_method, "character")) {
-    design$regimen_update_design$dose_optimization_method <- get(design$regimen_update_design$dose_optimization_method)
+  ##  - `regimen_update_design$dose_optimization_method` can be passed as
+  ##    reference to function, not a function itself, in that case we need to
+  ##    `get()` the actual function.
+  if(inherits(design$regimen_update$dose_optimization_method, "character")) {
+    design$regimen_update$dose_optimization_method <- get(design$regimen_update$dose_optimization_method)
+  }
+  ##  - `initial_regimen$method`: same, can be passed as character or function.
+  if(inherits(design$initial_regimen$method, "character")) {
+    design$initial_regimen$method <- get(design$initial_regimen$method)
   }
 
   design
