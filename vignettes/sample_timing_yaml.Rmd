@@ -1,5 +1,5 @@
 ---
-title: "Effect of sample timing"
+title: "Specifying a trial using yaml, a sample timing case study"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Effect of sample timing}
@@ -13,6 +13,13 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
+In this vignette, we will demonstrate the following tools:
+
+* using {mipdtrial} to simulate a trial, with the trial design specified using
+  yaml files.
+
+## Motivation
 
 A hospital currently collects two samples for adjusting vancomycin doses: one
 at 1-hr post-dose and another at 9 hours post-dose. They want to compare the 
@@ -41,7 +48,7 @@ We will adjust the fifth dose based on these levels, aiming for a daily AUC of  
 
 These designs are implemented in YAML files supplied with the package as follows:
 
-```{yaml, eval=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 name: Test different sampling designs.
 description: Sampling design 1 - peak / trough
 designs:
@@ -191,8 +198,8 @@ look at how each patient responded to each sampling strategy.
 
 ```{r}
 data.frame(
-  peak_trough = res1$auc$auc_true,
-  random = res2$auc$auc_true
+  peak_trough = res1$final_exposure$auc_true,
+  random = res2$final_exposure$auc_true
 ) %>%
   ggplot() +
     aes(x = peak_trough, y = random) +

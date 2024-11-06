@@ -1,5 +1,5 @@
 ---
-title: "PEG Asparaginase"
+title: "Custom initial dose nomogram, a PEG Asparaginase case study"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{PEG Asparaginase}
@@ -198,7 +198,7 @@ Here are the first few rows of our simulation results:
 head(res$final_exposure)
 ```
 
-## 6. Analyze results
+## 4. Analyze results
 
 How well did our patients get to target?
 
