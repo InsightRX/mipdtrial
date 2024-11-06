@@ -4,6 +4,7 @@
 #' PKPDsim regimen object.
 #'
 #' @returns a list object with the design specs
+#' @export
 #'
 create_initial_regimen_design <- function(
   method,

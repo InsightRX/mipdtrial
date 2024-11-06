@@ -32,12 +32,12 @@ run_trial <- function(
   if(!is.null(seed)) set.seed(seed) # important for reproducibility
 
   ## Set up data collectors
-  tdms <- c()
-  dose_updates <- c()
-  est_parameters <- c()
-  sim_parameters <- c()
-  gof <- c()
-  auc <- c()
+  tdms <- data.frame()
+  dose_updates <- data.frame()
+  est_parameters <- data.frame()
+  sim_parameters <- data.frame()
+  gof <- data.frame()
+  final_exposure <- data.frame()
 
   ## Set up number of individuals to simulate
   if(is.null(n_ids)) {
@@ -122,9 +122,7 @@ run_trial <- function(
       gof,
       res$gof %>% dplyr::mutate(id = i)
     )
-    if(design$target$type %in% c("auc", "cumauc", "auc24")) {
-      # get true AUC at end of treatment course
-      # the estimated AUC is in
+    if(design$target$type %in% target_types_auc) {
       auc_true <- calc_auc_from_regimen(
         regimen = res$final_regimen,
         parameters = pars_true_i, # true patient parameters
@@ -139,9 +137,28 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
-      auc <- dplyr::bind_rows(
-        auc,
+      final_exposure <- dplyr::bind_rows(
+        final_exposure,
         data.frame(id = i, auc_true = auc_true, auc_est = auc_est)
+      )
+    } else if (design$target$type %in% target_types_conc) {
+      conc_true <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      conc_est <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = res$est_parameters[[1]],
+        model = design$est$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      final_exposure <- dplyr::bind_rows(
+        final_exposure,
+        data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
       )
     }
   }
@@ -153,7 +170,7 @@ run_trial <- function(
     sim_parameters = sim_parameters,
     design = design,
     gof = gof,
-    auc = auc
+    final_exposure = final_exposure
   )
   class(out) <- c("mipdtrial_results", "list")
   out

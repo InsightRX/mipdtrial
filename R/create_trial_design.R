@@ -28,7 +28,7 @@ create_trial_design <- function(
       sampling = tdm_design,
       target = target_design,
       initial_regimen = initial_regimen_design,
-      regimen_update = dose_update_design,
+      regimen_update = regimen_update_design,
       sim = sim_design,
       est = est_design
     )

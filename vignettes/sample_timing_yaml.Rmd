@@ -161,8 +161,8 @@ between the two arms of the trial?
 
 ```{r}
 results <- bind_rows(
-  res1$auc %>% mutate(sampling_design = "peak_trough"),
-  res2$auc %>% mutate(sampling_design = "random"),
+  res1$final_exposure %>% mutate(sampling_design = "peak_trough"),
+  res2$final_exposure %>% mutate(sampling_design = "random"),
 )
 target_attainment <- results %>%
   mutate(ontarget = ifelse(auc_true >= 400 & auc_true <= 600, 1, 0)) %>%
