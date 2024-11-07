@@ -89,7 +89,7 @@ asp_nomogram <- function(covariates, ...) {
 }
 ```
 
-PEG-asparaginase has a long half-life. In this simulation trial, patients 
+PEG-asparaginase has a long half-life. In this simulated trial, patients 
 will receive 4 doses separated by 14 days levels collected every 14 days just 
 prior to the next dose. We will adjust doses 2 and 3 to achieve a steady state 
 asparaginase activity level of of 300 IU/L (0.3 IU/mL) (goal: 0.1 - 0.5 IU/mL)
@@ -127,13 +127,14 @@ design <- create_trial_design(
 
 ## 2. Create a set of digital patient covariates
 
-For this example we use the `NHANES::NHANES` synthetic data set, based on CDC growth curves of children. While the original data set is much larger, here we will take just the first
+For this example we will draw covariate distributions from the NHANES data set,
+which is based on survey data collected by the US National Center for Health
+Statistics from a general sampling of the US population.
+
+While the original data set is much larger, here we will take just the first
 20 patients to reduce computation time. 
 
 ```{r}
-# FIXME: The data wrangling here distracts from the purpose of this vignette. My
-# suggestion would be to include this 20 patient data set in mipdtrial, so you can
-# replace this code chunk with a one-liner like: mipdtrial::NHANES20 
 dat <- NHANES::NHANES |>
   # take just the first record per patient
   group_by(ID) |>
@@ -147,8 +148,6 @@ dat <- NHANES::NHANES |>
   # include only patients with all information available
   na.omit() |> 
   head(n = 20)
-
-dat
 ```
 
 We also need to link the covariates in our data set to the covariates expected
@@ -157,7 +156,6 @@ in the model:
   - To check which covariates are required for your model use `PKPDsim::get_model_covariates()`:
 
     ```{r}
-    # FIXME: This does not have the same covariates as colnames(). Missing BSA.
     get_model_covariates(model_design$model)
     ```
   
@@ -167,22 +165,25 @@ in the model:
     colnames(dat)
     ```
 
-After checking the covariates, we can link them in a named character vector, where the model covariates are names and the data covariates are values.
+After checking the covariates, we can link them in a named character vector, 
+where the model covariates are names and the data covariates are values.
+Because our initial dosing nomogram relies on BSA, we also need to include BSA
+in this mapping object.
 
 ```{r}
 cov_map <- c(
   AGE = "Age", 
   WT = "Weight", 
   HT = "Height", 
-  BSA = "BSA",
-  SEX = "Sex"
+  SEX = "Sex",
+  BSA = "BSA"
 )
 ```
 
 ## 3. Simulate a trial!
 
-To run our trial, we just call `run_trial()`! This function does a lot under-the-
-hood.
+To run our trial, we just call `run_trial()`! This function does a lot
+under-the-hood.
 
 For inter-individual variability terms, we will use the inter-individual
 variability described by our model, since this should reflect the distribution 
@@ -192,7 +193,7 @@ parameters using our estimation model and the measured TDMs we "collect".
 For residual error terms, we will use the residual error of our model,
 since this is supposed to reflect the unexplained error (assay error, 
 etc.). This function creates a data frame of error to add to each simulated 
-concentrations <!-- FIXME: typo? should be singular? --> to produced a measured therapeutic drug monitoring sample.
+concentration to produced a measured therapeutic drug monitoring sample.
 
 ```{r}
 res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1)
