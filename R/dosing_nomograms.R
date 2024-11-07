@@ -1,7 +1,11 @@
 #' Weight-based starting dose (e.g., mg/kg)
 #'
+#' This nomogram is a possible `method` supplied to
+#' `create_initial_regimen_design()`. An argument for `mgkg` should also be
+#' supplied to that function call. This function expects that a covariate `"WT"`
+#' exists in the processed patient parameters.
+#'
 #' @inheritParams model_based_starting_dose
-#' @param args something
 #' @export
 
 weight_based_starting_dose <- function(covariates, design, cov_mapping) {

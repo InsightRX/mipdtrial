@@ -6,9 +6,9 @@
 \usage{
 weight_based_starting_dose(covariates, design, cov_mapping)
 }
-\arguments{
-\item{args}{something}
-}
 \description{
-Weight-based starting dose (e.g., mg/kg)
+This nomogram is a possible \code{method} supplied to
+\code{create_initial_regimen_design()}. An argument for \code{mgkg} should also be
+supplied to that function call. This function expects that a covariate \code{"WT"}
+exists in the processed patient parameters.
 }
