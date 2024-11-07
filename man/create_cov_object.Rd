@@ -25,10 +25,10 @@ Otherwise, initial value only is taken for all covariates.}
 Returns a named list of PKPDsim covariates.
 }
 \description{
-Data sets (like NHANES) typically come in rectangular formats while for
-MIPD trials we model each individual separately. PKPDsim expects covariates
-to be provided as a list of PKPDsim covariates. This function helps convert
-rectangular (wide) data to model-ready covariates.
+Data sets typically come in rectangular formats while for MIPD trials we
+model each individual separately. PKPDsim expects covariates to be provided
+as a list of PKPDsim covariates. This function helps convert rectangular
+(wide) data to model-ready covariates.
 }
 \details{
 The data is assumed to already be numeric (e.g., categorical covariates like

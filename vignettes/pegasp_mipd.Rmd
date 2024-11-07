@@ -44,7 +44,6 @@ library(PKPDsim) # for working with models
 if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
   install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
 }
-library(NHANES) # for example data
 
 # For data handling/plotting
 library(dplyr, warn.conflicts = FALSE)
