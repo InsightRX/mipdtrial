@@ -56,9 +56,6 @@ if (!require(pkbusulfanshukla)) {
   library(pkbusulfanshukla)
 }
 
-# For example data
-library(NHANES)
-
 # For data handling/plotting
 library(dplyr)
 library(tidyr)
@@ -113,28 +110,19 @@ design <- create_trial_design(
 
 ## 2. Create a set of digital patient covariates
 
-We will use the NHANES data set for covariate distributions. This is a data set
-of five thousand individuals collected by the US National Center for Health
-Statistics. See package documentation for more details.
-
-We will also use the `dplyr` package for some basic data processing. Since every
-data set is un-tidy in its own way (“Tidy datasets are all alike, but every 
-messy dataset is messy in its own way.” 
-–– [Hadley Wickham](https://r4ds.had.co.nz/tidy-data.html)), data cleaning 
-should be handled outside of the `mipdtrial` tools. The functions expect all
-patient covariates to be numeric.
+We will create an example data set of 10 individuals originally drawn from the
+NHANES data set. This data set was created from survey data collected by the US
+National Center for Health Statistics from a general sampling of the US
+population, and is available in the NHANES R package.
 
 ```{r}
-dat <- NHANES::NHANES %>%
-  # take just the first record per patient
-  group_by(ID) %>%
-  slice(1) %>%
-  ungroup() %>%
-  # convert columns to numeric
-  mutate(Gender = ifelse(Gender == "male", 1, 0)) %>% # as defined in models
-  select(ID, Gender, Age, Weight, Height) %>%
-  # include only patients with all information available
-  filter(!is.na(Gender), !is.na(Weight), !is.na(Height), !is.na(Age))
+dat <- data.frame(
+  ID = 1:10,
+  Gender = c(1, 1, 0, 1, 1, 0, 1, 1, 1, 0),
+  Age = c(34L, 4L, 49L, 9L, 8L, 45L, 66L, 58L, 54L, 10L),
+  Weight = c(87.4, 17, 86.7, 29.8, 35.2, 75.7, 68, 78.4, 74.7, 38.6),
+  Height = c(164.7, 105.4, 168.4, 133, 130.6, 166.7, 169.5, 182, 169.4, 141.8)
+)
 ```
 
 The next step is to make sure we have all the covariates we need. Busulfan has a
@@ -162,21 +150,29 @@ Here are the first few rows of our data set:
 head(dat)
 ```
 
-We will also only look at the first 10 patients in our data set, in the 
-interest of speed.
-
-```{r}
-dat <- head(dat, 10)
-```
-
 We also need to link the covariates in our data set to the covariates expected
-in the model.
+in the model:
+
+  - To check which covariates are required for your models use
+    `PKPDsim::get_model_covariates()`:
+
+    ```{r}
+    unique(
+      c(
+        PKPDsim::get_model_covariates(sim_mod_design$model),
+        PKPDsim::get_model_covariates(est_mod_design$model)
+      )
+    )
+    ```
+  
+  - To check which covariates are in your data set use `colnames()`:
+
+    ```{r}
+    colnames(dat)
+    ```
+
 
 ```{r}
-# check which covariates are required for your model using 
-# `attr(sim_mod_design$model, "covariates")`
-
-# check which covariates are in your data set using `colnames(dat)`
 cov_map <- c(
   AGE = "Age", 
   WT = "Weight", 
@@ -206,7 +202,7 @@ etc.). This function creates a data frame of error to add to each "true"
 simulated concentration to produced a measured therapeutic drug monitoring 
 sample.
 
-```{r}
+```{r echo = FALSE}
 res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1)
 
 ```

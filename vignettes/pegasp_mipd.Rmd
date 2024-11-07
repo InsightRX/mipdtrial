@@ -127,27 +127,30 @@ design <- create_trial_design(
 
 ## 2. Create a set of digital patient covariates
 
-For this example we will draw covariate distributions from the NHANES data set,
-which is based on survey data collected by the US National Center for Health
-Statistics from a general sampling of the US population.
+We will create an example data set of 20 individuals originally drawn from the
+NHANES data set. This data set was created from survey data collected by the US
+National Center for Health Statistics from a general sampling of the US
+population, and is available in the NHANES R package.
 
-While the original data set is much larger, here we will take just the first
-20 patients to reduce computation time. 
 
 ```{r}
-dat <- NHANES::NHANES |>
-  # take just the first record per patient
-  group_by(ID) |>
-  slice(1) |>
-  ungroup() |>
-  # convert columns to numeric
-  mutate(Sex = if_else(Gender == "male", 1, 0)) |> # as defined in models
-  filter(Age < 18) |>
-  select(ID, Sex, Age, Weight, Height) |>
-  mutate(BSA = sqrt(Weight * Height / 3600)) |> 
-  # include only patients with all information available
-  na.omit() |> 
-  head(n = 20)
+dat <- data.frame(
+  ID = 1:20,
+  Sex = rep(c(0, 1), c(7L, 13L)),
+  Age = c(10, 9, 13, 11, 6, 16, 9, 4, 9, 8, 16, 8, 17, 12, 16, 8, 3, 17, 13, 7),
+  Weight = c(
+    38.6, 53.1, 45.1, 43.4, 20.7, 48.7, 59.7, 17, 29.8, 35.2, 73.2, 40.1, 72.3,
+    57.7, 88.9, 24.6, 11.6, 103.8, 74, 25.5
+  ),
+  Height = c(
+    141.8, 139.2, 157.6, 153.8, 112.9, 158.4, 146.7, 105.4, 133.1, 130.6, 172,
+    128.4, 176, 158.9, 183.3, 125.6, 89.9, 181.5, 173.7, 129.6
+  ),
+  BSA = c(
+    1.233, 1.433, 1.405, 1.362, 0.806, 1.464, 1.56, 0.705, 1.05, 1.13, 
+    1.87, 1.196, 1.88, 1.596, 2.128, 0.926, 0.538, 2.288, 1.89, 0.958
+  )
+)
 ```
 
 We also need to link the covariates in our data set to the covariates expected
