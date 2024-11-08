@@ -97,22 +97,8 @@ run_trial <- function(
       omega = design$est$omega_matrix,
       ruv = design$est$ruv
     )
-    res$tdms$id <- i
-    res$dose_updates$id <- i
-    res$additional_info$id <- i
-    sim_pars_i <- pars_true_i
-    sim_pars_i$id <- i
-    res$gof$id <-  i
 
-    #################################################################################
-    ## Collect data into object
-    #################################################################################
-    tdms <- rbind(tdms, res$tdms)
-    dose_updates <- rbind(dose_updates, res$dose_updates)
-    additional_info <- c(additional_info, res$additional_info)
-    sim_parameters <- rbind(sim_parameters, sim_pars_i)
-    gof <- rbind(gof, res$gof)
-
+    # post-processing to get common exposure read-outs
     if(design$target$type %in% target_types_auc) {
       auc_true <- calc_auc_from_regimen(
         regimen = res$final_regimen,
@@ -123,7 +109,7 @@ run_trial <- function(
       )
       auc_est <- calc_auc_from_regimen(
         regimen = res$final_regimen,
-        parameters = res$additional_info[[1]],
+        parameters = tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
@@ -142,7 +128,7 @@ run_trial <- function(
       )
       conc_est <- calc_concentration_from_regimen(
         regimen = res$final_regimen,
-        parameters = res$additional_info[[1]],
+        parameters = tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
@@ -152,6 +138,21 @@ run_trial <- function(
         data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
       )
     }
+
+    ############################################################################
+    ## Collect data into object
+    ############################################################################
+    res$tdms$id <- i
+    res$dose_updates$id <- i
+    res$additional_info$id <- i
+    sim_pars_i <- pars_true_i
+    sim_pars_i$id <- i
+    res$gof$id <-  i
+    tdms <- rbind(tdms, res$tdms)
+    dose_updates <- rbind(dose_updates, res$dose_updates)
+    additional_info <- c(additional_info, res$additional_info)
+    sim_parameters <- rbind(sim_parameters, sim_pars_i)
+    gof <- rbind(gof, res$gof)
   }
 
   out <- list(
