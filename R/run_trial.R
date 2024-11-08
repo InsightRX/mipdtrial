@@ -54,9 +54,9 @@ run_trial <- function(
   if(progress) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
   for (i in data$ID) {
     if(progress) setTxtProgressBar(pb, i)
-    #################################################################################
+    ############################################################################
     ## Create individual
-    #################################################################################
+    ############################################################################
     # get patient covariates
     covs <- create_cov_object(
       data[data$ID == i,],
@@ -69,20 +69,20 @@ run_trial <- function(
       parameters = design$sim$parameters
     )
 
-    #################################################################################
+    ############################################################################
     ## find initial starting dose: define basic regimen, then update
     ## the function that is called should be ble to take `design`, `covariates`,
     ## and `cov_mapping`.
-    #################################################################################
+    ############################################################################
     initial_reg <- design$initial_regimen$method(
       design = design,
       covariates = covs,
       cov_mapping = cov_mapping
     )
 
-    #################################################################################
+    ############################################################################
     ## Main patient-level loop: run through regimen optimization
-    #################################################################################
+    ############################################################################
     res <- sample_and_adjust_by_dose(
       regimen_update_design = design$regimen_update,
       sampling_design = design$sampling,
