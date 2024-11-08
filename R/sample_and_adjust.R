@@ -159,14 +159,16 @@ sample_and_adjust_by_dose <- function(
     )
 
     # update regimen based on specified algorithm
-    out <- regimen_update_design$dose_optimization_method(
+    method_args <- regimen_update_design$args
+    method_args <- append(method_args, list(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
       target_design = target_design,
-      covariates = covariates,
-      ...
-    )
+      covariates = covariates
+    ))
+    method_args <- append(method_args, list(...))
+    out <- do.call(regimen_update_design$dose_optimization_method, method_args)
     regimen <- out$regimen
     if(verbose) {
       message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)

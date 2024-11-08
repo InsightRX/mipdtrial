@@ -8,7 +8,8 @@ create_regimen_update_design(
   at,
   anchor,
   update_type = c("dose", "interval"),
-  dose_optimization_method = map_adjust_dose
+  dose_optimization_method = map_adjust_dose,
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ be adjusted given the collected drug levels. The function must return a
 named list of the structure \code{list(regimen = reg, additional_info = x)},
 where \code{reg} is the updated PKPDsim regimen for the patient and \code{x} can be
 another other information useful for post-processing of trial results.}
+
+\item{...}{arguments passed on to \code{dose_optimization_method}}
 }
 \description{
 Create scheme for updating dose or interval during dose optimization trial
