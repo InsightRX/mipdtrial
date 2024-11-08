@@ -1,5 +1,5 @@
 ---
-title: "Busulfan MIPD"
+title: "Model misspecification, a busulfan case study"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Busulfan MIPD}
@@ -16,7 +16,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this example script, we will estimate target attainment for busulfan.
+In this vignette, we will demonstrate the following tools:
+
+* using {mipdtrial} to simulate a trial, with the trial design specified using
+  R code.
+* simulating patient PK and estimating patient PK with different models, to
+  assess the impact of model misspecification
+* using a weight-based initial dose
 
 To account for model misspecification, we will use one model to simulate
 (McCune, 2014) and one model to estimate (Shukla, 2020). This is a simplified
@@ -50,9 +56,6 @@ if (!require(pkbusulfanshukla)) {
   library(pkbusulfanshukla)
 }
 
-# For example data
-library(NHANES)
-
 # For data handling/plotting
 library(dplyr)
 library(tidyr)
@@ -82,32 +85,45 @@ update_design <- create_regimen_update_design(
   anchor = "dose",
   dose_optimization_method = map_adjust_dose
 )
+initial_method <- create_initial_regimen_design(
+  method = weight_based_starting_dose,
+  mgkg = 3.2,
+  dosing_weight = "Weight", # matches column in data set
+  regimen = list(
+    interval = 24,
+    n = 4,
+    t_inf = 3,
+    type = "infusion"
+  )
+)
+sim_mod_design <- create_model_design(lib = "pkbusulfanmccune")
+est_mod_design <- create_model_design(lib = "pkbusulfanshukla")
+
+design <- create_trial_design(
+  sampling_design = tdm_design,
+  target_design = target_design,
+  regimen_update_design = update_design,
+  initial_regimen_design = initial_method,
+  sim_design = sim_mod_design, 
+  est_design = est_mod_design
+)
 ```
 
 ## 2. Create a set of digital patient covariates
 
-We will use the NHANES data set for covariate distributions. This is a data set
-of five thousand individuals collected by the US National Center for Health
-Statistics. See package documentation for more details.
-
-We will also use the `dplyr` package for some basic data processing. Since every
-data set is un-tidy in its own way (“Tidy datasets are all alike, but every 
-messy dataset is messy in its own way.” 
-–– [Hadley Wickham](https://r4ds.had.co.nz/tidy-data.html)), data cleaning 
-should be handled outside of the `mipdtrial` tools. The functions expect all
-patient covariates to be numeric.
+We will create an example data set of 10 individuals originally drawn from the
+NHANES data set. This data set was created from survey data collected by the US
+National Center for Health Statistics from a general sampling of the US
+population, and is available in the NHANES R package.
 
 ```{r}
-dat <- NHANES::NHANES %>%
-  # take just the first record per patient
-  group_by(ID) %>%
-  slice(1) %>%
-  ungroup() %>%
-  # convert columns to numeric
-  mutate(Gender = ifelse(Gender == "male", 1, 0)) %>% # as defined in models
-  select(ID, Gender, Age, Weight, Height) %>%
-  # include only patients with all information available
-  filter(!is.na(Gender), !is.na(Weight), !is.na(Height), !is.na(Age))
+dat <- data.frame(
+  ID = 1:10,
+  Gender = c(1, 1, 0, 1, 1, 0, 1, 1, 1, 0),
+  Age = c(34L, 4L, 49L, 9L, 8L, 45L, 66L, 58L, 54L, 10L),
+  Weight = c(87.4, 17, 86.7, 29.8, 35.2, 75.7, 68, 78.4, 74.7, 38.6),
+  Height = c(164.7, 105.4, 168.4, 133, 130.6, 166.7, 169.5, 182, 169.4, 141.8)
+)
 ```
 
 The next step is to make sure we have all the covariates we need. Busulfan has a
@@ -135,41 +151,30 @@ Here are the first few rows of our data set:
 head(dat)
 ```
 
-We will also only look at the first 10 patients in our data set, in the 
-interest of speed.
-
-```{r}
-ids <- dat$ID[1:10]
-```
-
-## 3. Load model definitions
-
-We need to define the model parameters and variability terms for our simulation.
-For this study, we will use the ones defined in the models.
-
-```{r}
-# Set up simulation model ("true")
-model_sim <- pkbusulfanmccune::model()
-parameters_sim <- pkbusulfanmccune::parameters()
-omega_sim <- pkbusulfanmccune::omega_matrix()
-ruv_sim <- pkbusulfanmccune::ruv()
-
-# Set up estimation model (model for MIPD)
-model_est <- pkbusulfanshukla::model()
-parameters_est <- pkbusulfanshukla::parameters()
-omega_est <- pkbusulfanshukla::omega_matrix()
-ruv_est <- pkbusulfanshukla::ruv()
-```
-
 We also need to link the covariates in our data set to the covariates expected
-in the model.
+in the model:
+
+  - To check which covariates are required for your models use
+    `PKPDsim::get_model_covariates()`:
+
+    ```{r}
+    unique(
+      c(
+        PKPDsim::get_model_covariates(sim_mod_design$model),
+        PKPDsim::get_model_covariates(est_mod_design$model)
+      )
+    )
+    ```
+  
+  - To check which covariates are in your data set use `colnames()`:
+
+    ```{r}
+    colnames(dat)
+    ```
+
 
 ```{r}
-# check which covariates are required for your model using 
-# `attr(model_sim, "covariates")`
-
-# check which covariates are in your data set using `colnames(dat)`
-cov_mapping <- c(
+cov_map <- c(
   AGE = "Age", 
   WT = "Weight", 
   HT = "Height", 
@@ -180,22 +185,8 @@ cov_mapping <- c(
 
 ```
 
-## 4. Initialize output metrics of interest
 
-We want to record both "true" cumulative AUC and estimated cumulative AUC, 
-along with patient identifiers (i.e., id). We will pre-populate a data frame
-rather than iteratively binding rows, since that is more performant.
-
-```{r}
-results <- data.frame(
-  id = ids,
-  iter = 1,
-  true_auc = NA_real_,
-  est_auc = NA_real_
-)
-```
-
-## 5. Simulate a trial!
+## 3. Simulate a trial!
 
 Each patient will start at a dose of 3.2 mg/kg body weight. We will then use
 `mipdtrial::dose_grid_search` to optimize doses to attain a target of 90 mg*h/L.
@@ -212,66 +203,15 @@ etc.). This function creates a data frame of error to add to each "true"
 simulated concentration to produced a measured therapeutic drug monitoring 
 sample.
 
-```{r}
-set.seed(1) # important for reproducibility
-for (i in ids) {
-  # get patient covariates
-  covs <- create_cov_object(
-    dat[dat$ID == i,],
-    mapping = cov_mapping
-  )
-  # create initial dosing regimen (see PKPDsim::new_regimen for more info)
-  reg <- PKPDsim::new_regimen(
-    amt = 3.2 * covs$WT$value, # we will update this each "day" of the trial.
-    interval = 24,
-    n = 4,
-    t_inf = 3,
-    type = "infusion"
-  )
-  # randomly draw individual PK parameters
-  pars_true_i <- generate_iiv(
-    sim_model = model_sim,
-    omega = omega_sim,
-    parameters = parameters_sim
-  )
-  
-  treatment_summary <- sample_and_adjust_by_dose(
-    sampling_design = tdm_design,
-    regimen_update_design = update_design,
-    target_design = target_design,
-    regimen = reg,
-    covariates = covs,
-    pars_true_i = pars_true_i,
-    sim_model = model_sim,
-    sim_ruv = ruv_sim,
-    est_model = model_est,
-    parameters = parameters_est,
-    omega = omega_est,
-    ruv = ruv_est
-  )
-  # extract metrics of interest
-  results$true_auc[results$id == i] <- calc_auc_from_regimen(
-    regimen = treatment_summary$final_regimen,
-    parameters = pars_true_i, # true patient parameters
-    model = model_sim,
-    target_design = target_design,
-    covariates = covs
-  )
-  final_parameters <- treatment_summary$additional_info[[length(treatment_summary$additional_info)]]
-  results$est_auc[results$id == i] <- calc_auc_from_regimen(
-    regimen = treatment_summary$final_regimen,
-    parameters = final_parameters, # estimated patient PK
-    model = model_est,
-    target_design = target_design,
-    covariates = covs
-  )
-}
+```{r echo = FALSE}
+res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1)
+
 ```
 
 Here are the first few rows of our simulation results:
 
 ```{r}
-head(results)
+head(res$final_exposure)
 ```
 
 ## 6. Analyze results
@@ -282,9 +222,9 @@ target attainment would be very high (all patients have an AUC very close to
 misspecification!
 
 ```{r fig.width = 2, fig.height = 3}
-results %>%
+res$final_exposure %>%
   pivot_longer(
-    c(true_auc, est_auc),
+    c(auc_true, auc_est),
     names_to = "auc_type",
     values_to = "auc"
   ) %>%
@@ -304,9 +244,9 @@ Even with some model misspecification, target attainment (within 20% of target
 AUC) was still high:
 
 ```{r}
-target_attainment <- results %>%
+target_attainment <- res$final_exposure %>%
   mutate(
-    ontarget = is_on_target(true_auc, target_design)) %>%
+    ontarget = is_on_target(auc_true, target_design)) %>%
   summarize(proportion_ontarget = mean(ontarget)) %>%
   pull(proportion_ontarget)
 target_attainment <- paste0(round(100 * target_attainment), "%")

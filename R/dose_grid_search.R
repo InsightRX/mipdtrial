@@ -64,6 +64,7 @@ dose_grid_search <- function(
     max_dose = NULL,
     min_dose = NULL,
     n_cores = 1,
+    md = list(),
     covariates = NULL,
     ...
 ) {

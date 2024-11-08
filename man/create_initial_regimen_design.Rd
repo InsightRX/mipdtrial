@@ -9,10 +9,27 @@ create_initial_regimen_design(method, ...)
 \arguments{
 \item{method}{a function to call. The function should always return a
 PKPDsim regimen object.}
+
+\item{...}{options passed on depending on \code{method}. Commonly includes
+\code{regimen}, a named list of arguments passed on to PKPDsim::new_regimen
+(see examples)}
 }
 \value{
 a list object with the design specs
 }
 \description{
 Creates a design for the initial regimen for patients in the trial
+}
+\examples{
+# create_initial_regimen_design(
+  method = weight_based_starting_dose,
+  mgkg = 15,
+  regimen = list(
+    interval = 12,
+    n = 10,
+    t_inf = 1,
+    type = "infusion"
+  )
+)
+
 }

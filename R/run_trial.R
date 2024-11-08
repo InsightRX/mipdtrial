@@ -32,12 +32,12 @@ run_trial <- function(
   if(!is.null(seed)) set.seed(seed) # important for reproducibility
 
   ## Set up data collectors
-  tdms <- c()
-  dose_updates <- c()
-  est_parameters <- c()
-  sim_parameters <- c()
-  gof <- c()
-  auc <- c()
+  tdms <- data.frame()
+  dose_updates <- data.frame()
+  additional_info <- list() # keep generic for other methods
+  sim_parameters <- data.frame()
+  gof <- data.frame()
+  final_exposure <- data.frame()
 
   ## Set up number of individuals to simulate
   if(is.null(n_ids)) {
@@ -54,9 +54,9 @@ run_trial <- function(
   if(progress) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
   for (i in data$ID) {
     if(progress) setTxtProgressBar(pb, i)
-    #################################################################################
+    ############################################################################
     ## Create individual
-    #################################################################################
+    ############################################################################
     # get patient covariates
     covs <- create_cov_object(
       data[data$ID == i,],
@@ -69,20 +69,20 @@ run_trial <- function(
       parameters = design$sim$parameters
     )
 
-    #################################################################################
+    ############################################################################
     ## find initial starting dose: define basic regimen, then update
     ## the function that is called should be ble to take `design`, `covariates`,
     ## and `cov_mapping`.
-    #################################################################################
+    ############################################################################
     initial_reg <- design$initial_regimen$method(
       design = design,
       covariates = covs,
       cov_mapping = cov_mapping
     )
 
-    #################################################################################
+    ############################################################################
     ## Main patient-level loop: run through regimen optimization
-    #################################################################################
+    ############################################################################
     res <- sample_and_adjust_by_dose(
       regimen_update_design = design$regimen_update,
       sampling_design = design$sampling,
@@ -98,33 +98,8 @@ run_trial <- function(
       ruv = design$est$ruv
     )
 
-    #################################################################################
-    ## Collect data into object
-    #################################################################################
-    tdms <- dplyr::bind_rows(
-      tdms,
-      res$tdms %>% dplyr::mutate(id = i)
-    )
-    dose_updates <- dplyr::bind_rows(
-      dose_updates,
-      res$dose_updates %>% dplyr::mutate(id = i)
-    )
-    est_parameters <- dplyr::bind_rows(
-      est_parameters,
-      bind_rows(lapply(res$est_parameters, data.frame)) %>%
-        dplyr::mutate(id = i, dose_update = 1:nrow(.))
-    )
-    sim_parameters <- dplyr::bind_rows(
-      sim_parameters,
-      pars_true_i %>% dplyr::mutate(id = i)
-    )
-    gof <- dplyr::bind_rows(
-      gof,
-      res$gof %>% dplyr::mutate(id = i)
-    )
-    if(design$target$type %in% c("auc", "cumauc", "auc24")) {
-      # get true AUC at end of treatment course
-      # the estimated AUC is in
+    # post-processing to get common exposure read-outs
+    if(design$target$type %in% target_types_auc) {
       auc_true <- calc_auc_from_regimen(
         regimen = res$final_regimen,
         parameters = pars_true_i, # true patient parameters
@@ -134,26 +109,60 @@ run_trial <- function(
       )
       auc_est <- calc_auc_from_regimen(
         regimen = res$final_regimen,
-        parameters = res$est_parameters[[1]],
+        parameters = tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
       )
-      auc <- dplyr::bind_rows(
-        auc,
+      final_exposure <- rbind(
+        final_exposure,
         data.frame(id = i, auc_true = auc_true, auc_est = auc_est)
       )
+    } else if (design$target$type %in% target_types_conc) {
+      conc_true <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      conc_est <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = tail(res$additional_info, 1)[[1]],
+        model = design$est$model,
+        target_design = design$target,
+        covariates = covs
+      )
+      final_exposure <- rbind(
+        final_exposure,
+        data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
+      )
     }
+
+    ############################################################################
+    ## Collect data into object
+    ############################################################################
+    res$tdms$id <- i
+    res$dose_updates$id <- i
+    res$additional_info$id <- i
+    sim_pars_i <- pars_true_i
+    sim_pars_i$id <- i
+    res$gof$id <-  i
+    tdms <- rbind(tdms, res$tdms)
+    dose_updates <- rbind(dose_updates, res$dose_updates)
+    additional_info <- c(additional_info, res$additional_info)
+    sim_parameters <- rbind(sim_parameters, sim_pars_i)
+    gof <- rbind(gof, res$gof)
   }
 
   out <- list(
     tdms = tdms,
     dose_updates = dose_updates,
-    est_parameters = est_parameters,
+    additional_info = additional_info,
     sim_parameters = sim_parameters,
     design = design,
     gof = gof,
-    auc = auc
+    final_exposure = final_exposure
   )
   class(out) <- c("mipdtrial_results", "list")
   out

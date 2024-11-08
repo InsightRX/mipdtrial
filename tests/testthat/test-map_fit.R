@@ -29,16 +29,23 @@ tdms <- data.frame(
 test_that("MAP fit works, with and without iov", {
   # with iov
   res_iov <- simulate_fit(model, parameters, omega, ruv, tdms, covs, regimen)
+  fit_par_iov <- res_iov[["parameters"]]
 
   # convert to non-IOV model
   add_fixed <- names(parameters)[grepl("kappa", names(parameters))]
   attr(model, "iov") <- list(n_bins = 1)
   attr(model, "fixed") <- c(attr(model, "fixed"), add_fixed)
-  res_no_iov <- simulate_fit(model, parameters, omega, ruv, tdms, covs, regimen)
+  res_no_iov <- suppressWarnings( # TODO: fix iov bin warning in PKPDmap
+    simulate_fit(model, parameters, omega, ruv, tdms, covs, regimen)
+  )
+  fit_par_no_iov <- res_no_iov[["parameters"]]
 
   # correct structure
-  expect_equal(sort(names(res_iov)), sort(names(parameters)))
-  expect_equal(sort(names(res_no_iov)), sort(names(parameters)))
+  expect_cols <- c("pred", "ipred", "dv", "weights")
+  expect_equal(sort(names(fit_par_iov)), sort(names(parameters)))
+  expect_equal(sort(names(fit_par_no_iov)), sort(names(parameters)))
+  expect_true(all(expect_cols %in% names(res_iov)))
+  expect_true(all(expect_cols %in% names(res_no_iov)))
 
   # not the same as population parameters
   expect_false(

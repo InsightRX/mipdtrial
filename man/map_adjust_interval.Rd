@@ -48,7 +48,7 @@ PKPDsim::sim}
 }
 \value{
 Returns a named list: \code{regimen}: the updated regimen;
-\code{est_parameters}: the MAP parameter estimates
+\code{additional_info}: the MAP parameter estimates
 }
 \description{
 Given a set of levels and a model definition, performs MAP Bayesian

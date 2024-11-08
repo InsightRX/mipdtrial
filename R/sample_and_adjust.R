@@ -32,7 +32,7 @@
 #' @param verbose verbose output?
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `tdms` (all collected levels, both true and measured, that is,
-#' both with and without residual variability), and `est_parameters`, which
+#' both with and without residual variability), and `additional_info`, which
 #' varies by dose_optimization_method. See selected function for details.
 #'
 #' @export
@@ -51,6 +51,8 @@ sample_and_adjust_by_dose <- function(
 ) {
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
+  iov_bins_sim <- attr(sim_model, "iov")$bins
+  if (!isTRUE(length(iov_bins_sim) > 1)) iov_bins_sim <- c(0, 99999)
 
   adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
@@ -75,10 +77,24 @@ sample_and_adjust_by_dose <- function(
   )
   last_adjust_time <- 0
 
-  est_parameters <- c()
-  dose_updates <- c()
+  additional_info <- c()
+  dose_updates <- data.frame(
+    t = numeric(0),
+    dose_update = numeric(0),
+    t_adjust = numeric(0),
+    dose_before_update = numeric(0),
+    interval_before_update = numeric(0),
+    auc_before_update = numeric(0),
+    trough_before_update = numeric(0)
+  )
   aucs_i <- c()
-  gof <- c()
+  gof <- data.frame(
+    pred = numeric(0),
+    ipred = numeric(0),
+    dv = numeric(0),
+    weights = numeric(0),
+    update = numeric(0)
+  )
 
   if(verbose) {
     message("Starting dose: ", round(regimen$dose_amts[1]))
@@ -104,7 +120,8 @@ sample_and_adjust_by_dose <- function(
       pars_i = pars_true_i,
       regimen = regimen,
       covariates = covariates,
-      lloq = sampling_design$lloq
+      lloq = sampling_design$lloq,
+      iov_bins = iov_bins_sim
     )
     auc_current_regimen <- calc_auc_from_regimen(
       regimen = regimen,
@@ -128,7 +145,7 @@ sample_and_adjust_by_dose <- function(
     } else {
       tdms_i <- new_tdms
     }
-    dose_updates <- dplyr::bind_rows(
+    dose_updates <- rbind(
       dose_updates,
       data.frame(
         t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
@@ -161,16 +178,14 @@ sample_and_adjust_by_dose <- function(
       regimen
     )
 
-    est_parameters <- c(
-      est_parameters,
-      setNames(list(out$est_parameters), paste0("dose_", adjust_at_dose[j]))
+    additional_info <- c(
+      additional_info,
+      setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
-
-    gof <- dplyr::bind_rows(
-      gof,
-      out$gof %>% mutate(update = j)
-    )
-
+    if (!is.null(out$gof)) {
+      out$gof$update <- j
+      gof <- rbind(gof, out$gof)
+    }
   }
 
   ## Calculate AUC for final regimen
@@ -188,7 +203,7 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
-  dose_updates <- dplyr::bind_rows(
+  dose_updates <- rbind(
     dose_updates,
     data.frame(
       t = regimen$dose_times[adjust_at_dose[j]],
@@ -206,7 +221,7 @@ sample_and_adjust_by_dose <- function(
     tdms = tdms_i,
     aucs = aucs_i,
     dose_updates = dose_updates,
-    est_parameters = est_parameters,
+    additional_info = additional_info,
     gof = gof
   )
 }
@@ -223,7 +238,7 @@ sample_and_adjust_by_dose <- function(
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `est_parameters`: the MAP parameter estimates
+#'   `additional_info`: the MAP parameter estimates
 #' @export
 #'
 map_adjust_dose <- function(
@@ -283,7 +298,7 @@ map_adjust_dose <- function(
     dose_update = dose_update,
     new_dose = new_dose,
     new_interval = NA,
-    est_parameters = est_par,
+    additional_info = est_par,
     gof = gof
   )
 }
@@ -301,7 +316,7 @@ map_adjust_dose <- function(
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `est_parameters`: the MAP parameter estimates
+#'   `additional_info`: the MAP parameter estimates
 #' @export
 map_adjust_interval <- function(
     tdms,
@@ -361,7 +376,7 @@ map_adjust_interval <- function(
     dose_update = dose_update,
     new_dose = NA,
     new_interval = new_interval,
-    est_parameters = est_par,
+    additional_info = est_par,
     gof = gof
   )
 }
