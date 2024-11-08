@@ -20,6 +20,6 @@ designs:
     update_type: dose
     dose_optimization_method: map_adjust_dose
   sim:
-    lib: pkvancothomson
+    lib: pkbusulfanmccune
   est:
-    lib: pkvancothomson
+    lib: pkbusulfanmccune
