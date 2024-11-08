@@ -25,7 +25,7 @@ create_trial_design <- function(
     design <- parse_spec_file_to_trial_design(file)
   } else {
     design <- list(
-      sampling = tdm_design,
+      sampling = sampling_design,
       target = target_design,
       initial_regimen = initial_regimen_design,
       regimen_update = regimen_update_design,
