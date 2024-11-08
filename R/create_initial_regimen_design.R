@@ -11,6 +11,7 @@
 #' # create_initial_regimen_design(
 #'   method = weight_based_starting_dose,
 #'   mgkg = 15,
+#'   dosing_weight = "total_body_weight",
 #'   regimen = list(
 #'     interval = 12,
 #'     n = 10,

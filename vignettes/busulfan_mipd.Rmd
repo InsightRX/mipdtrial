@@ -88,6 +88,7 @@ update_design <- create_regimen_update_design(
 initial_method <- create_initial_regimen_design(
   method = weight_based_starting_dose,
   mgkg = 3.2,
+  dosing_weight = "Weight", # matches column in data set
   regimen = list(
     interval = 24,
     n = 4,
