@@ -21,7 +21,7 @@ a list object with the design specs
 Creates a design for the initial regimen for patients in the trial
 }
 \examples{
-# create_initial_regimen_design(
+create_initial_regimen_design(
   method = weight_based_starting_dose,
   mgkg = 15,
   dosing_weight = "total_body_weight",

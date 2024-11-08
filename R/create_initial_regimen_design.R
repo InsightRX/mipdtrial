@@ -8,7 +8,7 @@
 #'
 #' @returns a list object with the design specs
 #' @examples
-#' # create_initial_regimen_design(
+#' create_initial_regimen_design(
 #'   method = weight_based_starting_dose,
 #'   mgkg = 15,
 #'   dosing_weight = "total_body_weight",
