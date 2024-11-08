@@ -14,6 +14,28 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r echo=FALSE, results='hide'}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+}
+
+if (!require(pkvancothomson)) {
+  PKPDsim::install_default_literature_model("pk_vanco_thomson")
+}
+```
+
+In this vignette, we will demonstrate the following tools:
+
+- Using {mipdtrial} to simulate a trial, with the trial design specified using
+  R code.
+- We will have two trial "arms", varying only by the therapeutic drug monitoring
+  strategy used. The two arms will be defined by two different calls to
+  `create_sampling_design()`
+
+## Motivation
+
 A hospital currently collects two samples for adjusting vancomycin doses: one
 at 1-hr post-dose and another at 9 hours post-dose. They want to compare the 
 impact on target attainment (an area under the curve (AUC) of 400-600 mg*h/L) if
@@ -39,9 +61,6 @@ In each case, we will collect the samples in the fourth dosing interval, and for
 infused over 2 hours.
 
 ```{r}
-# end_of_fourth_infusion <- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs
-# tdm_times1 <- c(1, 9) + end_of_fourth_infusion
-# tdm_times2 <- 5 + end_of_fourth_infusion
 tdm_design1 <- create_sampling_design(
   offset = c(1, 9),
   at = c(4, 4), 
@@ -55,7 +74,8 @@ tdm_design2 <- create_sampling_design(
 ```
 
 We will adjust the fifth dose based on these levels, aiming for a daily AUC of 
-400-600 mg*h/L by day 6.
+400-600 mg*h/L by day 6. We will use the Thomson (2009) model for simulating
+patient pharmacokinetics.
 
 ```{r}
 update_design <- create_regimen_update_design(
@@ -69,6 +89,47 @@ target_design <- create_target_design(
   targetmax = 600,
   at = 6,
   anchor = "day"
+)
+model_design <- create_model_design(lib = "pkvancothomson")
+```
+
+Our initial dosing strategy will be based on population PK parameters, with dose
+size calculated to reach the specified target for a dosing interval of 12 hours.
+
+```{r}
+initial_method <- create_initial_regimen_design(
+  method = model_based_starting_dose,
+  regimen = list(
+    interval = 12,
+    type = "infusion",
+    t_inf = 1
+  ),
+  settings = list(
+    auc_comp = 3,
+    dose_resolution = 250,
+    dose_grid = c(250, 5000, 250)
+  )
+)
+      
+```
+
+Now we can combine all these design choices together:
+
+```{r}
+design1 <- create_trial_design(
+  sampling_design = tdm_design1, # arm 1
+  target_design = target_design,
+  regimen_update_design = update_design,
+  initial_regimen_design = initial_method,
+  sim_design = model_design, est_design = model_design
+)
+
+design2 <- create_trial_design(
+  sampling_design = tdm_design2, # arm 2
+  target_design = target_design,
+  regimen_update_design = update_design,
+  initial_regimen_design = initial_method,
+  sim_design = model_design, est_design = model_design
 )
 ```
 
@@ -102,45 +163,24 @@ Here are the first few rows of our data set:
 head(dat)
 ```
 
-## 3. Load model definitions
-
-We need to define the model parameters and variability terms for our simulation.
-For this study, we will use the ones defined in the models.
-
-
-```{r echo=FALSE, results='hide'}
-# for CI, most windows users should not need this since the .libPaths should
-# include where the model was installed.
-if (.Platform$OS.type == "windows") { 
-    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
-}
-
-if (!require(pkvancothomson)) {
-  PKPDsim::install_default_literature_model("pk_vanco_thomson")
-}
-```
-
-```{r message=FALSE, warning=FALSE}
-# Set up simulation model
-if (!require(pkvancothomson)) {
-  PKPDsim::install_default_literature_model("pk_vanco_thomson")
-  library(pkvancothomson)
-}
-model <- pkvancothomson::model()
-pop_parameters <- pkvancothomson::parameters()
-omega <- pkvancothomson::omega_matrix()
-ruv <- pkvancothomson::ruv()
-```
-
 We also need to link the covariates in our data set to the covariates expected
-in the model.
+in the model:
+
+  - To check which covariates are required for your model use
+    `PKPDsim::get_model_covariates()`:
+
+    ```{r}
+    PKPDsim::get_model_covariates(model_design$model)
+    ```
+  
+  - To check which covariates are in your data set use `colnames()`:
+
+    ```{r}
+    colnames(dat)
+    ```
 
 ```{r}
-# check which covariates are required for your model using 
-# `PKPDsim::get_model_covariates(model)`
-
-# check which covariates are in your data set using `colnames(dat)`
-cov_mapping <- c(
+cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
   CL_HEMO = "CL_HEMO"
@@ -148,21 +188,7 @@ cov_mapping <- c(
 
 ```
 
-## 4. Initialize output metrics of interest
-
-We want to compare AUC at the end of the treatment course according to each 
-sample collection strategy. We will pre-populate a data frame rather than 
-iteratively binding rows, since that is more performant.
-
-```{r}
-results <- data.frame(
-  id = dat$ID,
-  peak_trough = NA_real_,
-  random = NA_real_
-)
-```
-
-## 5. Simulate a trial!
+## 3. Simulate a trial!
 
 Patients will get a model-based dose (using population PK parameters), and then
 this dose will be adjusted based on the MAP Bayesian fit made using the 
@@ -173,111 +199,35 @@ variability described in the model, and residual variability will be added to
 each sample collected using the error model described in the model.
 
 ```{r}
-set.seed(15) # important for reproducibility
-
-for (i in dat$ID) {
-  # get patient covariates
-  covs <- create_cov_object(
-    dat[dat$ID == i,],
-    mapping = cov_mapping
-  )
-  # find initial starting dose: define basic regimen, then upda
-  initial_reg <- model_based_starting_dose(
-    target_design = target_design,
-    sampling_design = tdm_design1,
-    n = 12,
-    interval = 12,
-    t_inf = 2,
-    dose_resolution = 250, # round to nearest 250 mg
-    grid = seq(250, 6000, by = 250),
-    grid_type = "dose",
-    # define model components
-    est_model = model,
-    parameters = pop_parameters,
-    covariates = covs,
-    auc_comp = attr(model, "size")
-  )
-
-  # randomly draw individual PK parameters
-  pars_true_i <- generate_iiv(
-    sim_model = model,
-    omega = omega,
-    parameters = pop_parameters
-  )
-  
-  # Summary of both MIPD approaches
-  treatment_summary1 <- sample_and_adjust_by_dose(
-    regimen_update_design = update_design, 
-    sampling_design = tdm_design1, # arm 1
-    target_design = target_design,
-    regimen = initial_reg,
-    covariates = covs,
-    pars_true_i = pars_true_i,
-    sim_model = model,
-    sim_ruv = ruv,
-    est_model = model,
-    parameters = pop_parameters,
-    omega = omega,
-    ruv = ruv
-  )
-  treatment_summary2 <- sample_and_adjust_by_dose(
-    regimen_update_design = update_design, 
-    sampling_design = tdm_design2, # arm 1
-    target_design = target_design,
-    regimen = initial_reg,
-    covariates = covs,
-    pars_true_i = pars_true_i,
-    sim_model = model,
-    sim_ruv = ruv,
-    est_model = model,
-    parameters = pop_parameters,
-    omega = omega,
-    ruv = ruv
-  )
-  
-  # get steady-state AUC at end of treatment course
-  results$peak_trough[results$id == i] <- calc_auc_from_regimen(
-    regimen = treatment_summary1$final_regimen,
-    parameters = pars_true_i, # true patient parameters
-    model = model,
-    target_design = target_design,
-    covariates = covs
-  )
-  results$random[results$id == i] <- calc_auc_from_regimen(
-    regimen = treatment_summary2$final_regimen,
-    parameters = pars_true_i, # true patient parameters
-    model = model,
-    target_design = target_design,
-    covariates = covs
-  )
-}
+res1 <- run_trial(data = dat, design = design1, cov_mapping = cov_map, seed = 15)
+res2 <- run_trial(data = dat, design = design2, cov_mapping = cov_map, seed = 15)
 ```
 
-Here are the first few rows of our simulation results:
+We can look at final exposure estimates for each arm:
 
 ```{r}
+final_exp1 <- res1$final_exposure %>%
+  mutate(arm = "peak-trough")
+final_exp2 <- res2$final_exposure %>%
+  mutate(arm = "mid-interval")
+results <- bind_rows(final_exp1, final_exp2)
 head(results)
 ```
 
-## 6. Analyze results
+
+## 4. Analyze results
 
 We are interested in AUC target attainment. How did target attainment compare
 between the two arms of the trial?
 
 ```{r}
 target_attainment <- results %>%
-  pivot_longer(
-    c(peak_trough, random),
-    names_to = "sampling_design",
-    values_to = "steady_state_auc"
-  ) %>%
-  mutate(ontarget = is_on_target(steady_state_auc, target_design)) %>%
-  group_by(sampling_design) %>%
+  mutate(ontarget = ifelse(auc_true >= 400 & auc_true <= 600, 1, 0)) %>%
+  group_by(arm) %>%
   summarize(prop_on_target = 100 * mean(ontarget))
-
 target_attainment %>%
   ggplot() +
-    aes(x = sampling_design, y = prop_on_target) +
+    aes(x = arm, y = prop_on_target) +
     geom_bar(stat = "identity") +
     theme_minimal() +
     theme(
@@ -298,8 +248,10 @@ look at how each patient responded to each sampling strategy.
 
 ```{r}
 results %>%
+  select(id, auc_true, arm) %>%
+  pivot_wider(names_from = arm, values_from = auc_true) %>%
   ggplot() +
-    aes(x = peak_trough, y = random) +
+    aes(x = `peak-trough`, y = `mid-interval`) +
     geom_rect(
       aes(xmin = 400, xmax = 600, ymin = -Inf, ymax = Inf), 
       fill = "grey70",
