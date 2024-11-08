@@ -151,7 +151,7 @@ test_that("Can use separate models for sim and est", {
   )
 
   # est and sim model are different
-  out <- suppressWarnings(sample_and_adjust_by_dose(
+  out <- sample_and_adjust_by_dose(
     tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
     regimen_update_design = create_regimen_update_design(
       at = c(2, 4),
@@ -181,7 +181,7 @@ test_that("Can use separate models for sim and est", {
     # target = list(type = "cum_auc", value = 90000),
     dose_optimization_method = map_adjust_dose,
     verbose = F
-  ))
+  )
 
   # expected structure
   expect_true(inherits(out, "list"))
