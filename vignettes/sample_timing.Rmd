@@ -48,6 +48,10 @@ library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
 library(ggplot2) # for plotting our results
+if(!require(pkvancothomson)) {
+  PKPDsim::install_default_literature_model("pk_vanco_thomson")
+  library(pkvancothomson)
+}
 ```
 
 ## 1. Define trial design

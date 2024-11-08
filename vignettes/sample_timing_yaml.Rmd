@@ -14,6 +14,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r echo=FALSE, results='hide'}
+# for CI, most windows users should not need this since the .libPaths should
+# include where the model was installed.
+if (.Platform$OS.type == "windows") { 
+    .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
+}
+
+if (!require(pkvancothomson)) {
+  PKPDsim::install_default_literature_model("pk_vanco_thomson")
+}
+```
+
 In this vignette, we will demonstrate the following tools:
 
 - Using {mipdtrial} to simulate a trial, with the trial design specified using
