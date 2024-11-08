@@ -51,7 +51,7 @@ function.}
 \value{
 a named list containing \code{final_regimen} (all doses after
 adjustment), \code{tdms} (all collected levels, both true and measured, that is,
-both with and without residual variability), and \code{est_parameters}, which
+both with and without residual variability), and \code{additional_info}, which
 varies by dose_optimization_method. See selected function for details.
 }
 \description{
