@@ -1,8 +1,8 @@
 ---
-title: "Specifying a trial using yaml, a sample timing case study"
+title: "Effect of sample timing (YAML example)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Effect of sample timing}
+  %\VignetteIndexEntry{Effect of sample timing, YAML example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -1,8 +1,8 @@
 ---
-title: "Effect of sample timing"
+title: "Effect of sample timing (R example)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Effect of sample timing}
+  %\VignetteIndexEntry{Effect of sample timing, R example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -50,7 +50,7 @@ library(tidyr)
 library(ggplot2) # for plotting our results
 if(!require(pkvancothomson)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
-  library(pkvancothomson)
+  loadNamespace(pkvancothomson)
 }
 ```
 

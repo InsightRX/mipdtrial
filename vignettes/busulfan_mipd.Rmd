@@ -49,11 +49,11 @@ if (!require(pkbusulfanshukla, warn.conflicts = FALSE)) {
 library(mipdtrial)
 if(!require(pkbusulfanmccune)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")
-  library(pkbusulfanmccune)
+  loadNamespace(pkbusulfanmccune)
 }
 if (!require(pkbusulfanshukla)) {
   PKPDsim::install_default_literature_model("pk_busulfan_shukla")
-  library(pkbusulfanshukla)
+  loadNamespace(pkbusulfanshukla)
 }
 
 # For data handling/plotting
