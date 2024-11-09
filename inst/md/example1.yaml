@@ -1,0 +1,25 @@
+name: test
+description: try out the functionality
+designs:
+  initial_regimen:
+    method: model_based_starting_dose
+  target:
+    targettype: auc24
+    targetmin: 400
+    targetmax: 600
+    at: 4
+    anchor: day
+  sampling:
+    offset: [1, -1, 1, -1, 1, -1]
+    when: [peak, trough, peak, trough, peak, trough]
+    at: [2, 2, 4, 4, 6, 6]
+    anchor: dose
+  regimen_update:
+    at: [3, 5, 7]
+    anchor: dose
+    update_type: dose
+    dose_optimization_method: map_adjust_dose
+  sim:
+    lib: pkbusulfanmccune
+  est:
+    lib: pkbusulfanmccune

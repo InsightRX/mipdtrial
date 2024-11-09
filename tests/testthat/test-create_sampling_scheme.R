@@ -126,4 +126,3 @@ test_that("'scatter' options works", {
   )
   expect_equal(tdm6, c(-0.11, 5.95, 10.95, 12.25))
 })
-

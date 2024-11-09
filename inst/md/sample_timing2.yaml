@@ -1,0 +1,32 @@
+name: Test different sampling designs.
+description: Sampling design 2 - mid-level
+designs:
+  initial_regimen:
+    method: model_based_starting_dose
+    regimen:
+      interval: 12
+      type: infusion
+      t_inf: 1
+    settings:
+      auc_comp: 3
+      dose_resolution: 250
+      dose_grid: [250, 5000, 250]
+  target:
+    targettype: auc24
+    targetmin: 400
+    targetmax: 600
+    at: 6
+    anchor: day
+  sampling:
+    offset: [5]
+    at: [4]
+    anchor: dose
+  regimen_update:
+    at: [5]
+    anchor: dose
+    update_type: dose
+    dose_optimization_method: map_adjust_dose
+  sim:
+    lib: pkvancothomson
+  est:
+    lib: pkvancothomson

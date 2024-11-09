@@ -150,7 +150,8 @@ test_that("Can use separate models for sim and est", {
     T_CL_EFF = PKPDsim::new_covariate(0)
   )
 
-  out <- sample_and_adjust_by_dose( # est and sim model are different
+  # est and sim model are different
+  out <- sample_and_adjust_by_dose(
     tdm_times = c(3, 5, 8, 12, 51, 53, 56, 60),
     regimen_update_design = create_regimen_update_design(
       at = c(2, 4),

@@ -51,6 +51,8 @@ sample_and_adjust_by_dose <- function(
 ) {
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
+  iov_bins_sim <- attr(sim_model, "iov")$bins
+  if (!isTRUE(length(iov_bins_sim) > 1)) iov_bins_sim <- c(0, 99999)
 
   adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
@@ -76,8 +78,23 @@ sample_and_adjust_by_dose <- function(
   last_adjust_time <- 0
 
   additional_info <- c()
-  dose_updates <- c()
+  dose_updates <- data.frame(
+    t = numeric(0),
+    dose_update = numeric(0),
+    t_adjust = numeric(0),
+    dose_before_update = numeric(0),
+    interval_before_update = numeric(0),
+    auc_before_update = numeric(0),
+    trough_before_update = numeric(0)
+  )
   aucs_i <- c()
+  gof <- data.frame(
+    pred = numeric(0),
+    ipred = numeric(0),
+    dv = numeric(0),
+    weights = numeric(0),
+    update = numeric(0)
+  )
 
   if(verbose) {
     message("Starting dose: ", round(regimen$dose_amts[1]))
@@ -103,7 +120,8 @@ sample_and_adjust_by_dose <- function(
       pars_i = pars_true_i,
       regimen = regimen,
       covariates = covariates,
-      lloq = sampling_design$lloq
+      lloq = sampling_design$lloq,
+      iov_bins = iov_bins_sim
     )
     auc_current_regimen <- calc_auc_from_regimen(
       regimen = regimen,
@@ -127,7 +145,7 @@ sample_and_adjust_by_dose <- function(
     } else {
       tdms_i <- new_tdms
     }
-    dose_updates <- dplyr::bind_rows(
+    dose_updates <- rbind(
       dose_updates,
       data.frame(
         t = ifelse(j == 1, 0, regimen$dose_times[adjust_at_dose[j-1]]),
@@ -141,14 +159,16 @@ sample_and_adjust_by_dose <- function(
     )
 
     # update regimen based on specified algorithm
-    out <- regimen_update_design$dose_optimization_method(
+    method_args <- regimen_update_design$args
+    method_args <- append(method_args, list(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
       target_design = target_design,
-      covariates = covariates,
-      ...
-    )
+      covariates = covariates
+    ))
+    method_args <- append(method_args, list(...))
+    out <- do.call(regimen_update_design$dose_optimization_method, method_args)
     regimen <- out$regimen
     if(verbose) {
       message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)
@@ -164,7 +184,10 @@ sample_and_adjust_by_dose <- function(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
-
+    if (!is.null(out$gof)) {
+      out$gof$update <- j
+      gof <- rbind(gof, out$gof)
+    }
   }
 
   ## Calculate AUC for final regimen
@@ -182,7 +205,7 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
-  dose_updates <- dplyr::bind_rows(
+  dose_updates <- rbind(
     dose_updates,
     data.frame(
       t = regimen$dose_times[adjust_at_dose[j]],
@@ -199,8 +222,9 @@ sample_and_adjust_by_dose <- function(
     final_regimen = regimen,
     tdms = tdms_i,
     aucs = aucs_i,
+    dose_updates = dose_updates,
     additional_info = additional_info,
-    dose_updates = dose_updates
+    gof = gof
   )
 }
 
@@ -233,7 +257,7 @@ map_adjust_dose <- function(
   ...
 ) {
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -243,6 +267,8 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -274,7 +300,8 @@ map_adjust_dose <- function(
     dose_update = dose_update,
     new_dose = new_dose,
     new_interval = NA,
-    additional_info = est_par
+    additional_info = est_par,
+    gof = gof
   )
 }
 
@@ -308,7 +335,7 @@ map_adjust_interval <- function(
 ) {
 
   # get MAP fit, using model for estimation
-  est_par <- simulate_fit(
+  fit <- simulate_fit(
     est_model = est_model,
     parameters = parameters,
     omega = omega,
@@ -318,6 +345,8 @@ map_adjust_interval <- function(
     regimen = regimen,
     ...
   )
+  est_par <- fit$parameters
+  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
@@ -349,6 +378,7 @@ map_adjust_interval <- function(
     dose_update = dose_update,
     new_dose = NA,
     new_interval = new_interval,
-    additional_info = est_par
+    additional_info = est_par,
+    gof = gof
   )
 }

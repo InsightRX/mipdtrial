@@ -7,6 +7,7 @@
 #'   named list of the structure `list(regimen = reg, additional_info = x)`,
 #'   where `reg` is the updated PKPDsim regimen for the patient and `x` can be
 #'   another other information useful for post-processing of trial results.
+#' @param ... arguments passed on to `dose_optimization_method`
 #'
 #' @examples
 #' create_regimen_update_design(
@@ -25,7 +26,8 @@ create_regimen_update_design <- function(
     at,
     anchor,
     update_type = c("dose", "interval"),
-    dose_optimization_method = map_adjust_dose
+    dose_optimization_method = map_adjust_dose,
+    ...
 ) {
   update_type <- match.arg(update_type)
   scheme <- create_design(
@@ -37,6 +39,7 @@ create_regimen_update_design <- function(
   scheme$update_type <- update_type
   list(
     dose_optimization_method = dose_optimization_method,
-    scheme = scheme
+    scheme = scheme,
+    args = list(...)
   )
 }

@@ -3,8 +3,8 @@ suppressMessages({ ## avoid message "the following objects are masked from ..."
   if (.Platform$OS.type == "windows") {
     .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
   }
-  if (!require("pkbusulfanmccune", character.only = TRUE)) {
+  if (!requireNamespace("pkbusulfanmccune", quietly = TRUE)) {
     PKPDsim::install_default_literature_model("pk_busulfan_mccune")
-    library(pkbusulfanmccune)
+    loadNamespace("pkbusulfanmccune")
   }
 })
