@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Effect of sample timing • mipdtrial</title>
+<title>Effect of sample timing (R example) • mipdtrial</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Effect of sample timing">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Effect of sample timing (R example)">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,9 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a></li>
-    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a></li>
-    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a></li>
+<li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Model misspecification, a busulfan case study</a></li>
+    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">Custom initial dose nomogram, a PEG Asparaginase case study</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
   </ul>
 </li>
@@ -57,7 +58,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Effect of sample timing</h1>
+      <h1>Effect of sample timing (R example)</h1>
             
       
 
@@ -66,6 +67,18 @@
 
     
     
+<p>In this vignette, we will demonstrate the following tools:</p>
+<ul>
+<li>Using {mipdtrial} to simulate a trial, with the trial design
+specified using R code.</li>
+<li>We will have two trial “arms”, varying only by the therapeutic drug
+monitoring strategy used. The two arms will be defined by two different
+calls to <code><a href="../reference/create_sampling_design.html">create_sampling_design()</a></code>
+</li>
+</ul>
+<div class="section level2">
+<h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
+</h2>
 <p>A hospital currently collects two samples for adjusting vancomycin
 doses: one at 1-hr post-dose and another at 9 hours post-dose. They want
 to compare the impact on target attainment (an area under the curve
@@ -76,7 +89,12 @@ sample at 5 hours post-dose.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mipdtrial</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>   <span class="co"># for easier data manipulation </span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># for plotting our results</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># for plotting our results</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pkvancothomson"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_vanco_thomson"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">loadNamespace</a></span><span class="op">(</span><span class="st">"pkvancothomson"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="define-trial-design">1. Define trial design<a class="anchor" aria-label="anchor" href="#define-trial-design"></a>
 </h2>
@@ -89,10 +107,7 @@ sample at 5 hours post-dose.</p>
 interval, and for simplicity, we will assume all patients are receiving
 vancomycin twice daily, infused over 2 hours.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># end_of_fourth_infusion &lt;- (4-1) * 12 + 2 # first dose at t=0, infusion is 2 hrs</span></span>
-<span><span class="co"># tdm_times1 &lt;- c(1, 9) + end_of_fourth_infusion</span></span>
-<span><span class="co"># tdm_times2 &lt;- 5 + end_of_fourth_infusion</span></span>
-<span><span class="va">tdm_design1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">tdm_design1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_sampling_design.html">create_sampling_design</a></span><span class="op">(</span></span>
 <span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">9</span><span class="op">)</span>,</span>
 <span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, </span>
 <span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
@@ -103,7 +118,8 @@ vancomycin twice daily, infused over 2 hours.</p>
 <span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We will adjust the fifth dose based on these levels, aiming for a
-daily AUC of 400-600 mg*h/L by day 6.</p>
+daily AUC of 400-600 mg*h/L by day 6. We will use the Thomson (2009)
+model for simulating patient pharmacokinetics.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
 <span>  at <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -116,6 +132,42 @@ daily AUC of 400-600 mg*h/L by day 6.</p>
 <span>  targetmax <span class="op">=</span> <span class="fl">600</span>,</span>
 <span>  at <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  anchor <span class="op">=</span> <span class="st">"day"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">model_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_model_design.html">create_model_design</a></span><span class="op">(</span>lib <span class="op">=</span> <span class="st">"pkvancothomson"</span><span class="op">)</span></span></code></pre></div>
+<p>Our initial dosing strategy will be based on population PK
+parameters, with dose size calculated to reach the specified target for
+a dosing interval of 12 hours.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">initial_method</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_initial_regimen_design.html">create_initial_regimen_design</a></span><span class="op">(</span></span>
+<span>  method <span class="op">=</span> <span class="va">model_based_starting_dose</span>,</span>
+<span>  regimen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    interval <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>    type <span class="op">=</span> <span class="st">"infusion"</span>,</span>
+<span>    t_inf <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  settings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    auc_comp <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    dose_resolution <span class="op">=</span> <span class="fl">250</span>,</span>
+<span>    dose_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">5000</span>, <span class="fl">250</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span>      </span></code></pre></div>
+<p>Now we can combine all these design choices together:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
+<span>  sampling_design <span class="op">=</span> <span class="va">tdm_design1</span>, <span class="co"># arm 1</span></span>
+<span>  target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
+<span>  regimen_update_design <span class="op">=</span> <span class="va">update_design</span>,</span>
+<span>  initial_regimen_design <span class="op">=</span> <span class="va">initial_method</span>,</span>
+<span>  sim_design <span class="op">=</span> <span class="va">model_design</span>, est_design <span class="op">=</span> <span class="va">model_design</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">design2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
+<span>  sampling_design <span class="op">=</span> <span class="va">tdm_design2</span>, <span class="co"># arm 2</span></span>
+<span>  target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
+<span>  regimen_update_design <span class="op">=</span> <span class="va">update_design</span>,</span>
+<span>  initial_regimen_design <span class="op">=</span> <span class="va">initial_method</span>,</span>
+<span>  sim_design <span class="op">=</span> <span class="va">model_design</span>, est_design <span class="op">=</span> <span class="va">model_design</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -123,7 +175,7 @@ daily AUC of 400-600 mg*h/L by day 6.</p>
 </h2>
 <p>For this example, we will randomly generate a set of weights and
 creatinine clearances (CRCLs) for our synthetic data set.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">15</span><span class="op">)</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>,</span>
@@ -136,10 +188,10 @@ our data set.</p>
 <p>Other models might require fat-free mass or other calculated
 covariates. This would be a good time to do that sort of processing on
 your data set!</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span><span class="op">$</span><span class="va">CL_HEMO</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></code></pre></div>
 <p>Here are the first few rows of our data set:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   ID    weight      crcl CL_HEMO</span></span>
 <span><span class="co">#&gt; 1  1  96.47057  4.827349       0</span></span>
@@ -148,58 +200,33 @@ your data set!</p>
 <span><span class="co">#&gt; 4  4 112.42995  8.546496       0</span></span>
 <span><span class="co">#&gt; 5  5 102.20041  9.448520       0</span></span>
 <span><span class="co">#&gt; 6  6  58.61535  7.477850       0</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="load-model-definitions">3. Load model definitions<a class="anchor" aria-label="anchor" href="#load-model-definitions"></a>
-</h2>
-<p>We need to define the model parameters and variability terms for our
-simulation. For this study, we will use the ones defined in the
-models.</p>
-<pre><code><span><span class="co">#&gt; Loading required package: pkvancothomson</span></span>
-<span><span class="co">#&gt; Warning in library(package, lib.loc = lib.loc, character.only = TRUE,</span></span>
-<span><span class="co">#&gt; logical.return = TRUE, : there is no package called 'pkvancothomson'</span></span>
-<span><span class="co">#&gt; - Retrieving model definition ()...</span></span>
-<span><span class="co">#&gt; - Package pkvancothomson not installed yet.</span></span>
-<span><span class="co">#&gt; - Compiling model.</span></span>
-<span><span class="co">#&gt; * Adding model definition to R package.</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Set up simulation model</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkvancothomson</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_vanco_thomson"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkvancothomson</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">pkvancothomson</span><span class="fu">::</span><span class="fu">model</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">pop_parameters</span> <span class="op">&lt;-</span> <span class="fu">pkvancothomson</span><span class="fu">::</span><span class="fu">parameters</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">omega</span> <span class="op">&lt;-</span> <span class="fu">pkvancothomson</span><span class="fu">::</span><span class="fu">omega_matrix</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">ruv</span> <span class="op">&lt;-</span> <span class="fu">pkvancothomson</span><span class="fu">::</span><span class="fu">ruv</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>We also need to link the covariates in our data set to the covariates
-expected in the model.</p>
+expected in the model:</p>
+<ul>
+<li>
+<p>To check which covariates are required for your model use
+<code><a href="https://insightrx.github.io/PKPDsim/reference/get_model_info.html" class="external-link">PKPDsim::get_model_covariates()</a></code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check which covariates are required for your model using </span></span>
-<span><span class="co"># `PKPDsim::get_model_covariates(model)`</span></span>
-<span></span>
-<span><span class="co"># check which covariates are in your data set using `colnames(dat)`</span></span>
-<span><span class="va">cov_mapping</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/get_model_info.html" class="external-link">get_model_covariates</a></span><span class="op">(</span><span class="va">model_design</span><span class="op">$</span><span class="va">model</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "WT"      "CRCL"    "CL_HEMO"</span></span></code></pre></div>
+</li>
+<li>
+<p>To check which covariates are in your data set use
+<code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames()</a></code>:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "ID"      "weight"  "crcl"    "CL_HEMO"</span></span></code></pre></div>
+</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cov_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  WT <span class="op">=</span> <span class="st">"weight"</span>, </span>
 <span>  CRCL <span class="op">=</span> <span class="st">"crcl"</span>,</span>
 <span>  CL_HEMO <span class="op">=</span> <span class="st">"CL_HEMO"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="initialize-output-metrics-of-interest">4. Initialize output metrics of interest<a class="anchor" aria-label="anchor" href="#initialize-output-metrics-of-interest"></a>
-</h2>
-<p>We want to compare AUC at the end of the treatment course according
-to each sample collection strategy. We will pre-populate a data frame
-rather than iteratively binding rows, since that is more performant.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  id <span class="op">=</span> <span class="va">dat</span><span class="op">$</span><span class="va">ID</span>,</span>
-<span>  peak_trough <span class="op">=</span> <span class="cn">NA_real_</span>,</span>
-<span>  random <span class="op">=</span> <span class="cn">NA_real_</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="simulate-a-trial">5. Simulate a trial!<a class="anchor" aria-label="anchor" href="#simulate-a-trial"></a>
+<h2 id="simulate-a-trial">3. Simulate a trial!<a class="anchor" aria-label="anchor" href="#simulate-a-trial"></a>
 </h2>
 <p>Patients will get a model-based dose (using population PK
 parameters), and then this dose will be adjusted based on the MAP
@@ -208,115 +235,40 @@ Bayesian fit made using the collected samples.</p>
 interindividual variability described in the model, and residual
 variability will be added to each sample collected using the error model
 described in the model.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">15</span><span class="op">)</span> <span class="co"># important for reproducibility</span></span>
-<span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">dat</span><span class="op">$</span><span class="va">ID</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># get patient covariates</span></span>
-<span>  <span class="va">covs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_cov_object.html">create_cov_object</a></span><span class="op">(</span></span>
-<span>    <span class="va">dat</span><span class="op">[</span><span class="va">dat</span><span class="op">$</span><span class="va">ID</span> <span class="op">==</span> <span class="va">i</span>,<span class="op">]</span>,</span>
-<span>    mapping <span class="op">=</span> <span class="va">cov_mapping</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="co"># find initial starting dose: define basic regimen, then upda</span></span>
-<span>  <span class="va">initial_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_based_starting_dose.html">model_based_starting_dose</a></span><span class="op">(</span></span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design1</span>,</span>
-<span>    n <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>    interval <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>    t_inf <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>    dose_resolution <span class="op">=</span> <span class="fl">250</span>, <span class="co"># round to nearest 250 mg</span></span>
-<span>    grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">6000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>,</span>
-<span>    grid_type <span class="op">=</span> <span class="st">"dose"</span>,</span>
-<span>    <span class="co"># define model components</span></span>
-<span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    auc_comp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">model</span>, <span class="st">"size"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># randomly draw individual PK parameters</span></span>
-<span>  <span class="va">pars_true_i</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_variability.html">generate_iiv</a></span><span class="op">(</span></span>
-<span>    sim_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span></span>
-<span>  <span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="co"># Summary of both MIPD approaches</span></span>
-<span>  <span class="va">treatment_summary1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>, </span>
-<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design1</span>, <span class="co"># arm 1</span></span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
-<span>    sim_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    sim_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
-<span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="va">treatment_summary2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>, </span>
-<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design2</span>, <span class="co"># arm 1</span></span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    regimen <span class="op">=</span> <span class="va">initial_reg</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
-<span>    sim_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    sim_ruv <span class="op">=</span> <span class="va">ruv</span>,</span>
-<span>    est_model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pop_parameters</span>,</span>
-<span>    omega <span class="op">=</span> <span class="va">omega</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv</span></span>
-<span>  <span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="co"># get steady-state AUC at end of treatment course</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">peak_trough</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
-<span>    regimen <span class="op">=</span> <span class="va">treatment_summary1</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
-<span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">random</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
-<span>    regimen <span class="op">=</span> <span class="va">treatment_summary2</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
-<span>    model <span class="op">=</span> <span class="va">model</span>,</span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<p>Here are the first few rows of our simulation results:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id peak_trough    random</span></span>
-<span><span class="co">#&gt; 1  1    500.3640  403.2282</span></span>
-<span><span class="co">#&gt; 2  2    606.9251  577.4495</span></span>
-<span><span class="co">#&gt; 3  3    592.2950  484.8727</span></span>
-<span><span class="co">#&gt; 4  4    404.5096  348.7749</span></span>
-<span><span class="co">#&gt; 5  5    729.9797 1018.3722</span></span>
-<span><span class="co">#&gt; 6  6    487.7377  476.6390</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design1</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span>
+<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design2</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span></code></pre></div>
+<p>We can look at final exposure estimates for each arm:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">final_exp1</span> <span class="op">&lt;-</span> <span class="va">res1</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>arm <span class="op">=</span> <span class="st">"peak-trough"</span><span class="op">)</span></span>
+<span><span class="va">final_exp2</span> <span class="op">&lt;-</span> <span class="va">res2</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>arm <span class="op">=</span> <span class="st">"mid-interval"</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">final_exp1</span>, <span class="va">final_exp2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id auc_true  auc_est         arm</span></span>
+<span><span class="co">#&gt; 1  1 531.2769 499.9513 peak-trough</span></span>
+<span><span class="co">#&gt; 2  2 499.4509 500.0458 peak-trough</span></span>
+<span><span class="co">#&gt; 3  3 318.2776 499.9952 peak-trough</span></span>
+<span><span class="co">#&gt; 4  4 664.3875 500.0520 peak-trough</span></span>
+<span><span class="co">#&gt; 5  5 384.5240 500.0313 peak-trough</span></span>
+<span><span class="co">#&gt; 6  6 590.1372 500.0520 peak-trough</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="analyze-results">6. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
+<h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
 </h2>
 <p>We are interested in AUC target attainment. How did target attainment
 compare between the two arms of the trial?</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">peak_trough</span>, <span class="va">random</span><span class="op">)</span>,</span>
-<span>    names_to <span class="op">=</span> <span class="st">"sampling_design"</span>,</span>
-<span>    values_to <span class="op">=</span> <span class="st">"steady_state_auc"</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">steady_state_auc</span>, <span class="va">target_design</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">sampling_design</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ontarget <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">auc_true</span> <span class="op">&gt;=</span> <span class="fl">400</span> <span class="op">&amp;</span> <span class="va">auc_true</span> <span class="op">&lt;=</span> <span class="fl">600</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">arm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>prop_on_target <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ontarget</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">target_attainment</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sampling_design</span>, y <span class="op">=</span> <span class="va">prop_on_target</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">arm</span>, y <span class="op">=</span> <span class="va">prop_on_target</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
@@ -326,17 +278,19 @@ compare between the two arms of the trial?</p>
 <span>      x <span class="op">=</span> <span class="st">"Sampling strategy"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Percent on target (%)"</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="sample_timing_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p><img src="sample_timing_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
 <p>Target attainment was high and varied little between the two arms,
 providing evidence to support the move from collecting two samples to
 collecting a single sample per dosing interval.</p>
 <p>Because we are simulating each sampling strategy in each patient, we
 can also look at how each patient responded to each sampling
 strategy.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">auc_true</span>, <span class="va">arm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">arm</span>, values_from <span class="op">=</span> <span class="va">auc_true</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">peak_trough</span>, y <span class="op">=</span> <span class="va">random</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">`peak-trough`</span>, y <span class="op">=</span> <span class="va">`mid-interval`</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">400</span>, xmax <span class="op">=</span> <span class="fl">600</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span><span class="op">)</span>, </span>
 <span>      fill <span class="op">=</span> <span class="st">"grey70"</span>,</span>
@@ -349,7 +303,7 @@ strategy.</p>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="sample_timing_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p><img src="sample_timing_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
 <p>There is a strong correlation in final AUC between the two sampling
 strategies. Some patients were under-exposed or over-exposed in both
 strategies, while others were on-target in one strategy but not in the
@@ -366,7 +320,7 @@ other.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

@@ -38,9 +38,10 @@ shortly before true troughs."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a></li>
-    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a></li>
-    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Model misspecification, a busulfan case study</a></li>
+    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">Custom initial dose nomogram, a PEG Asparaginase case study</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -117,11 +118,11 @@ dose and the next.</p></dd>
 <dt id="arg-scatter">scatter<a class="anchor" aria-label="anchor" href="#arg-scatter"></a></dt>
 <dd><p>optional random variation in time, specified as the standard
 deviation, e.g. <code>scatter = 0.1</code> to allow for variation in sampling time with
-an SD of 0.1 hours. Only implemented for sampling times (not for
-regimen_update designs), not applicable for or target designs. Random variation
-does not protect for peaks or troughs becoming sampled during infusion or in
-previous / next dose. So value for <code>scatter</code> should be chosen appropriately and
-probably used in conjunction with appropriate <code>offset</code> values.</p></dd>
+an SD of 0.1 hours. Only relevant for sampling times, not for
+regimen_update designs or target designs. Random variation does not protect
+for peaks or troughs becoming sampled during infusion or in previous / next
+dose. So value for <code>scatter</code> should be chosen appropriately and probably
+used in conjunction with approriate <code>offset</code> values.</p></dd>
 
 
 <dt id="arg-at">at<a class="anchor" aria-label="anchor" href="#arg-at"></a></dt>
@@ -215,7 +216,7 @@ types cannot be mixed.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

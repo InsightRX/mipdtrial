@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Busulfan MIPD • mipdtrial</title>
+<title>Model misspecification, a busulfan case study • mipdtrial</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Busulfan MIPD">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Model misspecification, a busulfan case study">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,9 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Busulfan MIPD</a></li>
-    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">PEG Asparaginase</a></li>
-    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing</a></li>
+<li><a class="dropdown-item" href="../articles/busulfan_mipd.html">Model misspecification, a busulfan case study</a></li>
+    <li><a class="dropdown-item" href="../articles/pegasp_mipd.html">Custom initial dose nomogram, a PEG Asparaginase case study</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
+    <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
   </ul>
 </li>
@@ -57,7 +58,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Busulfan MIPD</h1>
+      <h1>Model misspecification, a busulfan case study</h1>
             
       
 
@@ -66,8 +67,14 @@
 
     
     
-<p>In this example script, we will estimate target attainment for
-busulfan.</p>
+<p>In this vignette, we will demonstrate the following tools:</p>
+<ul>
+<li>using {mipdtrial} to simulate a trial, with the trial design
+specified using R code.</li>
+<li>simulating patient PK and estimating patient PK with different
+models, to assess the impact of model misspecification</li>
+<li>using a weight-based initial dose</li>
+</ul>
 <p>To account for model misspecification, we will use one model to
 simulate (McCune, 2014) and one model to estimate (Shukla, 2020). This
 is a simplified version of a <a href="https://link.springer.com/article/10.1007/s10928-024-09915-w" class="external-link">published
@@ -75,17 +82,14 @@ study</a> in which we compared non-compartmental analysis (NCA) with MAP
 Bayesian estimation for AUC-guided busulfan dosing.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mipdtrial</span><span class="op">)</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pkbusulfanmccune"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_mccune"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanmccune</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">loadNamespace</a></span><span class="op">(</span><span class="st">"pkbusulfanmccune"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pkbusulfanshukla"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/install_default_literature_model.html" class="external-link">install_default_literature_model</a></span><span class="op">(</span><span class="st">"pk_busulfan_shukla"</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pkbusulfanshukla</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">loadNamespace</a></span><span class="op">(</span><span class="st">"pkbusulfanshukla"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># For example data</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">NHANES</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># For data handling/plotting</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -113,33 +117,46 @@ cumulative AUC of 90 by t = 192 hours.</p>
 <span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
 <span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_dose</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">initial_method</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_initial_regimen_design.html">create_initial_regimen_design</a></span><span class="op">(</span></span>
+<span>  method <span class="op">=</span> <span class="va">weight_based_starting_dose</span>,</span>
+<span>  mgkg <span class="op">=</span> <span class="fl">3.2</span>,</span>
+<span>  dosing_weight <span class="op">=</span> <span class="st">"Weight"</span>, <span class="co"># matches column in data set</span></span>
+<span>  regimen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    interval <span class="op">=</span> <span class="fl">24</span>,</span>
+<span>    n <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    t_inf <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    type <span class="op">=</span> <span class="st">"infusion"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sim_mod_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_model_design.html">create_model_design</a></span><span class="op">(</span>lib <span class="op">=</span> <span class="st">"pkbusulfanmccune"</span><span class="op">)</span></span>
+<span><span class="va">est_mod_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_model_design.html">create_model_design</a></span><span class="op">(</span>lib <span class="op">=</span> <span class="st">"pkbusulfanshukla"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
+<span>  sampling_design <span class="op">=</span> <span class="va">tdm_design</span>,</span>
+<span>  target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
+<span>  regimen_update_design <span class="op">=</span> <span class="va">update_design</span>,</span>
+<span>  initial_regimen_design <span class="op">=</span> <span class="va">initial_method</span>,</span>
+<span>  sim_design <span class="op">=</span> <span class="va">sim_mod_design</span>, </span>
+<span>  est_design <span class="op">=</span> <span class="va">est_mod_design</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="create-a-set-of-digital-patient-covariates">2. Create a set of digital patient covariates<a class="anchor" aria-label="anchor" href="#create-a-set-of-digital-patient-covariates"></a>
 </h2>
-<p>We will use the NHANES data set for covariate distributions. This is
-a data set of five thousand individuals collected by the US National
-Center for Health Statistics. See package documentation for more
-details.</p>
-<p>We will also use the <code>dplyr</code> package for some basic data
-processing. Since every data set is un-tidy in its own way (“Tidy
-datasets are all alike, but every messy dataset is messy in its own
-way.” –– <a href="https://r4ds.had.co.nz/tidy-data.html" class="external-link">Hadley
-Wickham</a>), data cleaning should be handled outside of the
-<code>mipdtrial</code> tools. The functions expect all patient
-covariates to be numeric.</p>
+<p>We will create an example data set of 10 individuals originally drawn
+from the NHANES data set. This data set was created from survey data
+collected by the US National Center for Health Statistics from a general
+sampling of the US population, and is available in the NHANES R
+package.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">NHANES</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/NHANES/man/NHANES.html" class="external-link">NHANES</a></span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="co"># take just the first record per patient</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="co"># convert columns to numeric</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Gender <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Gender</span> <span class="op">==</span> <span class="st">"male"</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># as defined in models</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Gender</span>, <span class="va">Age</span>, <span class="va">Weight</span>, <span class="va">Height</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="co"># include only patients with all information available</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Gender</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Weight</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Height</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Age</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
+<span>  Gender <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  Age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">34L</span>, <span class="fl">4L</span>, <span class="fl">49L</span>, <span class="fl">9L</span>, <span class="fl">8L</span>, <span class="fl">45L</span>, <span class="fl">66L</span>, <span class="fl">58L</span>, <span class="fl">54L</span>, <span class="fl">10L</span><span class="op">)</span>,</span>
+<span>  Weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">87.4</span>, <span class="fl">17</span>, <span class="fl">86.7</span>, <span class="fl">29.8</span>, <span class="fl">35.2</span>, <span class="fl">75.7</span>, <span class="fl">68</span>, <span class="fl">78.4</span>, <span class="fl">74.7</span>, <span class="fl">38.6</span><span class="op">)</span>,</span>
+<span>  Height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">164.7</span>, <span class="fl">105.4</span>, <span class="fl">168.4</span>, <span class="fl">133</span>, <span class="fl">130.6</span>, <span class="fl">166.7</span>, <span class="fl">169.5</span>, <span class="fl">182</span>, <span class="fl">169.4</span>, <span class="fl">141.8</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The next step is to make sure we have all the covariates we need.
 Busulfan has a known time-dependent relationship with clearance, and so
 the McCune model takes a covariate that indicates at what time this
@@ -160,46 +177,38 @@ example.)</p>
 <p>Here are the first few rows of our data set:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;      ID Gender   Age Weight Height T_CL_EFF  REGI</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="text-decoration: underline;">51</span>624      1    34   87.4   165.        0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> <span style="text-decoration: underline;">51</span>625      1     4   17     105.        0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="text-decoration: underline;">51</span>630      0    49   86.7   168.        0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="text-decoration: underline;">51</span>638      1     9   29.8   133.        0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="text-decoration: underline;">51</span>646      1     8   35.2   131.        0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> <span style="text-decoration: underline;">51</span>647      0    45   75.7   167.        0     0</span></span></code></pre></div>
-<p>We will also only look at the first 10 patients in our data set, in
-the interest of speed.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">ID</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="load-model-definitions">3. Load model definitions<a class="anchor" aria-label="anchor" href="#load-model-definitions"></a>
-</h2>
-<p>We need to define the model parameters and variability terms for our
-simulation. For this study, we will use the ones defined in the
-models.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Set up simulation model ("true")</span></span>
-<span><span class="va">model_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">model</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">parameters_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">parameters</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">omega_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">omega_matrix</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">ruv_sim</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanmccune</span><span class="fu">::</span><span class="fu">ruv</span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Set up estimation model (model for MIPD)</span></span>
-<span><span class="va">model_est</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanshukla</span><span class="fu">::</span><span class="fu">model</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">parameters_est</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanshukla</span><span class="fu">::</span><span class="fu">parameters</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">omega_est</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanshukla</span><span class="fu">::</span><span class="fu">omega_matrix</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">ruv_est</span> <span class="op">&lt;-</span> <span class="fu">pkbusulfanshukla</span><span class="fu">::</span><span class="fu">ruv</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt;   ID Gender Age Weight Height T_CL_EFF REGI</span></span>
+<span><span class="co">#&gt; 1  1      1  34   87.4  164.7        0    0</span></span>
+<span><span class="co">#&gt; 2  2      1   4   17.0  105.4        0    0</span></span>
+<span><span class="co">#&gt; 3  3      0  49   86.7  168.4        0    0</span></span>
+<span><span class="co">#&gt; 4  4      1   9   29.8  133.0        0    0</span></span>
+<span><span class="co">#&gt; 5  5      1   8   35.2  130.6        0    0</span></span>
+<span><span class="co">#&gt; 6  6      0  45   75.7  166.7        0    0</span></span></code></pre></div>
 <p>We also need to link the covariates in our data set to the covariates
-expected in the model.</p>
+expected in the model:</p>
+<ul>
+<li>
+<p>To check which covariates are required for your models use
+<code><a href="https://insightrx.github.io/PKPDsim/reference/get_model_info.html" class="external-link">PKPDsim::get_model_covariates()</a></code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/get_model_info.html" class="external-link">get_model_covariates</a></span><span class="op">(</span><span class="va">sim_mod_design</span><span class="op">$</span><span class="va">model</span><span class="op">)</span>,</span>
+<span>    <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/get_model_info.html" class="external-link">get_model_covariates</a></span><span class="op">(</span><span class="va">est_mod_design</span><span class="op">$</span><span class="va">model</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "AGE"      "WT"       "HT"       "SEX"      "T_CL_EFF" "REGI"</span></span></code></pre></div>
+</li>
+<li>
+<p>To check which covariates are in your data set use
+<code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames()</a></code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "ID"       "Gender"   "Age"      "Weight"   "Height"   "T_CL_EFF" "REGI"</span></span></code></pre></div>
+</li>
+</ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># check which covariates are required for your model using </span></span>
-<span><span class="co"># `attr(model_sim, "covariates")`</span></span>
-<span></span>
-<span><span class="co"># check which covariates are in your data set using `colnames(dat)`</span></span>
-<span><span class="va">cov_mapping</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cov_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  AGE <span class="op">=</span> <span class="st">"Age"</span>, </span>
 <span>  WT <span class="op">=</span> <span class="st">"Weight"</span>, </span>
 <span>  HT <span class="op">=</span> <span class="st">"Height"</span>, </span>
@@ -209,22 +218,7 @@ expected in the model.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="initialize-output-metrics-of-interest">4. Initialize output metrics of interest<a class="anchor" aria-label="anchor" href="#initialize-output-metrics-of-interest"></a>
-</h2>
-<p>We want to record both “true” cumulative AUC and estimated cumulative
-AUC, along with patient identifiers (i.e., id). We will pre-populate a
-data frame rather than iteratively binding rows, since that is more
-performant.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  id <span class="op">=</span> <span class="va">ids</span>,</span>
-<span>  iter <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  true_auc <span class="op">=</span> <span class="cn">NA_real_</span>,</span>
-<span>  est_auc <span class="op">=</span> <span class="cn">NA_real_</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="simulate-a-trial">5. Simulate a trial!<a class="anchor" aria-label="anchor" href="#simulate-a-trial"></a>
+<h2 id="simulate-a-trial">3. Simulate a trial!<a class="anchor" aria-label="anchor" href="#simulate-a-trial"></a>
 </h2>
 <p>Each patient will start at a dose of 3.2 mg/kg body weight. We will
 then use <code><a href="../reference/dose_grid_search.html">mipdtrial::dose_grid_search</a></code> to optimize doses to
@@ -239,70 +233,17 @@ estimation model and the measured TDMs we “collect”.</p>
 error (assay error, etc.). This function creates a data frame of error
 to add to each “true” simulated concentration to produced a measured
 therapeutic drug monitoring sample.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="co"># important for reproducibility</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">ids</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># get patient covariates</span></span>
-<span>  <span class="va">covs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_cov_object.html">create_cov_object</a></span><span class="op">(</span></span>
-<span>    <span class="va">dat</span><span class="op">[</span><span class="va">dat</span><span class="op">$</span><span class="va">ID</span> <span class="op">==</span> <span class="va">i</span>,<span class="op">]</span>,</span>
-<span>    mapping <span class="op">=</span> <span class="va">cov_mapping</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="co"># create initial dosing regimen (see PKPDsim::new_regimen for more info)</span></span>
-<span>  <span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu">PKPDsim</span><span class="fu">::</span><span class="fu"><a href="https://insightrx.github.io/PKPDsim/reference/new_regimen.html" class="external-link">new_regimen</a></span><span class="op">(</span></span>
-<span>    amt <span class="op">=</span> <span class="fl">3.2</span> <span class="op">*</span> <span class="va">covs</span><span class="op">$</span><span class="va">WT</span><span class="op">$</span><span class="va">value</span>, <span class="co"># we will update this each "day" of the trial.</span></span>
-<span>    interval <span class="op">=</span> <span class="fl">24</span>,</span>
-<span>    n <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>    t_inf <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>    type <span class="op">=</span> <span class="st">"infusion"</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="co"># randomly draw individual PK parameters</span></span>
-<span>  <span class="va">pars_true_i</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_variability.html">generate_iiv</a></span><span class="op">(</span></span>
-<span>    sim_model <span class="op">=</span> <span class="va">model_sim</span>,</span>
-<span>    omega <span class="op">=</span> <span class="va">omega_sim</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">parameters_sim</span></span>
-<span>  <span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="va">treatment_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_and_adjust_by_dose.html">sample_and_adjust_by_dose</a></span><span class="op">(</span></span>
-<span>    sampling_design <span class="op">=</span> <span class="va">tdm_design</span>,</span>
-<span>    regimen_update_design <span class="op">=</span> <span class="va">update_design</span>,</span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    regimen <span class="op">=</span> <span class="va">reg</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span>,</span>
-<span>    pars_true_i <span class="op">=</span> <span class="va">pars_true_i</span>,</span>
-<span>    sim_model <span class="op">=</span> <span class="va">model_sim</span>,</span>
-<span>    sim_ruv <span class="op">=</span> <span class="va">ruv_sim</span>,</span>
-<span>    est_model <span class="op">=</span> <span class="va">model_est</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">parameters_est</span>,</span>
-<span>    omega <span class="op">=</span> <span class="va">omega_est</span>,</span>
-<span>    ruv <span class="op">=</span> <span class="va">ruv_est</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="co"># extract metrics of interest</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">true_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
-<span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">pars_true_i</span>, <span class="co"># true patient parameters</span></span>
-<span>    model <span class="op">=</span> <span class="va">model_sim</span>,</span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="va">final_parameters</span> <span class="op">&lt;-</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">treatment_summary</span><span class="op">$</span><span class="va">additional_info</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">results</span><span class="op">$</span><span class="va">est_auc</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">id</span> <span class="op">==</span> <span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exposure_metrics.html">calc_auc_from_regimen</a></span><span class="op">(</span></span>
-<span>    regimen <span class="op">=</span> <span class="va">treatment_summary</span><span class="op">$</span><span class="va">final_regimen</span>,</span>
-<span>    parameters <span class="op">=</span> <span class="va">final_parameters</span>, <span class="co"># estimated patient PK</span></span>
-<span>    model <span class="op">=</span> <span class="va">model_est</span>,</span>
-<span>    target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>    covariates <span class="op">=</span> <span class="va">covs</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================</span></span></code></pre>
 <p>Here are the first few rows of our simulation results:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      id iter  true_auc  est_auc</span></span>
-<span><span class="co">#&gt; 1 51624    1  83063.85 90006.79</span></span>
-<span><span class="co">#&gt; 2 51625    1 103788.19 89998.38</span></span>
-<span><span class="co">#&gt; 3 51630    1  83271.64 90045.76</span></span>
-<span><span class="co">#&gt; 4 51638    1  95389.50 89999.14</span></span>
-<span><span class="co">#&gt; 5 51646    1  82884.90 89965.09</span></span>
-<span><span class="co">#&gt; 6 51647    1 104570.85 89964.21</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id  auc_true  auc_est</span></span>
+<span><span class="co">#&gt; 1  1  93803.77 89972.06</span></span>
+<span><span class="co">#&gt; 2  2  99862.25 89871.12</span></span>
+<span><span class="co">#&gt; 3  3  90556.66 90037.13</span></span>
+<span><span class="co">#&gt; 4  4 106180.50 89957.48</span></span>
+<span><span class="co">#&gt; 5  5  96245.03 89983.03</span></span>
+<span><span class="co">#&gt; 6  6  95489.63 89983.04</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">6. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
@@ -311,10 +252,10 @@ therapeutic drug monitoring sample.</p>
 that target attainment would be very high (all patients have an AUC very
 close to 90 mg*h/L), but “true” AUC was higher than that due to some
 model misspecification!</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">true_auc</span>, <span class="va">est_auc</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_true</span>, <span class="va">auc_est</span><span class="op">)</span>,</span>
 <span>    names_to <span class="op">=</span> <span class="st">"auc_type"</span>,</span>
 <span>    values_to <span class="op">=</span> <span class="st">"auc"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -328,17 +269,17 @@ model misspecification!</p>
 <span>      y <span class="op">=</span> <span class="st">"Cumulative AUC (mg\u00B7h/L)"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"AUC type"</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="busulfan_mipd_files/figure-html/unnamed-chunk-13-1.png" width="192"></p>
+<p><img src="busulfan_mipd_files/figure-html/unnamed-chunk-12-1.png" width="192"></p>
 <p>Even with some model misspecification, target attainment (within 20%
 of target AUC) was still high:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">results</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">true_auc</span>, <span class="va">target_design</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">auc_true</span>, <span class="va">target_design</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>proportion_ontarget <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ontarget</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">proportion_ontarget</span><span class="op">)</span></span>
 <span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">target_attainment</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span></span></code></pre></div>
-<p>Overall, 90% of patients had a “true” AUC of 90 mg*h/L.</p>
+<p>Overall, 100% of patients had a “true” AUC of 90 mg*h/L.</p>
 <p>For an in-depth analysis of how differences between these two models
 impact target attainment, see <a href="https://link.springer.com/article/10.1007/s10928-024-09915-w" class="external-link">Hughes
 et al., <em>J PKPD</em> (2024)</a></p>
@@ -354,7 +295,7 @@ et al., <em>J PKPD</em> (2024)</a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

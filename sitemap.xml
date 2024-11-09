@@ -6,6 +6,7 @@
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/pegasp_mipd.html</loc></url>
 <url><loc>/articles/sample_timing.html</loc></url>
+<url><loc>/articles/sample_timing_yaml.html</loc></url>
 <url><loc>/articles/vancomycin_interval_adaptation.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
@@ -15,9 +16,12 @@
 <url><loc>/reference/collect_tdms.html</loc></url>
 <url><loc>/reference/create_cov_object.html</loc></url>
 <url><loc>/reference/create_design.html</loc></url>
+<url><loc>/reference/create_initial_regimen_design.html</loc></url>
+<url><loc>/reference/create_model_design.html</loc></url>
 <url><loc>/reference/create_regimen_update_design.html</loc></url>
 <url><loc>/reference/create_sampling_design.html</loc></url>
 <url><loc>/reference/create_target_design.html</loc></url>
+<url><loc>/reference/create_trial_design.html</loc></url>
 <url><loc>/reference/dose_grid_search.html</loc></url>
 <url><loc>/reference/exposure_metrics.html</loc></url>
 <url><loc>/reference/filter_rows_0_100.html</loc></url>
@@ -35,10 +39,13 @@
 <url><loc>/reference/mipd_target_types.html</loc></url>
 <url><loc>/reference/mipdtrial-package.html</loc></url>
 <url><loc>/reference/model_based_starting_dose.html</loc></url>
+<url><loc>/reference/parse_spec_file_to_trial_design.html</loc></url>
 <url><loc>/reference/round_to_multiple.html</loc></url>
+<url><loc>/reference/run_trial.html</loc></url>
 <url><loc>/reference/sample_and_adjust_by_dose.html</loc></url>
 <url><loc>/reference/simulate_dose_interval.html</loc></url>
 <url><loc>/reference/simulate_fit.html</loc></url>
 <url><loc>/reference/update_regimen.html</loc></url>
+<url><loc>/reference/weight_based_starting_dose.html</loc></url>
 </urlset>
 
