@@ -27,7 +27,7 @@ ggplot2::theme_update(
 if (.Platform$OS.type == "windows") { 
     .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
 }
-if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+if(!requireNamespace("pkpegasparaginasemodifiedwurthwein", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
 }
 ```
@@ -41,7 +41,7 @@ In this vignette, we will demonstrate the following tools:
 ```{r setup}
 library(mipdtrial)
 library(PKPDsim) # for working with models
-if(!require(pkpegasparaginasemodifiedwurthwein, warn.conflicts = FALSE)) {
+if (!requireNamespace("pkpegasparaginasemodifiedwurthwein", quietly = TRUE)) {
   install_default_literature_model("pk_pegasparaginase_modified_wurthwein")
 }
 

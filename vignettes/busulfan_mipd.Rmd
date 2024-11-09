@@ -37,23 +37,23 @@ AUC-guided busulfan dosing.
 if (.Platform$OS.type == "windows") { 
     .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
 }
-if(!require(pkbusulfanmccune, warn.conflicts = FALSE)) {
+if(!requireNamespace("pkbusulfanmccune", quietly = TRUE)) {
   capture.output(PKPDsim::install_default_literature_model("pk_busulfan_mccune"))
 }
-if (!require(pkbusulfanshukla, warn.conflicts = FALSE)) {
+if (!requireNamespace("pkbusulfanshukla", quietly = TRUE)) {
   capture.output(capture.output(PKPDsim::install_default_literature_model("pk_busulfan_shukla")))
 }
 ```
 
 ```{r setup, message=FALSE, warning=FALSE}
 library(mipdtrial)
-if(!require(pkbusulfanmccune)) {
+if(!requireNamespace("pkbusulfanmccune", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")
-  loadNamespace(pkbusulfanmccune)
+  loadNamespace("pkbusulfanmccune")
 }
-if (!require(pkbusulfanshukla)) {
+if (!requireNamespace("pkbusulfanshukla")) {
   PKPDsim::install_default_literature_model("pk_busulfan_shukla")
-  loadNamespace(pkbusulfanshukla)
+  loadNamespace("pkbusulfanshukla")
 }
 
 # For data handling/plotting

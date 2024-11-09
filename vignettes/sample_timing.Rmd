@@ -21,7 +21,7 @@ if (.Platform$OS.type == "windows") {
     .libPaths(c("D:/a/mipdtrial/mipdtrial/check/mipdtrial.Rcheck", .libPaths()))
 }
 
-if (!require(pkvancothomson)) {
+if (!requireNamespace("pkvancothomson", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
 }
 ```
@@ -48,9 +48,9 @@ library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
 library(ggplot2) # for plotting our results
-if(!require(pkvancothomson)) {
+if(!requireNamespace("pkvancothomson", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_vanco_thomson")
-  loadNamespace(pkvancothomson)
+  loadNamespace("pkvancothomson")
 }
 ```
 
