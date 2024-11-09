@@ -1,8 +1,9 @@
 ^mipdtrial\.Rproj$
-^\.Rproj\.user$
+^\.Rproj\.user
 ^LICENSE\.md$
 ^\.github$
 ^README\.Rmd$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.Rproj\.user$
