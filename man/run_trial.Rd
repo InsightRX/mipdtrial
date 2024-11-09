@@ -14,8 +14,22 @@ run_trial(
 )
 }
 \arguments{
+\item{data}{data set to use for simulation, a data frame. Should contain
+covariates in columns, corresponding to values in \code{cov_mapping} and a
+column for \code{ID}, as a patient identifier.}
+
+\item{design}{trial design, created using \code{create_trial_design()}}
+
+\item{cov_mapping}{a named vector indicating correspondence between model
+covariates and data frame columns. Vector names should reflect all
+covariates defined by the model, and vector values should represent the
+associated column in the provided data set.}
+
 \item{n_ids}{number of subjects to use in simulated trial. If not specified,
 will use all subjects in \code{data}.}
+
+\item{seed}{argument passed to \code{set.seed()} to set the seed for all random
+variability generation.}
 
 \item{progress}{show progress bar? (default is \code{TRUE})}
 }

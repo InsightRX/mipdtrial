@@ -6,6 +6,9 @@
 \usage{
 parse_spec_file_to_trial_design(file)
 }
+\arguments{
+\item{file}{full filepath to yaml file}
+}
 \description{
 Parse YAML spec file to trial design
 }

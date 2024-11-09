@@ -14,7 +14,16 @@
 #' 4. Return an object with data collected during and at the end of the MIPD
 #'    trial.
 #'
-#' @inheritParams model_based_starting_dose
+#' @param data data set to use for simulation, a data frame. Should contain
+#'   covariates in columns, corresponding to values in `cov_mapping` and a
+#'   column for `ID`, as a patient identifier.
+#' @param design trial design, created using `create_trial_design()`
+#' @param cov_mapping a named vector indicating correspondence between model
+#'   covariates and data frame columns. Vector names should reflect all
+#'   covariates defined by the model, and vector values should represent the
+#'   associated column in the provided data set.
+#' @param seed argument passed to `set.seed()` to set the seed for all random
+#'   variability generation.
 #' @param progress show progress bar? (default is `TRUE`)
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.

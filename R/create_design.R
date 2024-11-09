@@ -53,9 +53,6 @@ create_design <- function(
     if(!is.null(when) && is.null(at)) {
       at <- rep(1, length(when))
     }
-    if(is.null(at) && !is.nu) {
-      at <- rep(1, length(when))
-    }
     if(is.null(offset)) {
       offset <- rep(0, length(at))
     } else {

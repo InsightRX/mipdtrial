@@ -51,6 +51,7 @@ create_trial_design <- function(
 
 #' Parse YAML spec file to trial design
 #'
+#' @param file full filepath to yaml file
 parse_spec_file_to_trial_design <- function(file) {
   md <- yaml::read_yaml(file)
   design <- list()

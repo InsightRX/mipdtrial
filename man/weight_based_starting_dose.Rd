@@ -6,6 +6,17 @@
 \usage{
 weight_based_starting_dose(covariates, design, cov_mapping)
 }
+\arguments{
+\item{covariates}{named list of PKPDsim covariates. E.g.:
+list(WT = PKPDsim::new_covariate(70))}
+
+\item{design}{trial design, created using \code{create_trial_design()}}
+
+\item{cov_mapping}{a named vector indicating correspondence between model
+covariates and data frame columns. Vector names should reflect all
+covariates defined by the model, and vector values should represent the
+associated column in the provided data set.}
+}
 \description{
 This nomogram is a possible \code{method} supplied to
 \code{create_initial_regimen_design()}. When this method is used,

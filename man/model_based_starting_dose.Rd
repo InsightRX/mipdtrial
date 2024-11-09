@@ -7,6 +7,16 @@
 model_based_starting_dose(design, covariates, cov_mapping, ...)
 }
 \arguments{
+\item{design}{trial design, created using \code{create_trial_design()}}
+
+\item{covariates}{named list of PKPDsim covariates. E.g.:
+list(WT = PKPDsim::new_covariate(70))}
+
+\item{cov_mapping}{a named vector indicating correspondence between model
+covariates and data frame columns. Vector names should reflect all
+covariates defined by the model, and vector values should represent the
+associated column in the provided data set.}
+
 \item{...}{arguments passed on to \code{dose_grid_search}}
 }
 \value{

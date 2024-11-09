@@ -3,6 +3,9 @@
 #' A light wrapper for [dose_grid_search] for finding model-based starting doses
 #' and returning an appropriate regimen object.
 #'
+#' @inheritParams run_trial
+#' @param covariates named list of PKPDsim covariates. E.g.:
+#'   list(WT = PKPDsim::new_covariate(70))
 #' @param ... arguments passed on to `dose_grid_search`
 #' @export
 #' @returns Returns a PKPDsim regimen populated with the model-predicted dose
