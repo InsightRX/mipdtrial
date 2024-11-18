@@ -16,7 +16,7 @@ model_based_starting_dose <- function(
     cov_mapping,
     ...
 ) {
-
+  #browser()
   ## Parsing and checking design specs
   reg_md <- design$initial_regimen$regimen
   interval <- reg_md$interval
@@ -41,6 +41,7 @@ model_based_starting_dose <- function(
     t_aim <- (scheme$at-1) * 24
     n_doses <- which.min(abs(seq(0, 100*interval, interval) - t_aim))
   }
+  if (scheme$base == "cmin") n_doses <- n_doses + 1
 
   ## create a dummy regimen as input to dose_grid_search:
   reg <- PKPDsim::new_regimen(
