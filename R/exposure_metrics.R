@@ -111,6 +111,9 @@ calc_auc_from_regimen <- function(
   if(target_design$type == "auc24") {
     target_time <- c(target_time - 24, target_time)
   }
+  if(target_design$type == "auc12") {
+    target_time <- c(target_time - 12, target_time)
+  }
   sim_output <- PKPDsim::sim(
     model,
     parameters = parameters,

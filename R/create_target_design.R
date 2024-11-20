@@ -91,6 +91,9 @@ create_target_design <- function(
       } else if (targettype %in% c("auc24")) {
         offset <- 24
         when <- "dose"
+      } else if (targettype %in% c("auc12")) {
+        offset <- 12
+        when <- "dose"
       } else { # cum AUC
         when <- "dose"
       }
@@ -149,6 +152,7 @@ create_target_design <- function(
 #' - cum_auc: Cumulative AUC
 #' - auc: auc over a dosing interval
 #' - auc24: auc normalized to a 24-hour period
+#' - auc12: auc normalized to a 12-hour period
 #'
 #'
 #' @returns Returns a character vector of accepted target types.
@@ -158,7 +162,7 @@ mipd_target_types <- function() {
   c(target_types_auc, target_types_conc, target_types_time)
 }
 
-target_types_auc <- c("cum_auc", "auc", "auc24")
+target_types_auc <- c("cum_auc", "auc", "auc24", "auc12")
 target_types_time <- c("t_gt_mic","t_gt_4mic","t_gt_mic_free","t_gt_4mic_free")
 target_types_conc <- c("peak", "cmax", "cmax_1hr", "trough", "cmin", "conc")
 

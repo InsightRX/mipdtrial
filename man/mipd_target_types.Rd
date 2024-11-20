@@ -20,5 +20,6 @@ types:
 \item cum_auc: Cumulative AUC
 \item auc: auc over a dosing interval
 \item auc24: auc normalized to a 24-hour period
+\item auc12: auc normalized to a 12-hour period
 }
 }

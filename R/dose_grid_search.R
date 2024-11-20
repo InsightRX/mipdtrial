@@ -285,6 +285,9 @@ simulate_dose_interval <- function(value,
   } else if (target_design$type == "auc24") {
     # need 24 hours of dosing
     t_obs <- c(t_obs - 24, t_obs)
+  } else if (target_design$type == "auc12") {
+    # need 12 hours of dosing
+    t_obs <- c(t_obs - 12, t_obs)
   }
 
   tmp <- PKPDsim::sim(
@@ -297,7 +300,7 @@ simulate_dose_interval <- function(value,
     ...
   )
   if (is.null(pta)) {
-    if (target_design$type %in% c("auc", "auc24")) {
+    if (target_design$type %in% c("auc", "auc24", "auc12")) {
       if(!is.null(target_design$variable)) {
         return(diff(tmp[[target_design$variable]][tmp$comp == obs]))
       } else {
