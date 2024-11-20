@@ -116,17 +116,12 @@ know.
 ## Roadmap
 
 The `mipdtrial` package is currently under development, and there will
-likely be changes to core functionality in the upcoming months. The
-following features are on our short-term roadmap:
+likely be changes to core functionality in the upcoming months. Features
+thar are on our short-term roadmap:
 
-- Implement functionality to gather all relevant information during and
-  at the end of the simulated trial, and include it in the output from
-  `sample_and_adjust_by_dose`.
-- Improve ease of use: implement a single function to run the trial
-- Add more optimization functions, e.g. combined dose- and interval-
-  optimization
-- Add functionality to generate more realistic trial scenarios,
-  e.g. allow some random scattering of TDM samples over time.
+- Add more optimization functions
+- Add more initial dosing functions
+- Add further functionality to generate more realistic trial scenarios
 
 ## Contributing
 
