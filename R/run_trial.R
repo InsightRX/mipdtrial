@@ -35,10 +35,9 @@ run_trial <- function(
     design,
     cov_mapping,
     n_ids = NULL,
-    seed = NULL,
+    seed = 0,
     progress = TRUE
 ) {
-  if(!is.null(seed)) set.seed(seed) # important for reproducibility
 
   ## Set up data collectors
   tdms <- data.frame()
@@ -71,7 +70,9 @@ run_trial <- function(
       data[data$ID == i,],
       mapping = cov_mapping
     )
+
     # randomly draw individual PK parameters
+    set.seed(seed + i) # reset seed before each patient to ensure reproducibility
     pars_true_i <- generate_iiv(
       sim_model  = design$sim$model,
       omega      = design$sim$omega_matrix,

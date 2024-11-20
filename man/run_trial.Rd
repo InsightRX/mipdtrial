@@ -4,14 +4,7 @@
 \alias{run_trial}
 \title{Run an MIPD trial}
 \usage{
-run_trial(
-  data,
-  design,
-  cov_mapping,
-  n_ids = NULL,
-  seed = NULL,
-  progress = TRUE
-)
+run_trial(data, design, cov_mapping, n_ids = NULL, seed = 0, progress = TRUE)
 }
 \arguments{
 \item{data}{data set to use for simulation, a data frame. Should contain
