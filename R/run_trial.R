@@ -143,9 +143,27 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
+      conc_X <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = create_target_design(
+          targettype = "trough",
+          targetmin = 1,
+          targetmax = 6,
+          at = 8,
+          anchor = "dose"
+        ),
+        covariates = covs
+      )
       final_exposure <- rbind(
         final_exposure,
-        data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
+        data.frame(
+          id = i,
+          conc_true = conc_true,
+          conc_est = conc_est,
+          conc_X = conc_X
+        )
       )
     }
 
