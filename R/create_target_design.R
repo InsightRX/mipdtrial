@@ -177,3 +177,60 @@ target_types_conc <- c("peak", "cmax", "cmax_1hr", "trough", "cmin", "conc")
 is_on_target <- function(v, target) {
   v >= target$min & v <= target$max
 }
+
+
+#' Create evaluation object
+#'
+#' This function defines the evaluation metric and timing for non-target metrics.
+#' Use this function to record outputs from the simulation like troughs or AUC
+#' that are not at the target times.
+#'
+#' @inheritParams create_target_design
+#' @export
+create_eval_design <- function(
+    evaltype = mipd_target_types(),
+    time = NULL,
+    when = NULL,
+    offset = NULL,
+    at = NULL,
+    anchor = c("dose", "day")
+) {
+  evaltype <- match.arg(tolower(evaltype), mipd_target_types())
+  anchor <- match.arg(anchor)
+
+  ## Infer `time` and `when` from evaltype
+  if(is.null(when)) {
+    if(!is.null(time)) { # assume user wants to specify timepoint manually
+      when <- NULL
+    } else {
+      offset <- 0
+      time <- NULL
+      if(evaltype %in% c("cmin", "trough")) {
+        when <- "cmin"
+      } else if (evaltype %in% c("cmax", "peak")) {
+        when <- "cmax"
+      } else if (evaltype %in% c("auc24")) {
+        offset <- 24
+        when <- "dose"
+      } else if (evaltype %in% c("auc12")) {
+        offset <- 12
+        when <- "dose"
+      } else { # cum AUC
+        when <- "dose"
+      }
+    }
+  }
+
+  scheme <- create_design(
+    time = time,
+    when = when,
+    offset = offset,
+    at = at,
+    anchor = anchor
+  )
+
+  list(
+    type = evaltype,
+    scheme = scheme
+  )
+}

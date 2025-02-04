@@ -54,8 +54,8 @@ test_that("calc_auc_from_sim gets AUC", {
     comp = rep(c(1, 2, 3, "obs"), each = 3),
     y = c(0, 10, 20, 0, 2, 4, 0, 100, 300, 0, 10, 20)
   )
-  expect_equal(calc_auc_from_sim(sim_output, 3), c(100, 200))
-  expect_equal(calc_auc_from_sim(sim_output, 2), c(2, 2))
+  expect_equal(calc_auc_from_sim(sim_output, 3, c(24, 48), "auc24"), c(100, 200))
+  expect_equal(calc_auc_from_sim(sim_output, 2, c(24, 48), "auc24"), c(2, 2))
 })
 
 test_that("when passed one obs, calc_auc_from_sim give cumulative AUC", {
@@ -64,8 +64,8 @@ test_that("when passed one obs, calc_auc_from_sim give cumulative AUC", {
     comp = c(1, 2, 3, "obs"),
     y = c(20, 50, 1000, 20)
   )
-  expect_equal(calc_auc_from_sim(sim_output, 3), 1000)
-  expect_equal(calc_auc_from_sim(sim_output, 2), 50)
+  expect_equal(calc_auc_from_sim(sim_output, 3, 96, "auc_cum"), 1000)
+  expect_equal(calc_auc_from_sim(sim_output, 2, 96, "auc_cum"), 50)
 })
 
 test_that("calc_auc_from_regimen: parameter mismatch raises error", {
@@ -82,7 +82,11 @@ test_that("calc_auc_from_regimen: parameter mismatch raises error", {
 
 test_that("calc_auc_from_regimen: correct AUC calculated", {
   # parameters as list
-  target <- create_target_design(targettype = "conc", targetvalue = 10, time = c(48, 72))
+  target <- create_target_design(
+    targettype = "conc",
+    targetvalue = 10,
+    time = c(48, 72)
+  )
   expect_equal(
     calc_auc_from_regimen(
       regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),

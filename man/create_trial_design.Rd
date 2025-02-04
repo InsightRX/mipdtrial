@@ -11,7 +11,8 @@ create_trial_design(
   initial_regimen_design = NULL,
   regimen_update_design = NULL,
   sim_design = NULL,
-  est_design = NULL
+  est_design = NULL,
+  eval_design = NULL
 )
 }
 \arguments{

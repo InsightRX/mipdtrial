@@ -16,17 +16,22 @@ NULL
 #'
 #' @param sim_output output of a `PKPDsim::sim` call
 #' @param auc_comp auc compartment
+#' @param target_time target time from `get_sampling_times_from_scheme`
+#' @param target_type type of AUC target in `c(auc24, auc12, cum_auc)`.
 #' @returns `calc_auc_from_sim` returns a numeric vector of AUCs between each
 #'   simulated time point. Control time period over which AUC should be
 #'   calculated using `target_time` argument to `PKPDsim::sim`.
 #' @export
 
-calc_auc_from_sim <- function(sim_output, auc_comp) {
-  aucs <- sim_output$y[sim_output$comp == auc_comp]
-  if (length(aucs) == 1) {
-    aucs # i.e., cumulative
-  } else {
-    diff(aucs)
+calc_auc_from_sim <- function(sim_output, auc_comp, target_time, target_type) {
+  aucs <- sim_output[sim_output$comp == auc_comp, ]
+  if (nrow(aucs) == 1 | target_type == "auc_cum"){
+    aucs$y
+  } else if (target_type %in% target_types_auc){ # "auc24" or "auc12"
+    aucs$diff <- c(NA, diff(aucs$y))
+    aucs$diff[aucs$t %in% target_time]
+  } else { # target is conc or similar
+    diff(aucs$y)
   }
 }
 
@@ -104,22 +109,28 @@ calc_auc_from_regimen <- function(
   iov <- PKPDsim::get_model_iov(model)
   if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
 
-  target_time <- get_sampling_times_from_scheme(
+  target_time_original <- get_sampling_times_from_scheme(
     target_design$scheme,
     regimen
   )
+  target_time_sim <- target_time_original
   if(target_design$type == "auc24") {
-    target_time <- c(target_time - 24, target_time)
+    target_time_sim <- c(target_time_original - 24, target_time_original)
   } else if (target_design$type == "auc12") {
-    target_time <- c(target_time - 12, target_time)
+    target_time_sim <- c(target_time_original - 12, target_time_original)
   }
   sim_output <- PKPDsim::sim(
     model,
     parameters = parameters,
     regimen = regimen,
-    t_obs = target_time,
+    t_obs = target_time_sim,
     iov_bins = iov[["bins"]],
     ...
   )
-  calc_auc_from_sim(sim_output, attr(model, "size"))
+  calc_auc_from_sim(
+    sim_output,
+    attr(model, "size"),
+    target_time_original,
+    target_design$type
+  )
 }

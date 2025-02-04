@@ -4,12 +4,16 @@
 \alias{calc_auc_from_sim}
 \title{Get AUC from a simulation}
 \usage{
-calc_auc_from_sim(sim_output, auc_comp)
+calc_auc_from_sim(sim_output, auc_comp, target_time, target_type)
 }
 \arguments{
 \item{sim_output}{output of a \code{PKPDsim::sim} call}
 
 \item{auc_comp}{auc compartment}
+
+\item{target_time}{target time from \code{get_sampling_times_from_scheme}}
+
+\item{target_type}{type of AUC target in \code{c(auc24, auc12, cum_auc)}.}
 }
 \value{
 \code{calc_auc_from_sim} returns a numeric vector of AUCs between each

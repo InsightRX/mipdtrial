@@ -46,6 +46,7 @@ run_trial <- function(
   sim_parameters <- data.frame()
   gof <- data.frame()
   final_exposure <- data.frame()
+  eval_exposure <- data.frame()
 
   ## Set up number of individuals to simulate
   if(is.null(n_ids)) {
@@ -149,6 +150,49 @@ run_trial <- function(
       )
     }
 
+    # post-processing to get evaluation metrics
+    if(design$evaluation$type %in% target_types_auc) {
+      auc_eval <- calc_auc_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = design$evaluation,
+        covariates = covs
+      )
+      eval_time <- get_sampling_times_from_scheme(
+        design$evaluation$scheme,
+        res$final_regimen
+      )
+      eval_exposure <- rbind(
+        eval_exposure,
+        data.frame(
+          id = i,
+          time = eval_time,
+          auc = auc_eval
+        )
+      )
+    } else if (design$evaluation$type %in% target_types_conc){
+      conc_eval <- calc_concentration_from_regimen(
+        regimen = res$final_regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = design$sim$model,
+        target_design = design$evaluation,
+        covariates = covs
+      )
+      eval_time <- get_sampling_times_from_scheme(
+        design$evaluation$scheme,
+        res$final_regimen
+      )
+      eval_exposure <- rbind(
+        eval_exposure,
+        data.frame(
+          id = i,
+          time = eval_time,
+          conc = conc_eval
+        )
+      )
+    }
+
     ############################################################################
     ## Collect data into object
     ############################################################################
@@ -172,7 +216,8 @@ run_trial <- function(
     sim_parameters = sim_parameters,
     design = design,
     gof = gof,
-    final_exposure = final_exposure
+    final_exposure = final_exposure,
+    eval_exposure = eval_exposure
   )
   class(out) <- c("mipdtrial_results", "list")
   out
