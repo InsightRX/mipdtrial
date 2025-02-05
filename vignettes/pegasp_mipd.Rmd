@@ -86,6 +86,8 @@ asp_nomogram <- function(covariates, ...) {
     type = "infusion"
   )
 }
+
+initial_method <- create_initial_regimen_design(method = asp_nomogram)
 ```
 
 PEG-asparaginase has a long half-life. In this simulated trial, patients 
@@ -111,6 +113,12 @@ target_design <- create_target_design(
   anchor = "dose"
 )
 
+evaluation_design <- create_eval_design(
+  evaltype = "conc",
+  at = c(14, 28, 42),
+  anchor = "day"
+)
+
 model_design <- create_model_design(lib = "pkpegasparaginasemodifiedwurthwein")
 
 initial_method <- create_initial_regimen_design(method = asp_nomogram)
@@ -120,7 +128,9 @@ design <- create_trial_design(
   target_design = target_design,
   regimen_update_design = update_design,
   initial_regimen_design = initial_method,
-  sim_design = model_design, est_design = model_design
+  sim_design = model_design, 
+  est_design = model_design,
+  eval_design = evaluation_design
 )
 ```
 
@@ -228,6 +238,28 @@ res$final_exposure |>
       x = "Concentration type",
       y = "Final concentration after MIPD (IU/L)"
     )
+```
+
+We can also check how well our patients did at day 28.
+
+```{r fig.width = 2, fig.height = 4}
+res$eval_exposure |> 
+  dplyr::filter(time == 672) |> 
+  ggplot(aes(x = 1, y = conc)) +
+  geom_rect(
+    aes(
+      xmin = -Inf, xmax = Inf, 
+      ymin = target_design$min, ymax = target_design$max,
+    ),
+    fill = "grey80"
+  ) +
+  geom_boxplot() +
+  coord_cartesian(ylim = c(0, target_design$max * 1.3)) +
+  labs(
+    x = "",
+    y = "Concentration at day 28 (IU/L)"
+  ) +
+  theme(axis.text.x = element_blank())
 ```
 
 While further work is needed to establish a realistic upper toxicity threshold
