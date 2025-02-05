@@ -25,11 +25,12 @@ NULL
 
 calc_auc_from_sim <- function(sim_output, auc_comp, target_time, target_type) {
   aucs <- sim_output[sim_output$comp == auc_comp, ]
-  if (nrow(aucs) == 1 | target_type == "auc_cum"){
-    aucs$y
-  } else if (target_type %in% target_types_auc){ # "auc24" or "auc12"
+  if (target_type %in% c("auc24", "auc12")){
+    # want 12 or 24 hour AUC before original times
     aucs$diff <- c(NA, diff(aucs$y))
     aucs$diff[aucs$t %in% target_time]
+  } else if (nrow(aucs) == 1 | target_type == "auc_cum"){
+    aucs$y
   } else { # target is conc or similar
     diff(aucs$y)
   }
