@@ -125,9 +125,22 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
+      time_to_target <- calc_time_to_target(
+        regimen = res$final_regimen,
+        target_design = design$target,
+        auc_comp = attr(design$sim$model, "size"),
+        ode = design$sim$model,
+        parameters = pars_true_i,
+        covariates = covs
+      )
       final_exposure <- rbind(
         final_exposure,
-        data.frame(id = i, auc_true = auc_true, auc_est = auc_est)
+        data.frame(
+          id = i,
+          auc_true = auc_true,
+          auc_est = auc_est,
+          tta = time_to_target
+        )
       )
     } else if (design$target$type %in% target_types_conc) {
       conc_true <- calc_concentration_from_regimen(
@@ -144,9 +157,22 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
+      time_to_target <- calc_time_to_target(
+        regimen = res$final_regimen,
+        target_design = design$target,
+        auc_comp = NULL,
+        model = design$sim$model,
+        parameters = pars_true_i,
+        covariates = covs
+      )
       final_exposure <- rbind(
         final_exposure,
-        data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
+        data.frame(
+          id = i,
+          conc_true = conc_true,
+          conc_est = conc_est,
+          tta = time_to_target
+        )
       )
     }
 
