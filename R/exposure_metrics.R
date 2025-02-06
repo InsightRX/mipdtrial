@@ -16,23 +16,20 @@ NULL
 #'
 #' @param sim_output output of a `PKPDsim::sim` call
 #' @param auc_comp auc compartment
-#' @param target_time target time from `get_sampling_times_from_scheme`
-#' @param target_type type of AUC target in `c(auc24, auc12, cum_auc)`.
+#' @param extract_time time points for AUC12 or 24 to extract
+#' @param target_type type of AUC target in `c("auc24", "auc12", "cum_auc")`.
 #' @returns `calc_auc_from_sim` returns a numeric vector of AUCs between each
 #'   simulated time point. Control time period over which AUC should be
 #'   calculated using `target_time` argument to `PKPDsim::sim`.
 #' @export
 
-calc_auc_from_sim <- function(sim_output, auc_comp, target_time, target_type) {
+calc_auc_from_sim <- function(sim_output, auc_comp, extract_time, target_type) {
   aucs <- sim_output[sim_output$comp == auc_comp, ]
-  if (target_type %in% c("auc24", "auc12")){
-    # want 12 or 24 hour AUC before original times
-    aucs$diff <- c(0, diff(aucs$y))
-    aucs$diff[aucs$t %in% target_time]
-  } else if (nrow(aucs) == 1 || target_type == "auc_cum"){
+  if (nrow(aucs) == 1 || grepl("cum_", target_type)){ # cumulative
     aucs$y
-  } else { # target is conc or similar
-    diff(aucs$y)
+  } else if (grepl("auc\\d+", target_type)){ # auc24 or auc12
+    aucs$diff <- c(0, diff(aucs$y))
+    aucs$diff[aucs$t %in% extract_time]
   }
 }
 

@@ -83,9 +83,9 @@ test_that("calc_auc_from_regimen: parameter mismatch raises error", {
 test_that("calc_auc_from_regimen: correct AUC calculated", {
   # parameters as list
   target <- create_target_design(
-    targettype = "conc",
+    targettype = "auc24",
     targetvalue = 10,
-    time = c(48, 72)
+    time = c(72)
   )
   expect_equal(
     calc_auc_from_regimen(
@@ -130,10 +130,10 @@ test_that("handles IOV correctly", {
   pars <- pkbusulfanmccune::parameters()
   covs <- list(AGE = 15, WT = 70, HT = 150, SEX = 0, T_CL_EFF = 0)
   target_a <- create_target_design(
-    targettype = "cum_auc", targetvalue = 10, time = c(0, 24)
+    targettype = "cum_auc", targetvalue = 10, time = c(24)
   )
   target_b <- create_target_design(
-    targettype = "cum_auc", targetvalue = 10, time = c(48, 72)
+    targettype = "cum_auc", targetvalue = 10, time = c(72)
   )
   result1a <- calc_auc_from_regimen(
     regimen = PKPDsim::new_regimen(interval = 24, type = "infusion"),
