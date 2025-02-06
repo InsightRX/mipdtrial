@@ -151,7 +151,7 @@ run_trial <- function(
     }
 
     # post-processing to get evaluation metrics
-    if(design$evaluation$type %in% target_types_auc) {
+    if(isTRUE(design$evaluation$type %in% target_types_auc)) {
       auc_eval <- calc_auc_from_regimen(
         regimen = res$final_regimen,
         parameters = pars_true_i, # true patient parameters
