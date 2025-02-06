@@ -134,28 +134,6 @@ design <- create_trial_design(
 )
 ```
 
-
-```{r}
-evaluation_design <- create_eval_design(
-  evaltype = c("conc"),
-  at = c(14, 28, 42),
-  anchor = "day"
-)
-
-evaluation_design2 <- create_eval_design(
-  evaltype = c("conc", "auc24"),
-  at = c(14, 28, 42),
-  anchor = "day"
-)
-
-evaluation_design3 <- create_eval_design(
-  evaltype = c("auc24"),
-  at = c(14, 28, 42),
-  anchor = "day"
-)
-```
-
-
 ## 2. Create a set of digital patient covariates
 
 We will create an example data set of 20 individuals originally drawn from the
