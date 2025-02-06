@@ -170,7 +170,6 @@ test_that("handles IOV correctly", {
 })
 
 test_that("calc_time_to_target: correct time to target calculated", {
-  mod_1cmt_iv <- PKPDsim::new_ode_model("pk_1cmt_iv_auc")
   regimen <- PKPDsim::new_regimen(
     amt = 150,
     n = 20,
@@ -248,7 +247,6 @@ test_that("calc_time_to_target: correct time to target calculated", {
 })
 
 test_that("calc_time_to_target: return NA when unsupported type", {
-  mod_1cmt_iv <- PKPDsim::new_ode_model("pk_1cmt_iv_auc")
   regimen <- PKPDsim::new_regimen(
     amt = 150,
     n = 20,
