@@ -151,46 +151,67 @@ run_trial <- function(
     }
 
     # post-processing to get evaluation metrics
-    if(isTRUE(design$evaluation$type %in% target_types_auc)) {
-      auc_eval <- calc_auc_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$evaluation,
-        covariates = covs
-      )
-      eval_time <- get_sampling_times_from_scheme(
-        design$evaluation$scheme,
-        res$final_regimen
-      )
-      eval_exposure <- rbind(
-        eval_exposure,
-        data.frame(
-          id = i,
-          time = eval_time,
-          auc = auc_eval
-        )
-      )
-    } else if (design$evaluation$type %in% target_types_conc){
-      conc_eval <- calc_concentration_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$evaluation,
-        covariates = covs
-      )
-      eval_time <- get_sampling_times_from_scheme(
-        design$evaluation$scheme,
-        res$final_regimen
-      )
-      eval_exposure <- rbind(
-        eval_exposure,
-        data.frame(
-          id = i,
-          time = eval_time,
-          conc = conc_eval
-        )
-      )
+    if (!is.null(design$evaluation)){
+      # AUC metrics
+      if (any(names(design$evaluation) %in% target_types_auc)){
+        auc_evals <- names(design$evaluation)[names(design$evaluation) %in% target_types_auc]
+        for (design_type in auc_evals){
+          tmp_eval_design <- list(
+            type = design_type,
+            scheme = design$evaluation[[design_type]]
+          )
+          auc_eval <- calc_auc_from_regimen(
+            regimen = res$final_regimen,
+            parameters = pars_true_i, # true patient parameters
+            model = design$sim$model,
+            target_design = tmp_eval_design,
+            covariates = covs
+          )
+          eval_time <- get_sampling_times_from_scheme(
+            tmp_eval_design$scheme,
+            res$final_regimen
+          )
+          eval_exposure <- rbind(
+            eval_exposure,
+            data.frame(
+              id = i,
+              time = eval_time,
+              value = auc_eval,
+              type = tmp_eval_design$type
+            )
+          )
+        }
+      }
+      # concentration metrics
+      if (any(names(design$evaluation) %in% target_types_conc)){
+        conc_evals <- names(design$evaluation)[names(design$evaluation) %in% target_types_conc]
+        for (design_type in conc_evals){
+          tmp_eval_design <- list(
+            type = design_type,
+            scheme = design$evaluation[[design_type]]
+          )
+          conc_eval <- calc_concentration_from_regimen(
+            regimen = res$final_regimen,
+            parameters = pars_true_i, # true patient parameters
+            model = design$sim$model,
+            target_design = tmp_eval_design,
+            covariates = covs
+          )
+          eval_time <- get_sampling_times_from_scheme(
+            tmp_eval_design$scheme,
+            res$final_regimen
+          )
+          eval_exposure <- rbind(
+            eval_exposure,
+            data.frame(
+              id = i,
+              time = eval_time,
+              value = conc_eval,
+              type = tmp_eval_design$type
+            )
+          )
+        }
+      }
     }
 
     ############################################################################

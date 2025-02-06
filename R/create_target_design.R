@@ -195,42 +195,43 @@ create_eval_design <- function(
     at = NULL,
     anchor = c("dose", "day")
 ) {
-  evaltype <- match.arg(tolower(evaltype), mipd_target_types())
+  out <- list()
   anchor <- match.arg(anchor)
+  original_when <- when
 
-  ## Infer `time` and `when` from evaltype
-  if(is.null(when)) {
-    if(!is.null(time)) { # assume user wants to specify timepoint manually
-      when <- NULL
-    } else {
-      offset <- 0
-      time <- NULL
-      if(evaltype %in% c("cmin", "trough")) {
-        when <- "cmin"
-      } else if (evaltype %in% c("cmax", "peak")) {
-        when <- "cmax"
-      } else if (evaltype %in% c("auc24")) {
-        offset <- 24
-        when <- "dose"
-      } else if (evaltype %in% c("auc12")) {
-        offset <- 12
-        when <- "dose"
-      } else { # cum AUC
-        when <- "dose"
+  for (type_eval in evaltype){
+    ## Infer `time` and `when` from evaltype
+    if(is.null(original_when)) {
+      if(!is.null(time)) { # assume user wants to specify timepoint manually
+        when <- NULL
+      } else {
+        offset <- 0
+        time <- NULL
+        if(type_eval %in% c("cmin", "trough")) {
+          when <- "cmin"
+        } else if (type_eval %in% c("cmax", "peak")) {
+          when <- "cmax"
+        } else if (type_eval %in% c("auc24")) {
+          offset <- 24
+          when <- "dose"
+        } else if (type_eval %in% c("auc12")) {
+          offset <- 12
+          when <- "dose"
+        } else { # cum AUC
+          when <- "dose"
+        }
       }
     }
+    tmp <- create_design(
+      time = time,
+      when = when,
+      offset = offset,
+      at = at,
+      anchor = anchor
+    )
+
+    out[[type_eval]] <- tmp
   }
 
-  scheme <- create_design(
-    time = time,
-    when = when,
-    offset = offset,
-    at = at,
-    anchor = anchor
-  )
-
-  list(
-    type = evaltype,
-    scheme = scheme
-  )
+  out
 }
