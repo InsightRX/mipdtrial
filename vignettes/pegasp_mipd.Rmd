@@ -113,8 +113,8 @@ target_design <- create_target_design(
   anchor = "dose"
 )
 
-evaluation_design <- create_eval_design(
-  evaltype = "conc",
+evaluation_design2 <- create_eval_design(
+  evaltype = c("conc", "auc24"),
   at = c(14, 28, 42),
   anchor = "day"
 )
@@ -130,9 +130,31 @@ design <- create_trial_design(
   initial_regimen_design = initial_method,
   sim_design = model_design, 
   est_design = model_design,
-  eval_design = evaluation_design
+  eval_design = evaluation_design2
 )
 ```
+
+
+```{r}
+evaluation_design <- create_eval_design(
+  evaltype = c("conc"),
+  at = c(14, 28, 42),
+  anchor = "day"
+)
+
+evaluation_design2 <- create_eval_design(
+  evaltype = c("conc", "auc24"),
+  at = c(14, 28, 42),
+  anchor = "day"
+)
+
+evaluation_design3 <- create_eval_design(
+  evaltype = c("auc24"),
+  at = c(14, 28, 42),
+  anchor = "day"
+)
+```
+
 
 ## 2. Create a set of digital patient covariates
 
@@ -240,26 +262,18 @@ res$final_exposure |>
     )
 ```
 
-We can also check how well our patients did at day 28.
+We can also check how well our patients did across days 14, 28, and 42.
 
 ```{r fig.width = 2, fig.height = 4}
 res$eval_exposure |> 
-  dplyr::filter(time == 672) |> 
-  ggplot(aes(x = 1, y = conc)) +
-  geom_rect(
-    aes(
-      xmin = -Inf, xmax = Inf, 
-      ymin = target_design$min, ymax = target_design$max,
-    ),
-    fill = "grey80"
-  ) +
+  dplyr::filter(type == "conc") |> 
+  dplyr::mutate(time = time/24) |> 
+  ggplot(aes(x = time, y = value, group = time)) +
   geom_boxplot() +
-  coord_cartesian(ylim = c(0, target_design$max * 1.3)) +
   labs(
-    x = "",
-    y = "Concentration at day 28 (IU/L)"
-  ) +
-  theme(axis.text.x = element_blank())
+    x = "Day",
+    y = "Concentration(IU/L)"
+  )
 ```
 
 While further work is needed to establish a realistic upper toxicity threshold
