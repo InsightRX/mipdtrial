@@ -4,14 +4,7 @@
 \alias{calc_time_to_target}
 \title{Calculate time to target attainment}
 \usage{
-calc_time_to_target(
-  regimen,
-  target_design,
-  auc_comp,
-  model,
-  terminal_interval = 24,
-  ...
-)
+calc_time_to_target(regimen, target_design, auc_comp, model, ...)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}
@@ -22,8 +15,6 @@ calc_time_to_target(
 
 \item{model}{PKPDsim model object}
 
-\item{terminal_interval}{duration of final dosing interval}
-
 \item{...}{arguments passed on to \code{PKPDsim::sim}}
 }
 \value{
@@ -31,5 +22,13 @@ a numeric value indicating the time, in hours, if a dosing interval
 contained the target metric within range. Otherwise, returns NA.
 }
 \description{
-Calculate time to target attainment
+For AUC targets, this function returns the first time of the start of
+the dosing interval plus the infusion length where the AUC24 or 12 is
+on target.
+}
+\details{
+For trough targets, this returns the time of start of the dosing interval
+plus the infusion length immediately prior to the trough being on target
+(i.e. the dose + infusion length of the first dose that brought the trough
+to target).
 }

@@ -192,6 +192,7 @@ test_that("calc_time_to_target: correct time to target calculated", {
     covariates = NULL,
     parameters = list(CL = 5, V = 50)
   )
+  # attains target on second dosing interval + 1 hour infusion = 13 hours
   expect_equal(time_to_target_trough, 13)
 
   trough_target_point <- create_target_design(
@@ -244,6 +245,32 @@ test_that("calc_time_to_target: correct time to target calculated", {
     parameters = list(CL = 5, V = 50)
   )
   expect_equal(time_to_target_auc12, 13)
+})
+
+test_that("calc_time_to_target: return Inf if target is never reached", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 10,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+  trough_target <- create_target_design(
+    targettype = "trough",
+    targetmin = 100,
+    targetmax = 500,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_inf <- calc_time_to_target(
+    regimen = regimen,
+    target_design = trough_target,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  # never gets to target
+  expect_equal(time_to_target_inf, Inf)
 })
 
 test_that("calc_time_to_target: return NA when unsupported type", {
