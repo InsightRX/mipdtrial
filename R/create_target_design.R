@@ -84,19 +84,14 @@ create_target_design <- function(
     } else {
       offset <- 0
       time <- NULL
-      if(targettype %in% c("cmin", "trough")) {
-        when <- "cmin"
-      } else if (targettype %in% c("cmax", "peak")) {
-        when <- "cmax"
-      } else if (targettype %in% c("auc24")) {
-        offset <- 24
-        when <- "dose"
-      } else if (targettype %in% c("auc12")) {
-        offset <- 12
-        when <- "dose"
-      } else { # cum AUC
-        when <- "dose"
-      }
+      switch(
+        targettype,
+        "cmin" =, "trough" = { when <- "cmin" },
+        "cmax" =, "peak" = { when <- "cmax" },
+        "auc24" = { offset <- 24; when <- "dose" },
+        "auc12" = { offset <- 12; when <- "dose" },
+        "cum_auc" = {when <- "dose"}
+      )
     }
   }
 
@@ -207,19 +202,14 @@ create_eval_design <- function(
       } else {
         offset <- 0
         time <- NULL
-        if(type_eval %in% c("cmin", "trough")) {
-          when <- "cmin"
-        } else if (type_eval %in% c("cmax", "peak")) {
-          when <- "cmax"
-        } else if (type_eval %in% c("auc24")) {
-          offset <- 24
-          when <- "dose"
-        } else if (type_eval %in% c("auc12")) {
-          offset <- 12
-          when <- "dose"
-        } else { # cum AUC
-          when <- "dose"
-        }
+        switch(
+          targettype,
+          "cmin" =, "trough" = { when <- "cmin" },
+          "cmax" =, "peak" = { when <- "cmax" },
+          "auc24" = { offset <- 24; when <- "dose" },
+          "auc12" = { offset <- 12; when <- "dose" },
+          "cum_auc" = {when <- "dose"}
+        )
       }
     }
     tmp <- create_design(
