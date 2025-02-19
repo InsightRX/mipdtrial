@@ -182,6 +182,7 @@ is_on_target <- function(v, target) {
 #' that are not at the target times.
 #'
 #' @inheritParams create_target_design
+#' @param evaltype evaluation metric(s) to use. Types from `mipd_target_types()`
 #' @export
 create_eval_design <- function(
     evaltype = mipd_target_types(),

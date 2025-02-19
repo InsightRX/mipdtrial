@@ -10,6 +10,7 @@
 #' `create_regimen_update_design()`
 #' @param sim_design Design for simulation model, from `create_model_design()`
 #' @param est_design Design for estimation, from `create_model_design()`
+#' @param eval_design Design for evaluation metrics, from `create_eval_design()`
 #'
 #' @export
 create_trial_design <- function(
