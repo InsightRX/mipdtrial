@@ -150,7 +150,8 @@ calc_auc_from_regimen <- function(
 #' @param model PKPDsim model object
 #' @param ... arguments passed on to `PKPDsim::sim`
 #' @return a numeric value indicating the time, in hours, if a dosing interval
-#'   contained the target metric within range. Otherwise, returns NA.
+#'   contained the target metric within range. Returns Inf if target was never
+#'   achieved. Returns NA if the target type is not supported.
 #' @export
 calc_time_to_target <- function(
     regimen,
@@ -224,7 +225,7 @@ calc_time_to_target <- function(
     }
   }
 
-  # Return end of infusion of identified dose, or NA if no dose found
+  # Return end of infusion of identified dose, or Inf if never on target
   if (!is.null(dose_idx)) {
     regimen$dose_times[dose_idx] + regimen$t_inf[dose_idx]
   } else {

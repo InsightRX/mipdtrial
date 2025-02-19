@@ -281,7 +281,7 @@ test_that("calc_time_to_target: return NA when unsupported type", {
     type = "infusion"
   )
   unsupported_target <- create_target_design(
-    targettype = "cum_auc",
+    targettype = "gobears",
     targetmin = 1,
     targetmax = 5,
     at = 6,
@@ -295,5 +295,5 @@ test_that("calc_time_to_target: return NA when unsupported type", {
     covariates = NULL,
     parameters = list(CL = 5, V = 50)
   )
-  expect_equal(is.na(time_to_target_unsupported), TRUE)
+  expect_true(is.na(time_to_target_unsupported))
 })

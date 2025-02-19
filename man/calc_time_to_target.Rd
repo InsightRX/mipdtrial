@@ -19,7 +19,8 @@ calc_time_to_target(regimen, target_design, auc_comp, model, ...)
 }
 \value{
 a numeric value indicating the time, in hours, if a dosing interval
-contained the target metric within range. Otherwise, returns NA.
+contained the target metric within range. Returns Inf if target was never
+achieved. Returns NA if the target type is not supported.
 }
 \description{
 For AUC targets, this function returns the first time of the start of
