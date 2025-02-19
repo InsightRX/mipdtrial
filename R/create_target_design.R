@@ -203,7 +203,7 @@ create_eval_design <- function(
         offset <- 0
         time <- NULL
         switch(
-          targettype,
+          type_eval,
           "cmin" =, "trough" = { when <- "cmin" },
           "cmax" =, "peak" = { when <- "cmax" },
           "auc24" = { offset <- 24; when <- "dose" },
