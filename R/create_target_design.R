@@ -85,7 +85,7 @@ create_target_design <- function(
       offset <- 0
       time <- NULL
       switch(
-        type_eval,
+        targettype,
         "cmin" =, "trough" = { when <- "cmin" },
         "cmax" =, "peak" = { when <- "cmax" },
         "auc24" = { offset <- 24; when <- "dose" },
