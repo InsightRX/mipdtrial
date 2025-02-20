@@ -211,9 +211,13 @@ create_eval_design <- function(
           "auc24" = { offset <- 24; when <- "dose" },
           "auc12" = { offset <- 12; when <- "dose" },
           "conc" = { when <- "dose" },
-          "cum_auc" = {when <- "dose"}
+          "cum_auc" = {when <- "dose"},
+          when <- "unknown"
         )
       }
+    }
+    if (when == "unknown"){
+      stop(paste(type_eval), " is not yet supported. Please remove this metric from your evaluation.")
     }
     tmp <- create_design(
       time = time,

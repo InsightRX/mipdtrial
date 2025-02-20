@@ -161,9 +161,6 @@ run_trial <- function(
           f_calc <- calc_auc_from_regimen
         } else if (design_type %in% target_types_conc){
           f_calc <- calc_concentration_from_regimen
-        } else {
-          warning(paste(design_type, "is not supported yet"))
-          break
         }
         exposure_metric <- f_calc(
           regimen = res$final_regimen,
