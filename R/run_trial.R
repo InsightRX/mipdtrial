@@ -129,7 +129,7 @@ run_trial <- function(
         regimen = res$final_regimen,
         target_design = design$target,
         auc_comp = attr(design$sim$model, "size"),
-        ode = design$sim$model,
+        model = design$sim$model,
         parameters = pars_true_i,
         covariates = covs
       )
