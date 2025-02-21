@@ -84,19 +84,15 @@ create_target_design <- function(
     } else {
       offset <- 0
       time <- NULL
-      if(targettype %in% c("cmin", "trough")) {
-        when <- "cmin"
-      } else if (targettype %in% c("cmax", "peak")) {
-        when <- "cmax"
-      } else if (targettype %in% c("auc24")) {
-        offset <- 24
-        when <- "dose"
-      } else if (targettype %in% c("auc12")) {
-        offset <- 12
-        when <- "dose"
-      } else { # cum AUC
-        when <- "dose"
-      }
+      switch(
+        targettype,
+        "cmin" =, "trough" = { when <- "cmin" },
+        "cmax" =, "peak" = { when <- "cmax" },
+        "auc24" = { offset <- 24; when <- "dose" },
+        "auc12" = { offset <- 12; when <- "dose" },
+        "conc" = { when <- "dose" },
+        "cum_auc" = {when <- "dose"}
+      )
     }
   }
 
@@ -186,6 +182,7 @@ is_on_target <- function(v, target) {
 #' that are not at the target times.
 #'
 #' @inheritParams create_target_design
+#' @param evaltype evaluation metric(s) to use. Types from `mipd_target_types()`
 #' @export
 create_eval_design <- function(
     evaltype = mipd_target_types(),
@@ -207,20 +204,20 @@ create_eval_design <- function(
       } else {
         offset <- 0
         time <- NULL
-        if(type_eval %in% c("cmin", "trough")) {
-          when <- "cmin"
-        } else if (type_eval %in% c("cmax", "peak")) {
-          when <- "cmax"
-        } else if (type_eval %in% c("auc24")) {
-          offset <- 24
-          when <- "dose"
-        } else if (type_eval %in% c("auc12")) {
-          offset <- 12
-          when <- "dose"
-        } else { # cum AUC
-          when <- "dose"
-        }
+        switch(
+          type_eval,
+          "cmin" =, "trough" = { when <- "cmin" },
+          "cmax" =, "peak" = { when <- "cmax" },
+          "auc24" = { offset <- 24; when <- "dose" },
+          "auc12" = { offset <- 12; when <- "dose" },
+          "conc" = { when <- "dose" },
+          "cum_auc" = {when <- "dose"},
+          when <- "unknown"
+        )
       }
+    }
+    if (when == "unknown"){
+      stop(paste(type_eval), " is not yet supported. Please remove this metric from your evaluation.")
     }
     tmp <- create_design(
       time = time,

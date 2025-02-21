@@ -14,6 +14,8 @@ create_eval_design(
 )
 }
 \arguments{
+\item{evaltype}{evaluation metric(s) to use. Types from \code{mipd_target_types()}}
+
 \item{time}{a vector of numeric values at which to measure and optimize the
 target. In most cases \code{time} is not required as argument, and will be inferred
 from the the \code{targettype}.

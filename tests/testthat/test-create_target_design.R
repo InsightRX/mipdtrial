@@ -144,6 +144,17 @@ test_that("target design works for absolute time", {
   )
 })
 
+test_that("create_eval_design: handles missing metrics", {
+  expect_error(
+    create_eval_design(
+      evaltype = c("unsupported"),
+      at = c(14, 28, 42),
+      anchor = "day"
+    ),
+    "unsupported is not yet supported. Please remove this metric from your evaluation."
+  )
+})
+
 test_that("create_eval_design: handles multiple metrics", {
   eval_design <- create_eval_design(
     evaltype = c("conc"),

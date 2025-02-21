@@ -32,6 +32,8 @@ create_trial_design(
 \item{sim_design}{Design for simulation model, from \code{create_model_design()}}
 
 \item{est_design}{Design for estimation, from \code{create_model_design()}}
+
+\item{eval_design}{Design for evaluation metrics, from \code{create_eval_design()}}
 }
 \description{
 Combine all sub-designs into the overall trial design object
