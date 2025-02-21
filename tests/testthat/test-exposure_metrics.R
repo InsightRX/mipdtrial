@@ -281,7 +281,7 @@ test_that("calc_time_to_target: return NA when unsupported type", {
     type = "infusion"
   )
   unsupported_target <- create_target_design(
-    targettype = "gobears",
+    targettype = "cum_auc",
     targetmin = 1,
     targetmax = 5,
     at = 6,
