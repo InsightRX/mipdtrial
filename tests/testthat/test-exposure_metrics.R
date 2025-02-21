@@ -169,3 +169,131 @@ test_that("handles IOV correctly", {
   expect_false(result2a == result2b) # iov is different after day 3
 })
 
+test_that("calc_time_to_target: correct time to target calculated", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 150,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+
+  trough_target <- create_target_design(
+    targettype = "trough",
+    targetmin = 1,
+    targetmax = 5,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_trough <- calc_time_to_target(
+    regimen = regimen,
+    target_design = trough_target,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  # attains target on second dosing interval + 1 hour infusion = 13 hours
+  expect_equal(time_to_target_trough, 13)
+
+  trough_target_point <- create_target_design(
+    targettype = "trough",
+    targetvalue = 1.5,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_trough_point <- calc_time_to_target(
+    regimen = regimen,
+    target_design = trough_target_point,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+
+  expect_equal(time_to_target_trough_point, 13)
+
+  auc24_target <- create_target_design(
+    targettype = "auc24",
+    targetmin = 55,
+    targetmax = 75,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_auc24 <- calc_time_to_target(
+    regimen = regimen,
+    target_design = auc24_target,
+    auc_comp = attr(mod_1cmt_iv, "size"),
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  expect_equal(time_to_target_auc24, 25)
+
+  auc12_target <- create_target_design(
+    targettype = "auc12",
+    targetmin = 25,
+    targetmax = 40,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_auc12 <- calc_time_to_target(
+    regimen = regimen,
+    target_design = auc12_target,
+    auc_comp = attr(mod_1cmt_iv, "size"),
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  expect_equal(time_to_target_auc12, 13)
+})
+
+test_that("calc_time_to_target: return Inf if target is never reached", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 10,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+  trough_target <- create_target_design(
+    targettype = "trough",
+    targetmin = 100,
+    targetmax = 500,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_inf <- calc_time_to_target(
+    regimen = regimen,
+    target_design = trough_target,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  # never gets to target
+  expect_equal(time_to_target_inf, Inf)
+})
+
+test_that("calc_time_to_target: return NA when unsupported type", {
+  regimen <- PKPDsim::new_regimen(
+    amt = 150,
+    n = 20,
+    interval = 12,
+    type = "infusion"
+  )
+  unsupported_target <- create_target_design(
+    targettype = "gobears",
+    targetmin = 1,
+    targetmax = 5,
+    at = 6,
+    anchor = "day"
+  )
+  time_to_target_unsupported <- calc_time_to_target(
+    regimen = regimen,
+    target_design = unsupported_target,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
+  )
+  expect_true(is.na(time_to_target_unsupported))
+})
