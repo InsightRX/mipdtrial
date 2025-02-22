@@ -45,7 +45,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_auc_from_sim</span><span class="op">(</span><span class="va">sim_output</span>, <span class="va">auc_comp</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_auc_from_sim</span><span class="op">(</span><span class="va">sim_output</span>, <span class="va">auc_comp</span>, <span class="va">extract_time</span>, <span class="va">target_type</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,6 +58,14 @@
 
 <dt id="arg-auc-comp">auc_comp<a class="anchor" aria-label="anchor" href="#arg-auc-comp"></a></dt>
 <dd><p>auc compartment</p></dd>
+
+
+<dt id="arg-extract-time">extract_time<a class="anchor" aria-label="anchor" href="#arg-extract-time"></a></dt>
+<dd><p>time points for AUC12 or 24 to extract</p></dd>
+
+
+<dt id="arg-target-type">target_type<a class="anchor" aria-label="anchor" href="#arg-target-type"></a></dt>
+<dd><p>type of AUC target in <code>c("auc24", "auc12", "cum_auc")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

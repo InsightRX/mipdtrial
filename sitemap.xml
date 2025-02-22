@@ -12,10 +12,12 @@
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/adjust_dose_checks.html</loc></url>
 <url><loc>/reference/calc_auc_from_sim.html</loc></url>
+<url><loc>/reference/calc_time_to_target.html</loc></url>
 <url><loc>/reference/check_when.html</loc></url>
 <url><loc>/reference/collect_tdms.html</loc></url>
 <url><loc>/reference/create_cov_object.html</loc></url>
 <url><loc>/reference/create_design.html</loc></url>
+<url><loc>/reference/create_eval_design.html</loc></url>
 <url><loc>/reference/create_initial_regimen_design.html</loc></url>
 <url><loc>/reference/create_model_design.html</loc></url>
 <url><loc>/reference/create_regimen_update_design.html</loc></url>

@@ -248,13 +248,13 @@ described in the model.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>arm <span class="op">=</span> <span class="st">"mid-interval"</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">final_exp1</span>, <span class="va">final_exp2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id auc_true  auc_est         arm</span></span>
-<span><span class="co">#&gt; 1  1 455.5427 500.0427 peak-trough</span></span>
-<span><span class="co">#&gt; 2  2 376.8851 499.8176 peak-trough</span></span>
-<span><span class="co">#&gt; 3  3 408.3171 499.9847 peak-trough</span></span>
-<span><span class="co">#&gt; 4  4 432.2175 499.9052 peak-trough</span></span>
-<span><span class="co">#&gt; 5  5 500.6255 499.9565 peak-trough</span></span>
-<span><span class="co">#&gt; 6  6 376.1044 500.0055 peak-trough</span></span></code></pre></div>
+<span><span class="co">#&gt;   id auc_true  auc_est tta         arm</span></span>
+<span><span class="co">#&gt; 1  1 455.5427 500.0427  37 peak-trough</span></span>
+<span><span class="co">#&gt; 2  2 376.8851 499.8176  13 peak-trough</span></span>
+<span><span class="co">#&gt; 3  3 408.3171 499.9847   1 peak-trough</span></span>
+<span><span class="co">#&gt; 4  4 432.2175 499.9052   1 peak-trough</span></span>
+<span><span class="co">#&gt; 5  5 500.6255 499.9565  13 peak-trough</span></span>
+<span><span class="co">#&gt; 6  6 376.1044 500.0055  25 peak-trough</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
