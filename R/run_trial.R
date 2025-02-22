@@ -46,6 +46,7 @@ run_trial <- function(
   sim_parameters <- data.frame()
   gof <- data.frame()
   final_exposure <- data.frame()
+  eval_exposure <- data.frame()
 
   ## Set up number of individuals to simulate
   if(is.null(n_ids)) {
@@ -124,9 +125,22 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
+      time_to_target <- calc_time_to_target(
+        regimen = res$final_regimen,
+        target_design = design$target,
+        auc_comp = attr(design$sim$model, "size"),
+        model = design$sim$model,
+        parameters = pars_true_i,
+        covariates = covs
+      )
       final_exposure <- rbind(
         final_exposure,
-        data.frame(id = i, auc_true = auc_true, auc_est = auc_est)
+        data.frame(
+          id = i,
+          auc_true = auc_true,
+          auc_est = auc_est,
+          tta = time_to_target
+        )
       )
     } else if (design$target$type %in% target_types_conc) {
       conc_true <- calc_concentration_from_regimen(
@@ -143,10 +157,58 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
+      time_to_target <- calc_time_to_target(
+        regimen = res$final_regimen,
+        target_design = design$target,
+        auc_comp = NULL,
+        model = design$sim$model,
+        parameters = pars_true_i,
+        covariates = covs
+      )
       final_exposure <- rbind(
         final_exposure,
-        data.frame(id = i, conc_true = conc_true, conc_est = conc_est)
+        data.frame(
+          id = i,
+          conc_true = conc_true,
+          conc_est = conc_est,
+          tta = time_to_target
+        )
       )
+    }
+
+    # post-processing to get evaluation metrics
+    if (!is.null(design$evaluation)){
+      for (design_type in names(design$evaluation)){
+        tmp_eval_design <- list(
+          type = design_type,
+          scheme = design$evaluation[[design_type]]
+        )
+        if (design_type %in% target_types_auc){
+          f_calc <- calc_auc_from_regimen
+        } else if (design_type %in% target_types_conc){
+          f_calc <- calc_concentration_from_regimen
+        }
+        exposure_metric <- f_calc(
+          regimen = res$final_regimen,
+          parameters = pars_true_i, # true patient parameters
+          model = design$sim$model,
+          target_design = tmp_eval_design,
+          covariates = covs
+        )
+        eval_time <- get_sampling_times_from_scheme(
+          tmp_eval_design$scheme,
+          res$final_regimen
+        )
+        eval_exposure <- rbind(
+          eval_exposure,
+          data.frame(
+            id = i,
+            time = eval_time,
+            value = exposure_metric,
+            type = design_type
+          )
+        )
+      }
     }
 
     ############################################################################
@@ -172,7 +234,8 @@ run_trial <- function(
     sim_parameters = sim_parameters,
     design = design,
     gof = gof,
-    final_exposure = final_exposure
+    final_exposure = final_exposure,
+    eval_exposure = eval_exposure
   )
   class(out) <- c("mipdtrial_results", "list")
   out

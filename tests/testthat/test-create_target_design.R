@@ -144,3 +144,80 @@ test_that("target design works for absolute time", {
   )
 })
 
+test_that("create_eval_design: handles missing metrics", {
+  expect_error(
+    create_eval_design(
+      evaltype = c("unsupported"),
+      at = c(14, 28, 42),
+      anchor = "day"
+    ),
+    "unsupported is not yet supported. Please remove this metric from your evaluation."
+  )
+})
+
+test_that("create_eval_design: handles multiple metrics", {
+  eval_design <- create_eval_design(
+    evaltype = c("conc"),
+    at = c(14, 28, 42),
+    anchor = "day"
+  )
+  eval_design2 <- create_eval_design(
+    evaltype = c("conc", "auc24"),
+    at = c(14, 28, 42),
+    anchor = "day"
+  )
+  eval_design3 <- create_eval_design(
+    evaltype = c("cmin", "cmax"),
+    at = c(14, 28, 42),
+    anchor = "day"
+  )
+
+  eval1 <- list(
+    conc = data.frame(
+      base = rep("dose", 3L),
+      offset = numeric(3),
+      at = c(14, 28, 42),
+      anchor = rep("day", 3L),
+      scatter = numeric(3)
+    )
+  )
+
+  eval2 <- list(
+    conc = data.frame(
+      base = rep("dose", 3L),
+      offset = numeric(3),
+      at = c(14, 28, 42),
+      anchor = rep("day", 3L),
+      scatter = numeric(3)
+    ),
+    auc24 = data.frame(
+      base = rep("dose", 3L),
+      offset = rep(24, 3L),
+      at = c(14, 28, 42),
+      anchor = rep("day", 3L),
+      scatter = numeric(3)
+    )
+  )
+
+  eval3 <- list(
+    cmin = data.frame(
+      base = rep("cmin", 3L),
+      offset = numeric(3),
+      at = c(14, 28, 42),
+      anchor = rep("day", 3L),
+      scatter = numeric(3)
+    ),
+    cmax = data.frame(
+      base = rep("cmax", 3L),
+      offset = numeric(3),
+      at = c(14, 28, 42),
+      anchor = rep("day", 3L),
+      scatter = numeric(3)
+    )
+  )
+
+  expect_equal(eval_design, eval1)
+  expect_equal(eval_design2, eval2)
+  expect_equal(eval_design3, eval3)
+})
+

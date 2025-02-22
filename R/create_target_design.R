@@ -84,19 +84,15 @@ create_target_design <- function(
     } else {
       offset <- 0
       time <- NULL
-      if(targettype %in% c("cmin", "trough")) {
-        when <- "cmin"
-      } else if (targettype %in% c("cmax", "peak")) {
-        when <- "cmax"
-      } else if (targettype %in% c("auc24")) {
-        offset <- 24
-        when <- "dose"
-      } else if (targettype %in% c("auc12")) {
-        offset <- 12
-        when <- "dose"
-      } else { # cum AUC
-        when <- "dose"
-      }
+      switch(
+        targettype,
+        "cmin" =, "trough" = { when <- "cmin" },
+        "cmax" =, "peak" = { when <- "cmax" },
+        "auc24" = { offset <- 24; when <- "dose" },
+        "auc12" = { offset <- 12; when <- "dose" },
+        "conc" = { when <- "dose" },
+        "cum_auc" = {when <- "dose"}
+      )
     }
   }
 
@@ -176,4 +172,63 @@ target_types_conc <- c("peak", "cmax", "cmax_1hr", "trough", "cmin", "conc")
 
 is_on_target <- function(v, target) {
   v >= target$min & v <= target$max
+}
+
+
+#' Create evaluation object
+#'
+#' This function defines the evaluation metric and timing for non-target metrics.
+#' Use this function to record outputs from the simulation like troughs or AUC
+#' that are not at the target times.
+#'
+#' @inheritParams create_target_design
+#' @param evaltype evaluation metric(s) to use. Types from `mipd_target_types()`
+#' @export
+create_eval_design <- function(
+    evaltype = mipd_target_types(),
+    time = NULL,
+    when = NULL,
+    offset = NULL,
+    at = NULL,
+    anchor = c("dose", "day")
+) {
+  out <- list()
+  anchor <- match.arg(anchor)
+  original_when <- when
+
+  for (type_eval in evaltype){
+    ## Infer `time` and `when` from evaltype
+    if(is.null(original_when)) {
+      if(!is.null(time)) { # assume user wants to specify timepoint manually
+        when <- NULL
+      } else {
+        offset <- 0
+        time <- NULL
+        switch(
+          type_eval,
+          "cmin" =, "trough" = { when <- "cmin" },
+          "cmax" =, "peak" = { when <- "cmax" },
+          "auc24" = { offset <- 24; when <- "dose" },
+          "auc12" = { offset <- 12; when <- "dose" },
+          "conc" = { when <- "dose" },
+          "cum_auc" = {when <- "dose"},
+          when <- "unknown"
+        )
+      }
+    }
+    if (when == "unknown"){
+      stop(paste(type_eval), " is not yet supported. Please remove this metric from your evaluation.")
+    }
+    tmp <- create_design(
+      time = time,
+      when = when,
+      offset = offset,
+      at = at,
+      anchor = anchor
+    )
+
+    out[[type_eval]] <- tmp
+  }
+
+  out
 }
