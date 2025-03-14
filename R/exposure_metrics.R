@@ -121,7 +121,7 @@ calc_auc_from_regimen <- function(
     model,
     parameters = parameters,
     regimen = regimen,
-    t_obs = target_time_sim,
+    t_obs = unique(target_time_sim),
     iov_bins = iov[["bins"]],
     ...
   )
