@@ -36,8 +36,7 @@ In this vignette, we will demonstrate the following tools:
 
 ## Motivation
 
-In model-informed precision dosing we can update doses, but of course we can also reduce or increase the dosing interval length. This can also be studied using 
-the `mipdtrial` package.
+In model-informed precision dosing we can update doses, but of course we can also reduce or increase the dosing interval length. This can also be studied using the `mipdtrial` package.
 
 ```{r setup}
 library(mipdtrial)

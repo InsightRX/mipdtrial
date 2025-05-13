@@ -66,6 +66,7 @@ dose_grid_search <- function(
     n_cores = 1,
     md = list(),
     covariates = NULL,
+    verbose = FALSE,
     ...
 ) {
 
@@ -82,13 +83,6 @@ dose_grid_search <- function(
     }
   }
 
-  target_time <- get_sampling_times_from_scheme(
-    target_design$scheme, regimen
-  )
-  if(length(target_time) > 1 && !target_design$type %in% c("auc", target_types_time)) {
-    target_time <- target_time[1]
-  }
-
   if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
   } else if(target_design$type %in% target_types_auc) {
@@ -100,11 +94,6 @@ dose_grid_search <- function(
     stop("Target type not recognized!")
   }
 
-  if(target_design$type %in% c("auc", target_types_time)) {
-    if(length(target_time) != 2) {
-      stop("Need start and end of observation interval as vector target_time.")
-    }
-  }
   if (target_design$type == "auc" & !is.null(pta)) {
     stop("PTA method for AUC currently not supported.")
   }
@@ -137,7 +126,6 @@ dose_grid_search <- function(
     pta = pta,
     target_design = target_design,
     model = est_model,
-    t_obs = target_time,
     omega = omega,
     obs = obs,
     ruv = ruv,
@@ -152,9 +140,15 @@ dose_grid_search <- function(
       tab <- filter_rows_0_100(tab)
     }
     interval <- tab[which.min(abs(tab$y - target_design$value)),]$interval
+    if(verbose) {
+      print(tab)
+    }
     return(interval)
   } else {
-    tab <- data.frame(dose = grid, y = unlist(y))
+    tab <- data.frame(
+      dose = grid,
+      y = unlist(y)
+    )
   }
 
   ## get best dose:
@@ -247,23 +241,22 @@ dose_grid_search <- function(
 #' @param model model for simulating dose (estimation model)
 #' @param value element of the dose/interval grid
 #' @param grid_type either `dose` grid or `interval` grid
-#' @param t_obs time at which observation should be calculated
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)
 #' @md
-simulate_dose_interval <- function(value,
-                              grid_type = "dose",
-                              dose_update,
-                              regimen,
-                              md,
-                              pta,
-                              target_design,
-                              model,
-                              t_obs,
-                              omega,
-                              obs,
-                              ruv,
-                              ...) {
-
+simulate_dose_interval <- function(
+    value,
+    grid_type = "dose",
+    dose_update,
+    regimen,
+    md,
+    pta,
+    target_design,
+    model,
+    omega,
+    obs,
+    ruv,
+    ...
+) {
   reg <- regimen
   if(grid_type == "dose") {
     reg <- update_regimen(
@@ -278,6 +271,22 @@ simulate_dose_interval <- function(value,
       dose_update_number = dose_update
     )
   }
+
+  ## Calculate time at which target needs to be checked
+  ## This is constant for dose-optimization, but differs for interval-based
+  ## optimization.
+  target_time <- get_sampling_times_from_scheme(
+    target_design$scheme, reg
+  )
+  if(length(target_time) > 1 && !target_design$type %in% c("auc", target_types_time)) {
+    target_time <- target_time[1]
+  }
+  if(target_design$type %in% c("auc", target_types_time)) {
+    if(length(target_time) != 2) {
+      stop("Need start and end of observation interval as vector target_time.")
+    }
+  }
+  t_obs <- target_time
 
   if (target_design$type %in% target_types_time || target_design$type == "auc") {
     # need two time points for time-based targets

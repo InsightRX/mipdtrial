@@ -6,7 +6,6 @@
 #' likely easiest. To modify the model parameters or error models (e.g., for
 #' sensitivity analysis), the other arguments provide a convenient API.
 #'
-#'
 #' @param lib PKPDsim model name, as a string.
 #' @param model PKPDsim model object
 #' @param parameters model parameters, as a named list
@@ -38,21 +37,23 @@ create_model_design <- function(
   ruv = NULL
 ) {
   design <- list()
+  params <- c("model", "parameters", "omega_matrix", "ruv")
   if(!is.null(lib)) {
     suppressMessages( ## avoid message "the following objects are masked from ..."
       require(lib, character.only = TRUE)
     )
-    load_lib <- c("model", "parameters", "omega_matrix", "ruv")
-    for(i in seq(load_lib)) {
-      design[[load_lib[i]]] <- get(load_lib[i], asNamespace(lib))()
+    for(i in seq(params)) {
+      design[[params[i]]] <- get(params[i], asNamespace(lib))()
     }
   } else {
-    design <- list(
-      model = model,
-      parameters = parameters,
-      omega_matrix = omega_matrix,
-      ruv = ruv
-    )
+    design <- list()
+  }
+  ## potentially override using user-specified details
+  for(key in params) {
+    tmp <- get(key)
+    if(!is.null(tmp)) {
+      design[[key]] <- tmp
+    }
   }
   design
 }

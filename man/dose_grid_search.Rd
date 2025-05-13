@@ -24,6 +24,7 @@ dose_grid_search(
   n_cores = 1,
   md = list(),
   covariates = NULL,
+  verbose = FALSE,
   ...
 )
 }
