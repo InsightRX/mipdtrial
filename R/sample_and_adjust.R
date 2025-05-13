@@ -101,11 +101,13 @@ sample_and_adjust_by_dose <- function(
   )
 
   if(verbose) {
-    message("Starting dose: ", round(regimen$dose_amts[1]))
+    cli::cli_alert_info(paste0("Starting dose: ", round(regimen$dose_amts[1])))
   }
 
   for (j in 1:length(adjust_at_dose)) {
-    if(verbose) message("Adjustment of dose# ", adjust_at_dose[j])
+    if(verbose) {
+      cli::cli_alert_info(paste0("Adjustment of dose# ", adjust_at_dose[j]))
+    }
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
     tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
@@ -115,7 +117,7 @@ sample_and_adjust_by_dose <- function(
     }
     last_adjust_time <- adjust_time
     if(verbose) {
-      message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
+      cli::cli_alert_info(paste0("Sample times: ", paste0(tdm_times[collect_idx], collapse=", ")))
     }
     new_tdms <- collect_tdms(
       sim_model = sim_model,
@@ -142,7 +144,7 @@ sample_and_adjust_by_dose <- function(
       covariates = covariates
     )
     if(verbose) {
-      message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
+      cli::cli_alert_info(paste0("TDMs: ", paste(round(new_tdms$y, 1), collapse=", ")))
     }
     if(accumulate_data) {
       tdms_i <- rbind(tdms_i, new_tdms)
@@ -175,7 +177,7 @@ sample_and_adjust_by_dose <- function(
     out <- do.call(regimen_update_design$dose_optimization_method, method_args)
     regimen <- out$regimen
     if(verbose) {
-      message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)
+      cli::cli_alert_info(paste0("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval))
     }
 
     ## update the vector of dose_udpate numbers, if needed

@@ -27,7 +27,7 @@
 #' @param progress show progress bar? (default is `TRUE`)
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.
-#'
+#' @param verbose verbose output?
 #' @export
 #'
 run_trial <- function(
@@ -36,6 +36,7 @@ run_trial <- function(
     cov_mapping,
     n_ids = NULL,
     seed = 0,
+    verbose = FALSE,
     progress = TRUE
 ) {
 
@@ -60,13 +61,15 @@ run_trial <- function(
   }
 
   ## Main loop
-  if(progress) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
+  if(progress && !verbose) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
   for (i in data$ID) {
-    if(progress) setTxtProgressBar(pb, i)
+    if(progress  && !verbose) setTxtProgressBar(pb, i)
     ############################################################################
     ## Create individual
     ############################################################################
     # get patient covariates
+    if(verbose)
+      cli::cli_alert_info("Starting simulation for patient: {i}")
     covs <- create_cov_object(
       data[data$ID == i,],
       mapping = cov_mapping
@@ -106,10 +109,13 @@ run_trial <- function(
       est_model = design$est$model,
       parameters = design$est$parameters,
       omega = design$est$omega_matrix,
-      ruv = design$est$ruv
+      ruv = design$est$ruv,
+      verbose = verbose
     )
 
     # post-processing to get common exposure read-outs
+    if(verbose)
+      cli::cli_alert_info("Post-processing simulated data")
     if(design$target$type %in% target_types_auc) {
       auc_true <- calc_auc_from_regimen(
         regimen = res$final_regimen,
@@ -174,6 +180,10 @@ run_trial <- function(
           tta = time_to_target
         )
       )
+
+      if(verbose)
+        cli::cli_alert_success("Virtual patient {i} done")
+
     }
 
     # post-processing to get evaluation metrics

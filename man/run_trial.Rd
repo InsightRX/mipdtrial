@@ -4,7 +4,15 @@
 \alias{run_trial}
 \title{Run an MIPD trial}
 \usage{
-run_trial(data, design, cov_mapping, n_ids = NULL, seed = 0, progress = TRUE)
+run_trial(
+  data,
+  design,
+  cov_mapping,
+  n_ids = NULL,
+  seed = 0,
+  verbose = FALSE,
+  progress = TRUE
+)
 }
 \arguments{
 \item{data}{data set to use for simulation, a data frame. Should contain
@@ -23,6 +31,8 @@ will use all subjects in \code{data}.}
 
 \item{seed}{argument passed to \code{set.seed()} to set the seed for all random
 variability generation.}
+
+\item{verbose}{verbose output?}
 
 \item{progress}{show progress bar? (default is \code{TRUE})}
 }
