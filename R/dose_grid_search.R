@@ -38,6 +38,7 @@
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
 #' @param covariates covariates object
+#' @param verbose verbose output?
 #' @param ... passed on to PKPDsim function
 #' @returns A numeric value indicating the recommended dose
 #' @export
@@ -140,9 +141,6 @@ dose_grid_search <- function(
       tab <- filter_rows_0_100(tab)
     }
     interval <- tab[which.min(abs(tab$y - target_design$value)),]$interval
-    if(verbose) {
-      message(capture.output(print(tab)))
-    }
     return(interval)
   } else {
     tab <- data.frame(
