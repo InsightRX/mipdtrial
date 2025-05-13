@@ -141,7 +141,7 @@ dose_grid_search <- function(
     }
     interval <- tab[which.min(abs(tab$y - target_design$value)),]$interval
     if(verbose) {
-      print(tab)
+      message(capture.output(print(tab)))
     }
     return(interval)
   } else {
