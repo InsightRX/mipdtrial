@@ -52,7 +52,6 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
-  if (!isTRUE(length(iov_bins_sim) > 1)) iov_bins_sim <- c(0, 99999)
 
   adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
