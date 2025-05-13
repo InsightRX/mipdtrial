@@ -70,7 +70,6 @@ simulate_fit <- function(
 
 get_iov_specification <- function(model, parameters, iiv) {
   iov_specs <- attr(model, "iov")
-  if (!isTRUE(iov_specs$n_bins > 1)) iov_specs$bins <- c(0, 99999)
 
   iov <- PKPDmap::create_iov_object(
     cv = iov_specs[["cv"]],
