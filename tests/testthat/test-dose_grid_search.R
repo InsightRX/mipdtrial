@@ -77,13 +77,14 @@ test_that("trough concentration search with interval optimization works", {
     est_model = mod,
     grid = interval_grid,
     grid_type = "interval",
+    dose_update = 4,
     parameters = par,
     regimen = reg,
     refine = FALSE,
     return_obj = FALSE,
     verbose = T,
     target_design = create_target_design(
-      at = 4,
+      at = 6,
       targettype = "conc",
       targetvalue = 5,
       anchor = "dose"
@@ -96,6 +97,7 @@ test_that("trough concentration search with interval optimization works", {
     est_model = mod,
     grid = interval_grid,
     grid_type = "interval",
+    dose_update = 4,
     parameters = par,
     regimen = reg,
     omega = omega, # needs omega now!
@@ -104,7 +106,7 @@ test_that("trough concentration search with interval optimization works", {
     target_time = intv * n,
     return_obj = FALSE,
     target_design = create_target_design(
-      at = 4,
+      at = 6,
       targettype = "conc",
       targetvalue = 15,
       anchor = "dose"
@@ -117,6 +119,7 @@ test_that("trough concentration search with interval optimization works", {
     est_model = mod,
     grid = interval_grid,
     grid_type = "interval",
+    dose_update = 4,
     parameters = par,
     regimen = reg,
     omega = omega, # needs omega now!
@@ -124,7 +127,7 @@ test_that("trough concentration search with interval optimization works", {
     target_time = intv * n,
     return_obj = FALSE,
     target_design = create_target_design(
-      at = 4,
+      at = 6,
       targettype = "conc",
       targetvalue = 5,
       anchor = "dose"
