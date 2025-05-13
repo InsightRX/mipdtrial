@@ -17,7 +17,7 @@ dose_grid <- seq(from = 50, to = 600, by = 10)
 test_that("trough concentration search works", {
   dose_ctr <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     refine = FALSE,
@@ -27,7 +27,7 @@ test_that("trough concentration search works", {
   #setting a probability of 50% should be the same thing
   dose_ctr_prob1 <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     omega = omega, # needs omega now!
@@ -40,7 +40,7 @@ test_that("trough concentration search works", {
   #setting a probability of 90% should require a higher dose
   dose_ctr_prob2 <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     omega = omega, # needs omega now!
@@ -52,7 +52,7 @@ test_that("trough concentration search works", {
   #setting a probability of 90% + ruv should require an even higher dose
   dose_ctr_prob3 <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     omega = omega, # needs omega now!
@@ -69,6 +69,68 @@ test_that("trough concentration search works", {
   expect_lt(dose_ctr_prob2, dose_ctr_prob3)
   expect_lt(abs(dose_ctr_prob2 - 243)/243, 0.01)
   expect_lt(abs(dose_ctr_prob3 - 252)/252, 0.01)
+})
+
+test_that("trough concentration search with interval optimization works", {
+  interval_grid <- c(6, 8, 12, 24, 48)
+  intv_ctr1 <- dose_grid_search(
+    est_model = mod,
+    grid = interval_grid,
+    grid_type = "interval",
+    parameters = par,
+    regimen = reg,
+    refine = FALSE,
+    return_obj = FALSE,
+    verbose = T,
+    target_design = create_target_design(
+      at = 4,
+      targettype = "conc",
+      targetvalue = 5,
+      anchor = "dose"
+    )
+  )
+  expect_equal(intv_ctr1, 12)
+
+  # setting a higher trough target should switch to shorter interval
+  intv_ctr2 <- dose_grid_search(
+    est_model = mod,
+    grid = interval_grid,
+    grid_type = "interval",
+    parameters = par,
+    regimen = reg,
+    omega = omega, # needs omega now!
+    pta = list(prob = .5, type="gt"),
+    auc_comp = 1,
+    target_time = intv * n,
+    return_obj = FALSE,
+    target_design = create_target_design(
+      at = 4,
+      targettype = "conc",
+      targetvalue = 15,
+      anchor = "dose"
+    )
+  )
+  expect_equal(intv_ctr2, 6)
+
+  # setting a lower probability should require a longer interval
+  intv_ctr_prob1 <- dose_grid_search(
+    est_model = mod,
+    grid = interval_grid,
+    grid_type = "interval",
+    parameters = par,
+    regimen = reg,
+    omega = omega, # needs omega now!
+    pta = list(prob = .01, type="gt"),
+    target_time = intv * n,
+    return_obj = FALSE,
+    target_design = create_target_design(
+      at = 4,
+      targettype = "conc",
+      targetvalue = 5,
+      anchor = "dose"
+    )
+  )
+  expect_equal(intv_ctr_prob1, 24)
 })
 
 
@@ -95,7 +157,7 @@ test_that("peak concentration search works", {
 test_that("AUC search works", {
   dose_cum_auc <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     auc_comp = 2,
@@ -112,7 +174,7 @@ test_that("AUC search works", {
   # probability of AUC>target (at 50% prob it should be same as before)
   dose_auc_prob1 <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     pta = list(prob = .5, type="gt"),
@@ -130,7 +192,7 @@ test_that("AUC search works", {
   # probability of AUC>target (at 90% prob it should be higher)
   dose_auc_prob2 <- dose_grid_search(
     est_model = mod,
-    dose_grid = dose_grid,
+    grid = dose_grid,
     parameters = par,
     regimen = reg,
     pta = list(prob = .9, type="gt"),
