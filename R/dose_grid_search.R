@@ -38,6 +38,7 @@
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
 #' @param covariates covariates object
+#' @param verbose verbose output?
 #' @param ... passed on to PKPDsim function
 #' @returns A numeric value indicating the recommended dose
 #' @export
@@ -272,18 +273,18 @@ simulate_dose_interval <- function(
   ## Calculate time at which target needs to be checked
   ## This is constant for dose-optimization, but differs for interval-based
   ## optimization.
-  target_time <- get_sampling_times_from_scheme(
-    target_design$scheme, reg
+  t_obs <- get_sampling_times_from_scheme(
+    scheme = target_design$scheme,
+    regimen = reg
   )
-  if(length(target_time) > 1 && !target_design$type %in% c("auc", target_types_time)) {
-    target_time <- target_time[1]
+  if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_time)) {
+    t_obs <- t_obs[1]
   }
   if(target_design$type %in% c("auc", target_types_time)) {
-    if(length(target_time) != 2) {
-      stop("Need start and end of observation interval as vector target_time.")
+    if(length(t_obs) != 2) {
+      stop("Need a vector of length 2 for observation times when target type is `auc`.")
     }
   }
-  t_obs <- target_time
 
   if (target_design$type %in% target_types_time || target_design$type == "auc") {
     # need two time points for time-based targets

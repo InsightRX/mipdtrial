@@ -83,6 +83,8 @@ should grid be expanded?}
 
 \item{covariates}{covariates object}
 
+\item{verbose}{verbose output?}
+
 \item{...}{passed on to PKPDsim function}
 }
 \value{
