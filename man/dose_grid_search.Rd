@@ -24,6 +24,7 @@ dose_grid_search(
   n_cores = 1,
   md = list(),
   covariates = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -81,6 +82,8 @@ should grid be expanded?}
 \code{get_quantity_from_variable()} to generate target value)}
 
 \item{covariates}{covariates object}
+
+\item{verbose}{verbose output?}
 
 \item{...}{passed on to PKPDsim function}
 }

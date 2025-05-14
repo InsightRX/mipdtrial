@@ -64,7 +64,6 @@ calc_concentration_from_regimen <- function(
   }
 
   iov <- PKPDsim::get_model_iov(model)
-  if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
 
   target_time <- get_sampling_times_from_scheme(
     target_design$scheme,
@@ -105,7 +104,6 @@ calc_auc_from_regimen <- function(
   }
 
   iov <- PKPDsim::get_model_iov(model)
-  if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
 
   target_time_original <- get_sampling_times_from_scheme(
     target_design$scheme,
@@ -175,7 +173,6 @@ calc_time_to_target <- function(
   }
 
   iov <- PKPDsim::get_model_iov(model)
-  if (is.null(iov[["bins"]])) iov[["bins"]] <- c(0, 9999)
 
   # Which dose resulted in an exposure metric on-target?
   dose_idx <- NULL

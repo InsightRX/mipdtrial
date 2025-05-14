@@ -52,13 +52,17 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
-  if (!isTRUE(length(iov_bins_sim) > 1)) iov_bins_sim <- c(0, 99999)
 
   adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
   first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
   tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
   if (!any(tdm_times < first_adjust_time)) {
-    stop("At least one TDM must be collected before dose adjustment")
+    msg <- paste0(
+      "At least one TDM must be collected before dose adjustment.\n",
+      "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
+      "Dose adjustment times: ", paste0(regimen$dose_times[adjust_at_dose], collapse = ", ")
+    )
+    stop(msg)
   }
 
   # randomly draw error terms
@@ -224,161 +228,6 @@ sample_and_adjust_by_dose <- function(
     aucs = aucs_i,
     dose_updates = dose_updates,
     additional_info = additional_info,
-    gof = gof
-  )
-}
-
-#' Adjust doses to achieve a target metric using MAP Bayesian estimation.
-#'
-#' Given a set of levels and a model definition, performs MAP Bayesian
-#' estimation of individual PK/PD parameters, then finds the appropriate dose
-#' to achieve the specified PK/PD target and updates the individual's regimen
-#' accordingly.
-#'
-#' @inheritParams simulate_fit
-#' @inheritParams dose_grid_search
-#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
-#'   PKPDsim::sim
-#' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `additional_info`: the MAP parameter estimates
-#' @export
-#'
-map_adjust_dose <- function(
-  tdms,
-  est_model,
-  parameters,
-  omega,
-  ruv,
-  regimen,
-  covariates = NULL,
-  target_design,
-  dose_update,
-  grid = NULL,
-  ...
-) {
-  # get MAP fit, using model for estimation
-  fit <- simulate_fit(
-    est_model = est_model,
-    parameters = parameters,
-    omega = omega,
-    ruv = ruv,
-    tdms = tdms,
-    covariates = covariates,
-    regimen = regimen,
-    ...
-  )
-  est_par <- fit$parameters
-  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
-
-  # calculate new dose, using the estimation model
-  if (is.null(grid)) {
-    # base dose finding grid on initial regimen
-    d1 <- regimen$dose_amts[1]
-    grid <- seq(d1/5, d1 * 5, length.out = 10)
-  }
-  new_dose <- dose_grid_search(
-    est_model = est_model,
-    regimen = regimen,
-    parameters = est_par, # we want to use our "best guess" to get the dose
-    target_design = target_design,
-    auc_comp = PKPDsim::get_model_auc_compartment(est_model),
-    dose_update = dose_update,
-    grid = grid,
-    grid_type = "dose",
-    covariates = covariates,
-    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
-    ...
-  )
-  # return new regimen
-  regimen <- update_regimen(
-    regimen,
-    new_dose = new_dose,
-    dose_update_number = dose_update
-  )
-  list(
-    regimen = regimen,
-    dose_update = dose_update,
-    new_dose = new_dose,
-    new_interval = NA,
-    additional_info = est_par,
-    gof = gof
-  )
-}
-
-#' Adjust intervals to achieve a target metric using MAP Bayesian estimation by
-#' adapting the dosing interval
-#'
-#' Given a set of levels and a model definition, performs MAP Bayesian
-#' estimation of individual PK/PD parameters, then finds the appropriate dosing
-#' interval to achieve the specified PK/PD target and updates the
-#' individual's regimen accordingly.
-#'
-#' @inheritParams simulate_fit
-#' @inheritParams dose_grid_search
-#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
-#'   PKPDsim::sim
-#' @returns Returns a named list: `regimen`: the updated regimen;
-#'   `additional_info`: the MAP parameter estimates
-#' @export
-map_adjust_interval <- function(
-    tdms,
-    est_model,
-    parameters,
-    omega,
-    ruv,
-    regimen,
-    covariates = NULL,
-    target_design,
-    dose_update,
-    grid = NULL,
-    ...
-) {
-
-  # get MAP fit, using model for estimation
-  fit <- simulate_fit(
-    est_model = est_model,
-    parameters = parameters,
-    omega = omega,
-    ruv = ruv,
-    tdms = tdms,
-    covariates = covariates,
-    regimen = regimen,
-    ...
-  )
-  est_par <- fit$parameters
-  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
-
-  # calculate new dose, using the estimation model
-  if (is.null(grid)) {
-    stop("Interval-optimization requires `grid` argument.")
-  }
-  new_interval <- dose_grid_search(
-    est_model = est_model,
-    regimen = regimen,
-    parameters = est_par, # we want to use our "best guess" to get the dose
-    target_design = target_design,
-    auc_comp = PKPDsim::get_model_auc_compartment(est_model),
-    dose_update = dose_update,
-    grid = grid,
-    grid_type = "interval",
-    covariates = covariates,
-    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
-    verbose = T,
-    ...
-  )
-
-  # return new regimen
-  regimen <- update_regimen(
-    regimen,
-    new_interval = new_interval,
-    dose_update_number = dose_update
-  )
-  list(
-    regimen = regimen,
-    dose_update = dose_update,
-    new_dose = NA,
-    new_interval = new_interval,
-    additional_info = est_par,
     gof = gof
   )
 }

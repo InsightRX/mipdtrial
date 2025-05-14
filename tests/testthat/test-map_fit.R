@@ -109,7 +109,6 @@ test_that("iov specifications for model without IOV are correct", {
   )
   expect_true(all(expect_names %in% names(no_iov)))
   expect_equal(no_iov$fixed, attr(model, "fixed"))
-  expect_equal(no_iov$bins, c(0, 99999))
   expect_equal(sort(names(no_iov$parameters)), sort(names(parameters)))
 
   omega_type_counts <- table(no_iov$omega_type)
