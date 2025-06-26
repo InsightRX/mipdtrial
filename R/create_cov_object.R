@@ -33,6 +33,9 @@ create_cov_object <- function(
   implementation = NULL,
   time_column = NULL
 ) {
+  if(inherits(mapping, "list")) {
+    mapping <- unlist(mapping)
+  }
   if (!all(mapping %in% colnames(dat_i)) || any(is.na(dat_i[mapping]))) {
     missing_cov <- setdiff(mapping, colnames(dat_i))
     non_missing <- setdiff(

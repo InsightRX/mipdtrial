@@ -124,13 +124,17 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
-      auc_est <- calc_auc_from_regimen(
-        regimen = res$final_regimen,
-        parameters = tail(res$additional_info, 1)[[1]],
-        model = design$est$model,
-        target_design = design$target,
-        covariates = covs
-      )
+      if(!is.null(res$additional_info)) {
+        auc_est <- calc_auc_from_regimen(
+          regimen = res$final_regimen,
+          parameters = tail(res$additional_info, 1)[[1]],
+          model = design$est$model,
+          target_design = design$target,
+          covariates = covs
+        )
+      } else {
+        auc_est <- rep(NA, length(auc_true))
+      }
       time_to_target <- calc_time_to_target(
         regimen = res$final_regimen,
         target_design = design$target,
@@ -156,13 +160,17 @@ run_trial <- function(
         target_design = design$target,
         covariates = covs
       )
-      conc_est <- calc_concentration_from_regimen(
-        regimen = res$final_regimen,
-        parameters = tail(res$additional_info, 1)[[1]],
-        model = design$est$model,
-        target_design = design$target,
-        covariates = covs
-      )
+      if(!is.null(res$additional_info)) {
+        conc_est <- calc_concentration_from_regimen(
+          regimen = res$final_regimen,
+          parameters = tail(res$additional_info, 1)[[1]],
+          model = design$est$model,
+          target_design = design$target,
+          covariates = covs
+        )
+      } else{
+        conc_est <- rep(NA, length(conc_true))
+      }
       time_to_target <- calc_time_to_target(
         regimen = res$final_regimen,
         target_design = design$target,
@@ -224,12 +232,14 @@ run_trial <- function(
     ############################################################################
     ## Collect data into object
     ############################################################################
-    res$tdms$id <- i
+    if(nrow(res$tdms) > 0)
+      res$tdms$id <- i
     res$dose_updates$id <- i
     res$additional_info$id <- i
     sim_pars_i <- pars_true_i
     sim_pars_i$id <- i
-    res$gof$id <-  i
+    if(nrow(res$gof) > 0)
+      res$gof$id <-  i
     tdms <- rbind(tdms, res$tdms)
     dose_updates <- rbind(dose_updates, res$dose_updates)
     additional_info <- c(additional_info, res$additional_info)
