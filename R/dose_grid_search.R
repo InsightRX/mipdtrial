@@ -88,26 +88,26 @@ dose_grid_search <- function(
     obs <- "obs"
   } else if(target_design$type %in% target_types_auc) {
     if(is.null(auc_comp)) {
-      stop("AUC compartment not specified")
+      cli::cli_abort("AUC compartment not specified")
     }
     obs <- auc_comp
   } else {
-    stop("Target type not recognized!")
+    cli::cli_abort("Target type not recognized!")
   }
 
   if (target_design$type == "auc" & !is.null(pta)) {
-    stop("PTA method for AUC currently not supported.")
+    cli::cli_abort("PTA method for AUC currently not supported.")
   }
   if (!is.null(pta)) {
     if(is.null(omega)) {
-      stop("PTA method requires specification of omega!")
+      cli::cli_abort("PTA method requires specification of omega!")
     }
   }
   if (is.null(grid) || any(is.na(grid)) || length(grid) < 2) {
-    stop("Must supply grid search space in `grid`")
+    cli::cli_abort("Must supply grid search space in `grid`")
   }
   if(is.null(target_design$value) || length(target_design$value) == 0) {
-    stop("Target not specified!")
+    cli::cli_abort("Target not specified!")
   }
   if (is.null(refine)){
     # unless specified otherwise, do not refine if model is linear
@@ -282,7 +282,7 @@ simulate_dose_interval <- function(
   }
   if(target_design$type %in% c("auc", target_types_time)) {
     if(length(t_obs) != 2) {
-      stop("Need a vector of length 2 for observation times when target type is `auc`.")
+      cli::cli_abort("Need a vector of length 2 for observation times when target type is `auc`.")
     }
   }
 

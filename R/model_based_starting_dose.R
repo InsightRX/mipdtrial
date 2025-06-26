@@ -23,12 +23,12 @@ model_based_starting_dose <- function(
   t_inf <- reg_md$t_inf
   type <- reg_md$type
   if(is.null(interval) || is.null(type)) {
-    stop("`interval` and type` are needed for `initial_regimen` design.")
+    cli::cli_abort("`interval` and type` are needed for `initial_regimen` design.")
   }
   if(is.null(t_inf)) {
     t_inf <- 0
     if(type == "infusion") {
-      warning("No `t_inf` specified but `type` is `infusion`. Setting `t_inf` to 0 (bolus).")
+      cli::cli_alert_warning("No `t_inf` specified but `type` is `infusion`. Setting `t_inf` to 0 (bolus).")
     }
   }
 

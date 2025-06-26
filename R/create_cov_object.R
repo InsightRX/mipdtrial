@@ -44,7 +44,10 @@ create_cov_object <- function(
     )
     mapping <- mapping[non_missing]
     missing_cov <- c(missing_cov, mapping[is.na(dat_i[mapping])])
-    warning("missing covariates: ", paste0(missing_cov, collapse = ", "))
+    cli::cli_alert_warning(paste0(
+      "Missing covariates: ",
+      paste0(missing_cov, collapse = ", ")
+    ))
     return(NULL)
   }
 
@@ -53,7 +56,8 @@ create_cov_object <- function(
     dat_i$t <- 0
   } else {
     if (!time_column %in% colnames(dat_i)) {
-      warning("missing time column: ", time_column)
+      cli::cli_alert_warning(
+        paste0("Missing time column: ", time_column))
       return(NULL)
     }
     dat_i$t <- dat_i[[time_column]]

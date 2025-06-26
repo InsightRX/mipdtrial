@@ -72,7 +72,7 @@ sample_and_adjust_by_dose <- function(
         "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
         "Dose adjustment times: ", paste0(regimen$dose_times[adjust_at_dose], collapse = ", ")
       )
-      stop(msg)
+      cli::cli_abort(msg)
     }
   } else {
     tdm_times <- c()
@@ -127,7 +127,7 @@ sample_and_adjust_by_dose <- function(
     tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
-      stop("No new samples in current adjustment interval, check target and sampling settings.")
+      cli::cli_abort("No new samples in current adjustment interval, check target and sampling settings.")
     }
     last_adjust_time <- adjust_time
     if(verbose) {
@@ -209,6 +209,7 @@ sample_and_adjust_by_dose <- function(
       gof <- rbind(gof, out$gof)
     }
   }
+  cli::cli_progress_done()
 
   ## Calculate AUC for final regimen
   auc_final <- calc_auc_from_regimen(

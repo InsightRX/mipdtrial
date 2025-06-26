@@ -106,11 +106,11 @@ create_target_design <- function(
 
   ## Parse targets
   if ((is.null(targetmin) || is.null(targetmax)) && is.null(targetvalue)) {
-    stop("Either targetmin + targetmax or midpoint must be supplied")
+    cli::cli_abort("Either `targetmin` + `targetmax` or midpoint must be supplied")
   }
   if (!is.null(targetmin) && !is.null(targetmax)) {
     if (!is_single_valid_number(targetmin) || !is_single_valid_number(targetmax)) {
-      stop("targetmin or targetmax misspecified/not numeric")
+      cli::cli_abort("`targetmin` or `targetmax` misspecified/not numeric")
     }
     midpoint <- mean(c(targetmin, targetmax))
     lowerbound <- targetmin
@@ -118,10 +118,10 @@ create_target_design <- function(
   }
   if (!is.null(targetvalue)) {
     if (!is_single_valid_number(targetvalue)) {
-      stop("targetvalue misspecified/not numeric")
+      cli::cli_abort("`targetvalue` misspecified/not numeric")
     }
     if (!is_single_valid_number(single_point_variation)) {
-      stop("single_point_variation misspecified/not numeric")
+      cli::cli_abort("`single_point_variation` misspecified/not numeric")
     }
     midpoint <- targetvalue
     lowerbound <- (1 - single_point_variation) * targetvalue
@@ -217,7 +217,9 @@ create_eval_design <- function(
       }
     }
     if (when == "unknown"){
-      stop(paste(type_eval), " is not yet supported. Please remove this metric from your evaluation.")
+      cli::cli_abort(paste0(
+        paste(type_eval), " is not yet supported. Please remove this metric from your evaluation."
+      ))
     }
     tmp <- create_design(
       time = time,

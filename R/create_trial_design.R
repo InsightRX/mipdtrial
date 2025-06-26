@@ -57,9 +57,11 @@ parse_spec_file_to_trial_design <- function(file) {
   }
   missing <- setdiff(c("target", "sampling", "regimen_update", "sim", "est"), names(design))
   if(length(missing) > 0) {
-    warning(
-      "Subdesigns are missing from design specification file: ",
-      paste0(missing, collapse = ", ")
+    cli::cli_alert_warning(
+      paste(
+        "Subdesigns are missing from design specification file: ",
+        paste0(missing, collapse = ", ")
+      )
     )
   }
   design
@@ -73,13 +75,13 @@ parse_spec_file_to_trial_design <- function(file) {
 #'
 check_design <- function(design) {
   if(is.null(design$initial_regimen)) {
-    stop("Please specify initial regimen design.")
+    cli::cli_abort("Please specify initial regimen design.")
   }
   if(is.null(design$sampling)) {
-    warning("No `sampling_design` provided, will not perform sampling.")
+    cli::cli_alert_warning("No `sampling_design` provided, will not perform sampling.")
   }
   if(is.null(design$regimen_update)) {
-    warning("No `regimen_update_design` provided, will not perform regimen optimization.")
+    cli::cli_alert_warning("No `regimen_update_design` provided, will not perform regimen optimization.")
   }
   ##  `regimen_update_design$dose_optimization_method` can be passed as
   ##  reference to function, not a function itself, in that case we need to
@@ -92,14 +94,14 @@ check_design <- function(design) {
     design$initial_regimen$method <- get(design$initial_regimen$method)
   }
   if(is.null(design$sim)) {
-    stop("Need a simulation model.")
+    cli::cli_abort("Need a simulation model.")
   }
   if(is.null(design$est)) {
     design$est <- design$sim
-    warning("No model for estimation (`est`) defined, using same model as specified for simulations.")
+    cli::cli_alert_warning("No model for estimation (`est`) defined, using same model as specified for simulations.")
   }
   if(sum(unlist(design$est$ruv)) == 0) {
-    stop("Residual error magnitude for estimation model cannot be zero.")
+    cli::cli_abort("Residual error magnitude for estimation model cannot be zero.")
   }
   design
 }

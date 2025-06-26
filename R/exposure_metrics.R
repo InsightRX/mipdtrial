@@ -57,7 +57,7 @@ calc_concentration_from_regimen <- function(
     ...
 ){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
-    stop("Model/parameter mismatch")
+    cli::cli_abort("Model/parameter mismatch")
   }
   if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
     parameters <- as.list(parameters)
@@ -97,7 +97,7 @@ calc_auc_from_regimen <- function(
   ...
 ){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
-    stop("Model/parameter mismatch")
+    cli::cli_abort("Model/parameter mismatch")
   }
   if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
     parameters <- as.list(parameters)
@@ -162,7 +162,7 @@ calc_time_to_target <- function(
 
   supported_targets <- c("auc24", "auc12", "trough", "cmin")
   if (!(target_type %in% supported_targets)){
-    # warning(
+    # cli::cli_alert_warning(
     #   paste(
     #     "Warning: The target type", target_type,
     #     "is not yet supported. Supported types are:",

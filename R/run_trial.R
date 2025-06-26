@@ -56,22 +56,20 @@ run_trial <- function(
     if(n_ids <= nrow(data)) {
       data <- data[1:n_ids,]
     } else {
-      stop("`n_ids` cannot be larger than number of subjects in dataset.")
+      cli::cli_abort("`n_ids` cannot be larger than number of subjects in dataset.")
     }
   }
 
   ## Main loop
-  if(progress && !verbose) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
-  for (i in data$ID) {
-    if(progress  && !verbose) setTxtProgressBar(pb, i)
+  for (i in cli::cli_progress_along(unique(data$ID), "Simulating patients")) {
+
     ############################################################################
     ## Create individual
     ############################################################################
     # get patient covariates
-    if(verbose)
-      cli::cli_alert_info("Starting simulation for patient: {i}")
+    id <- data$ID[i]
     covs <- create_cov_object(
-      data[data$ID == i,],
+      data[data$ID == id,],
       mapping = cov_mapping
     )
 
@@ -146,7 +144,7 @@ run_trial <- function(
       final_exposure <- rbind(
         final_exposure,
         data.frame(
-          id = i,
+          id = id,
           auc_true = auc_true,
           auc_est = auc_est,
           tta = time_to_target
@@ -182,7 +180,7 @@ run_trial <- function(
       final_exposure <- rbind(
         final_exposure,
         data.frame(
-          id = i,
+          id = id,
           conc_true = conc_true,
           conc_est = conc_est,
           tta = time_to_target
@@ -220,7 +218,7 @@ run_trial <- function(
         eval_exposure <- rbind(
           eval_exposure,
           data.frame(
-            id = i,
+            id = id,
             time = eval_time,
             value = exposure_metric,
             type = design_type
@@ -233,13 +231,13 @@ run_trial <- function(
     ## Collect data into object
     ############################################################################
     if(nrow(res$tdms) > 0)
-      res$tdms$id <- i
-    res$dose_updates$id <- i
-    res$additional_info$id <- i
+      res$tdms$id <- id
+    res$dose_updates$id <- id
+    res$additional_info$id <- id
     sim_pars_i <- pars_true_i
-    sim_pars_i$id <- i
+    sim_pars_i$id <- id
     if(nrow(res$gof) > 0)
-      res$gof$id <-  i
+      res$gof$id <-  id
     tdms <- rbind(tdms, res$tdms)
     dose_updates <- rbind(dose_updates, res$dose_updates)
     additional_info <- c(additional_info, res$additional_info)
