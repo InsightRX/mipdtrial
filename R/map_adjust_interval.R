@@ -26,7 +26,6 @@ map_adjust_interval <- function(
     grid = NULL,
     ...
 ) {
-
   # get MAP fit, using model for estimation
   fit <- simulate_fit(
     est_model = est_model,
@@ -38,6 +37,9 @@ map_adjust_interval <- function(
     regimen = regimen,
     ...
   )
+  if("error" %in% class(fit)) {
+    stop("Fit to simulated data failed, please check model and simulation designs.")
+  }
   est_par <- fit$parameters
   gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
