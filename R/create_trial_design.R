@@ -37,38 +37,8 @@ create_trial_design <- function(
     )
   }
 
-  ## Design checks / parsing:
-  if(is.null(initial_regimen_design)) {
-    stop("Please specify initial regimen design.")
-  }
-  if(is.null(sampling_design)) {
-    warning("No `sampling_design` provided, will not perform sampling.")
-  }
-  if(is.null(regimen_update_design)) {
-    warning("No `regimen_update_design` provided, will not perform regimen optimization.")
-  }
-  ##  `regimen_update_design$dose_optimization_method` can be passed as
-  ##  reference to function, not a function itself, in that case we need to
-  ##  `get()` the actual function.
-  if(inherits(design$regimen_update$dose_optimization_method, "character")) {
-    design$regimen_update$dose_optimization_method <- get(design$regimen_update$dose_optimization_method)
-  }
-  ##  `initial_regimen$method`: same, can be passed as character or function.
-  if(inherits(design$initial_regimen$method, "character")) {
-    design$initial_regimen$method <- get(design$initial_regimen$method)
-  }
-  if(is.null(design$sim)) {
-    stop("Need a simulation model.")
-  }
-  if(is.null(design$est)) {
-    design$est <- design$sim
-    warning("No model for estimation (`est`) defined, using same model as specified for simulations.")
-  }
-  if(sum(unlist(design$est$ruv)) == 0) {
-    stop("Residual error magnitude for estimation model cannot be zero.")
-  }
-
-  design
+  ## Design checks / parsing before returning
+  check_design(design)
 }
 
 #' Parse YAML spec file to trial design
@@ -91,6 +61,45 @@ parse_spec_file_to_trial_design <- function(file) {
       "Subdesigns are missing from design specification file: ",
       paste0(missing, collapse = ", ")
     )
+  }
+  design
+}
+
+#' Check design
+#'
+#' @param design a trial design object
+#'
+#' @returns a trial design object
+#'
+check_design <- function(design) {
+  if(is.null(design$initial_regimen)) {
+    stop("Please specify initial regimen design.")
+  }
+  if(is.null(design$sampling)) {
+    warning("No `sampling_design` provided, will not perform sampling.")
+  }
+  if(is.null(design$regimen_update)) {
+    warning("No `regimen_update_design` provided, will not perform regimen optimization.")
+  }
+  ##  `regimen_update_design$dose_optimization_method` can be passed as
+  ##  reference to function, not a function itself, in that case we need to
+  ##  `get()` the actual function.
+  if(inherits(design$regimen_update$dose_optimization_method, "character")) {
+    design$regimen_update$dose_optimization_method <- get(design$regimen_update$dose_optimization_method)
+  }
+  ##  `initial_regimen$method`: same, can be passed as character or function.
+  if(inherits(design$initial_regimen$method, "character")) {
+    design$initial_regimen$method <- get(design$initial_regimen$method)
+  }
+  if(is.null(design$sim)) {
+    stop("Need a simulation model.")
+  }
+  if(is.null(design$est)) {
+    design$est <- design$sim
+    warning("No model for estimation (`est`) defined, using same model as specified for simulations.")
+  }
+  if(sum(unlist(design$est$ruv)) == 0) {
+    stop("Residual error magnitude for estimation model cannot be zero.")
   }
   design
 }
