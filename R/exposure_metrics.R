@@ -193,7 +193,7 @@ calc_time_to_target <- function(
       dose_idx <- min(aucs_on_target)
     }
   } else if (target_type %in% c("trough", "cmin")){
-    terminal_interval <- regimen$t[nrow(regimen)] - regimen$t[nrow(regimen)-1]
+    terminal_interval <- regimen$dose_times[length(regimen$dose_times)] - regimen$dose_times[length(regimen$dose_times)-1]
     t_obs_target <- c(regimen$dose_times, tail(regimen$dose_times, 1) + terminal_interval)
     sim_target <- PKPDsim::sim(
       model,

@@ -79,7 +79,10 @@ run_trial <- function(
       sim_model  = design$sim$model,
       omega      = design$sim$omega_matrix,
       parameters = design$sim$parameters
-    )
+    )  |>
+      dplyr::select(-id, -iteration) |>
+      as.list()
+
 
     ############################################################################
     ## find initial starting dose: define basic regimen, then update
