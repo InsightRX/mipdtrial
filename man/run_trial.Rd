@@ -11,7 +11,8 @@ run_trial(
   n_ids = NULL,
   seed = 0,
   verbose = FALSE,
-  progress = TRUE
+  progress = TRUE,
+  threads = 1
 )
 }
 \arguments{
@@ -35,6 +36,10 @@ variability generation.}
 \item{verbose}{verbose output?}
 
 \item{progress}{show progress bar? (default is \code{TRUE})}
+
+\item{threads}{number of threads to run the simulations on. By default the
+simulations will run on 4 cores, or less if less are available (one core will
+always be reserved). The user can override by specifying manually.}
 }
 \description{
 This function is a wrapper function to make it easier to run a basic MIPD

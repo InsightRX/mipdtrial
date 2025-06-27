@@ -28,7 +28,10 @@
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.
 #' @param verbose verbose output?
-#' @param ...
+#' @param threads number of threads to run the simulations on. By default the
+#' simulations will run on 4 cores, or less if less are available (one core will
+#' always be reserved). The user can override by specifying manually.
+
 #' @export
 #'
 run_trial <- function(
@@ -38,8 +41,17 @@ run_trial <- function(
     n_ids = NULL,
     seed = 0,
     verbose = FALSE,
-    progress = TRUE
+    progress = TRUE,
+    threads = 1
 ) {
+
+  ## Determine number of threads
+  n_cores <- max(c(1, parallel::detectCores() - 1))
+  if(threads > (n_cores-1)) {
+    cli::cli_alert_warning("Number of threads ({threads}) cannot be equal to or higher than the number of cores available ({n_cores}). Reducing to {n_cores-1}")
+    threads <- n_cores - 1
+  }
+  cli::cli_alert_info("Starting simulations in {threads} threads")
 
   ## Set up data collectors
   tdms <- data.frame()
@@ -74,190 +86,34 @@ run_trial <- function(
     dplyr::mutate(id = sim_ids)
 
   ## Main loop
-  for (i in cli::cli_progress_along(sim_ids, "Running simulations")) {
-
-    ############################################################################
-    ## Create individual
-    ############################################################################
-    # get patient covariates
-    id <- sim_ids[i]
-    covs <- create_cov_object(
-      data[data$id == id,],
-      mapping = cov_mapping
+  f <- function(i) {
+    sim_subject(
+      data = data[i, ],
+      cov_mapping = cov_mapping,
+      parameters = all_pars[i, ] |>
+        dplyr::select(-id, -iteration) |>
+        as.list(),
+      design = design
     )
-
-    # Get individual PK parameters for subject
-    pars_true_i <- all_pars[i,]  |>
-      dplyr::select(-id, -iteration) |>
-      as.list()
-
-    ############################################################################
-    ## find initial starting dose: define basic regimen, then update
-    ## the function that is called should be ble to take `design`, `covariates`,
-    ## and `cov_mapping`.
-    ############################################################################
-    initial_reg <- design$initial_regimen$method(
-      design = design,
-      covariates = covs,
-      cov_mapping = cov_mapping
+  }
+  if(threads > 1) {
+    future::plan(future::multisession, workers = threads)
+    res <- furrr:::future_map(
+      sim_ids,
+      .f = f,
+      .options = furrr::furrr_options(seed = seed),
+      .progress = TRUE
     )
-
-    ############################################################################
-    ## Main patient-level loop: run through regimen optimization
-    ############################################################################
-    res <- sample_and_adjust_by_dose(
-      regimen_update_design = design$regimen_update,
-      sampling_design = design$sampling,
-      target_design = design$target,
-      regimen = initial_reg,
-      covariates = covs,
-      pars_true_i = pars_true_i,
-      sim_model = design$sim$model,
-      sim_ruv = design$sim$ruv,
-      est_model = design$est$model,
-      parameters = design$est$parameters,
-      omega = design$est$omega_matrix,
-      ruv = design$est$ruv,
-      verbose = verbose
+  } else {
+    # purrr has nicer progress bars, since it can use cli!
+    res <- purrr::map(
+      sim_ids,
+      .f = f,
+      .progress = TRUE
     )
-
-    # post-processing to get common exposure read-outs
-    if(verbose)
-      cli::cli_alert_info("Post-processing simulated data")
-    if(design$target$type %in% target_types_auc) {
-      auc_true <- calc_auc_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      if(!is.null(res$additional_info)) {
-        auc_est <- calc_auc_from_regimen(
-          regimen = res$final_regimen,
-          parameters = tail(res$additional_info, 1)[[1]],
-          model = design$est$model,
-          target_design = design$target,
-          covariates = covs
-        )
-      } else {
-        auc_est <- rep(NA, length(auc_true))
-      }
-      time_to_target <- calc_time_to_target(
-        regimen = res$final_regimen,
-        target_design = design$target,
-        auc_comp = attr(design$sim$model, "size"),
-        model = design$sim$model,
-        parameters = pars_true_i,
-        covariates = covs
-      )
-      final_exposure <- rbind(
-        final_exposure,
-        data.frame(
-          id = id,
-          auc_true = auc_true,
-          auc_est = auc_est,
-          tta = time_to_target
-        )
-      )
-    } else if (design$target$type %in% target_types_conc) {
-      conc_true <- calc_concentration_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      if(!is.null(res$additional_info)) {
-        conc_est <- calc_concentration_from_regimen(
-          regimen = res$final_regimen,
-          parameters = tail(res$additional_info, 1)[[1]],
-          model = design$est$model,
-          target_design = design$target,
-          covariates = covs
-        )
-      } else{
-        conc_est <- rep(NA, length(conc_true))
-      }
-      time_to_target <- calc_time_to_target(
-        regimen = res$final_regimen,
-        target_design = design$target,
-        auc_comp = NULL,
-        model = design$sim$model,
-        parameters = pars_true_i,
-        covariates = covs
-      )
-      final_exposure <- rbind(
-        final_exposure,
-        data.frame(
-          id = id,
-          conc_true = conc_true,
-          conc_est = conc_est,
-          tta = time_to_target
-        )
-      )
-    }
-
-    # post-processing to get evaluation metrics
-    if (!is.null(design$evaluation)){
-      for (design_type in names(design$evaluation)){
-        tmp_eval_design <- list(
-          type = design_type,
-          scheme = design$evaluation[[design_type]]
-        )
-        if (design_type %in% target_types_auc){
-          f_calc <- calc_auc_from_regimen
-        } else if (design_type %in% target_types_conc){
-          f_calc <- calc_concentration_from_regimen
-        }
-        exposure_metric <- f_calc(
-          regimen = res$final_regimen,
-          parameters = pars_true_i, # true patient parameters
-          model = design$sim$model,
-          target_design = tmp_eval_design,
-          covariates = covs
-        )
-        eval_time <- get_sampling_times_from_scheme(
-          tmp_eval_design$scheme,
-          res$final_regimen
-        )
-        eval_exposure <- rbind(
-          eval_exposure,
-          data.frame(
-            id = id,
-            time = eval_time,
-            value = exposure_metric,
-            type = design_type
-          )
-        )
-      }
-    }
-
-    ############################################################################
-    ## Collect data into object
-    ############################################################################
-    if(nrow(res$tdms) > 0)
-      res$tdms$id <- id
-    res$dose_updates$id <- id
-    res$additional_info$id <- id
-    if(nrow(res$gof) > 0)
-      res$gof$id <-  id
-    tdms <- rbind(tdms, res$tdms)
-    dose_updates <- rbind(dose_updates, res$dose_updates)
-    additional_info <- c(additional_info, res$additional_info)
-    gof <- rbind(gof, res$gof)
   }
 
-  out <- list(
-    tdms = tdms,
-    dose_updates = dose_updates,
-    additional_info = additional_info,
-    sim_parameters = all_pars,
-    design = design,
-    gof = gof,
-    final_exposure = final_exposure,
-    eval_exposure = eval_exposure
-  )
-  class(out) <- c("mipdtrial_results", "list")
-  out
+  ## Return simulation results as list of data.frames
+  bind_sim_output(res)
+
 }
