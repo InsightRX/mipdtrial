@@ -73,7 +73,10 @@ run_trial <- function(
   }
 
   ## Draw individual parameters up front
-  colnames(data) <- tolower(colnames(data))
+  if("ID" %in% names(data)) { # ensure we have a lower case `id`
+    data <- data |>
+      dplyr::rename(id = ID)
+  }
   if(any(duplicated(data$id)))
     cli::cli_abort("Input dataset cannot have duplicate `id`.")
   sim_ids <- data$id
@@ -93,7 +96,7 @@ run_trial <- function(
     progressr::handlers("cli")
     p <- progressr::progressor(along = sim_ids)
   } else {
-    p <- function() {}
+    p <- function() { }
   }
 
   ## Main loop
