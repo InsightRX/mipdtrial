@@ -94,7 +94,7 @@ run_trial <- function(
 
   ## Main loop
   f <- function(i) {
-    p(sprintf("i=%g", i))
+    p()
     sim_subject(
       data = data[i, ],
       cov_mapping = cov_mapping,
