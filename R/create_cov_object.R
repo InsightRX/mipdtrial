@@ -11,7 +11,7 @@
 #' The function returns NULL if required columns are missing or NA.
 #'
 #' @param dat_i a rectangular data set, containing only rows for an individual
-#' @param mapping named vector indicating which columns to extract, and what
+#' @param mapping named vector or list indicating which columns to extract, and what
 #'   the covariate names are expected in the model. Names should be model
 #'   covariates and values should be data frame column names.
 #' @param implementation named vector indicating covariate implementation, one
@@ -44,7 +44,7 @@ create_cov_object <- function(
     )
     mapping <- mapping[non_missing]
     missing_cov <- c(missing_cov, mapping[is.na(dat_i[mapping])])
-    cli::cli_alert_warning(paste0(
+    cli::cli_warn(paste0(
       "Missing covariates: ",
       paste0(missing_cov, collapse = ", ")
     ))
@@ -56,7 +56,7 @@ create_cov_object <- function(
     dat_i$t <- 0
   } else {
     if (!time_column %in% colnames(dat_i)) {
-      cli::cli_alert_warning(
+      cli::cli_warn(
         paste0("Missing time column: ", time_column))
       return(NULL)
     }

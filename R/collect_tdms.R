@@ -32,6 +32,7 @@ collect_tdms <- function(
   if (!all(c("prop", "add") %in% colnames(res_var))) {
     cli::cli_abort("residual variability must include proportional & additive error")
   }
+
   # simulate TDM collection (no residual error)
   true_tdm <- sim(
     ode = sim_model,

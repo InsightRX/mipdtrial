@@ -52,7 +52,6 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
-  if (!isTRUE(length(iov_bins_sim) > 1)) iov_bins_sim <- c(0, 99999)
 
   ## Get times to adjust dose
   if(!is.null(regimen_update_design)) {
@@ -118,7 +117,7 @@ sample_and_adjust_by_dose <- function(
   }
 
   out <- list()
-  for (j in seq(adjust_at_dose)) {
+  for (j in 1:length(adjust_at_dose)) {
     if(verbose) {
       cli::cli_alert_info(paste0("Adjustment of dose# ", adjust_at_dose[j]))
     }

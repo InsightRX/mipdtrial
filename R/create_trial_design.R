@@ -57,7 +57,7 @@ parse_spec_file_to_trial_design <- function(file) {
   }
   missing <- setdiff(c("target", "sampling", "regimen_update", "sim", "est"), names(design))
   if(length(missing) > 0) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       paste(
         "Subdesigns are missing from design specification file: ",
         paste0(missing, collapse = ", ")
@@ -78,10 +78,10 @@ check_design <- function(design) {
     cli::cli_abort("Please specify initial regimen design.")
   }
   if(is.null(design$sampling)) {
-    cli::cli_alert_warning("No `sampling_design` provided, will not perform sampling.")
+    cli::cli_warn("No `sampling_design` provided, will not perform sampling.")
   }
   if(is.null(design$regimen_update)) {
-    cli::cli_alert_warning("No `regimen_update_design` provided, will not perform regimen optimization.")
+    cli::cli_warn("No `regimen_update_design` provided, will not perform regimen optimization.")
   }
   ##  `regimen_update_design$dose_optimization_method` can be passed as
   ##  reference to function, not a function itself, in that case we need to
@@ -98,7 +98,7 @@ check_design <- function(design) {
   }
   if(is.null(design$est)) {
     design$est <- design$sim
-    cli::cli_alert_warning("No model for estimation (`est`) defined, using same model as specified for simulations.")
+    cli::cli_warn("No model for estimation (`est`) defined, using same model as specified for simulations.")
   }
   if(sum(unlist(design$est$ruv)) == 0) {
     cli::cli_abort("Residual error magnitude for estimation model cannot be zero.")

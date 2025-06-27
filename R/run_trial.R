@@ -61,7 +61,7 @@ run_trial <- function(
   }
 
   ## Main loop
-  for (i in cli::cli_progress_along(unique(data$ID), "Simulating patients")) {
+  for (i in cli::cli_progress_along(unique(data$ID), "Running simulations")) {
 
     ############################################################################
     ## Create individual
@@ -186,10 +186,6 @@ run_trial <- function(
           tta = time_to_target
         )
       )
-
-      if(verbose)
-        cli::cli_alert_success("Virtual patient {i} done")
-
     }
 
     # post-processing to get evaluation metrics

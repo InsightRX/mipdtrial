@@ -28,7 +28,7 @@ model_based_starting_dose <- function(
   if(is.null(t_inf)) {
     t_inf <- 0
     if(type == "infusion") {
-      cli::cli_alert_warning("No `t_inf` specified but `type` is `infusion`. Setting `t_inf` to 0 (bolus).")
+      cli::cli_warn("No `t_inf` specified but `type` is `infusion`. Setting `t_inf` to 0 (bolus).")
     }
   }
 

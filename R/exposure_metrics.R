@@ -162,13 +162,6 @@ calc_time_to_target <- function(
 
   supported_targets <- c("auc24", "auc12", "trough", "cmin")
   if (!(target_type %in% supported_targets)){
-    # cli::cli_alert_warning(
-    #   paste(
-    #     "Warning: The target type", target_type,
-    #     "is not yet supported. Supported types are:",
-    #     paste(supported_targets, collapse = ", "), "."
-    #   )
-    # )
     return(NA_real_)
   }
 
