@@ -28,6 +28,7 @@
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.
 #' @param verbose verbose output?
+#' @param ...
 #' @export
 #'
 run_trial <- function(
@@ -44,7 +45,6 @@ run_trial <- function(
   tdms <- data.frame()
   dose_updates <- data.frame()
   additional_info <- list() # keep generic for other methods
-  sim_parameters <- data.frame()
   gof <- data.frame()
   final_exposure <- data.frame()
   eval_exposure <- data.frame()
@@ -60,29 +60,36 @@ run_trial <- function(
     }
   }
 
+  ## Draw individual parameters up front
+  colnames(data) <- tolower(colnames(data))
+  if(any(duplicated(data$id)))
+    cli::cli_abort("Input dataset cannot have duplicate `id`.")
+  sim_ids <- data$id
+  all_pars <- generate_iiv(
+    sim_model  = design$sim$model,
+    omega      = design$sim$omega_matrix,
+    parameters = design$sim$parameters,
+    n_iter = length(sim_ids)
+  ) |>
+    dplyr::mutate(id = sim_ids)
+
   ## Main loop
-  for (i in cli::cli_progress_along(unique(data$ID), "Running simulations")) {
+  for (i in cli::cli_progress_along(sim_ids, "Running simulations")) {
 
     ############################################################################
     ## Create individual
     ############################################################################
     # get patient covariates
-    id <- data$ID[i]
+    id <- sim_ids[i]
     covs <- create_cov_object(
-      data[data$ID == id,],
+      data[data$id == id,],
       mapping = cov_mapping
     )
 
-    # randomly draw individual PK parameters
-    set.seed(seed + i) # reset seed before each patient to ensure reproducibility
-    pars_true_i <- generate_iiv(
-      sim_model  = design$sim$model,
-      omega      = design$sim$omega_matrix,
-      parameters = design$sim$parameters
-    )  |>
+    # Get individual PK parameters for subject
+    pars_true_i <- all_pars[i,]  |>
       dplyr::select(-id, -iteration) |>
       as.list()
-
 
     ############################################################################
     ## find initial starting dose: define basic regimen, then update
@@ -233,14 +240,11 @@ run_trial <- function(
       res$tdms$id <- id
     res$dose_updates$id <- id
     res$additional_info$id <- id
-    sim_pars_i <- pars_true_i
-    sim_pars_i$id <- id
     if(nrow(res$gof) > 0)
       res$gof$id <-  id
     tdms <- rbind(tdms, res$tdms)
     dose_updates <- rbind(dose_updates, res$dose_updates)
     additional_info <- c(additional_info, res$additional_info)
-    sim_parameters <- rbind(sim_parameters, sim_pars_i)
     gof <- rbind(gof, res$gof)
   }
 
@@ -248,7 +252,7 @@ run_trial <- function(
     tdms = tdms,
     dose_updates = dose_updates,
     additional_info = additional_info,
-    sim_parameters = sim_parameters,
+    sim_parameters = all_pars,
     design = design,
     gof = gof,
     final_exposure = final_exposure,
