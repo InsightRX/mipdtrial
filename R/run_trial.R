@@ -85,8 +85,16 @@ run_trial <- function(
   ) |>
     dplyr::mutate(id = sim_ids)
 
+  ## Set up progress bars
+  ## Need to loop this through the progressr package
+  ## because furrr currently doesn't support progressbars with cli.
+  progressr::handlers(global = TRUE)
+  progressr::handlers("cli")
+  p <- progressr::progressor(along = sim_ids)
+
   ## Main loop
   f <- function(i) {
+    p(sprintf("i=%g", i))
     sim_subject(
       data = data[i, ],
       cov_mapping = cov_mapping,
@@ -101,19 +109,17 @@ run_trial <- function(
     res <- furrr:::future_map(
       sim_ids,
       .f = f,
-      .options = furrr::furrr_options(seed = seed),
-      .progress = TRUE
+      .options = furrr::furrr_options(seed = seed)
     )
   } else {
-    # purrr has nicer progress bars, since it can use cli!
     res <- purrr::map(
       sim_ids,
-      .f = f,
-      .progress = TRUE
+      .f = f
     )
   }
 
   ## Return simulation results as list of data.frames
+  cli::cli_alert_info("Post-processing results")
   bind_sim_output(res)
 
 }
