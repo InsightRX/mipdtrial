@@ -88,9 +88,13 @@ run_trial <- function(
   ## Set up progress bars
   ## Need to loop this through the progressr package
   ## because furrr currently doesn't support progressbars with cli.
-  progressr::handlers(global = TRUE)
-  progressr::handlers("cli")
-  p <- progressr::progressor(along = sim_ids)
+  if(progress) {
+    progressr::handlers(global = TRUE)
+    progressr::handlers("cli")
+    p <- progressr::progressor(along = sim_ids)
+  } else {
+    p <- function() {}
+  }
 
   ## Main loop
   f <- function(i) {

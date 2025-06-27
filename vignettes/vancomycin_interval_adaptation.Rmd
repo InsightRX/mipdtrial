@@ -173,7 +173,7 @@ in the model:
 cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
-  CL_HEMO = "CL_HEMO"
+  CL_HEMO = "cl_hemo"
 )
 
 ```
@@ -189,8 +189,8 @@ variability described in the model, and residual variability will be added to
 each sample collected using the error model described in the model.
 
 ```{r}
-res1 <- run_trial(data = dat, design = design1, cov_mapping = cov_map, seed = 15)
-res2 <- run_trial(data = dat, design = design2, cov_mapping = cov_map, seed = 15)
+res1 <- run_trial(data = dat, design = design1, cov_mapping = cov_map, seed = 15, progress = FALSE)
+res2 <- run_trial(data = dat, design = design2, cov_mapping = cov_map, seed = 15, progress = FALSE)
 ```
 ## 5. Analyze results 
 
