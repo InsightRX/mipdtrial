@@ -170,7 +170,7 @@ test_that("Can use separate models for sim and est", {
     sim_model = mod2,
     sim_ruv = list(prop = 0.05, add = 1),
     est_model = mod,
-    parameters = par,
+    est_parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(

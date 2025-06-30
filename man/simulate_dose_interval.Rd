@@ -13,6 +13,8 @@ simulate_dose_interval(
   pta,
   target_design,
   model,
+  parameters,
+  covariates,
   omega,
   obs,
   ruv,
@@ -39,6 +41,8 @@ specific conc or auc.}
 \code{create_target_design()}}
 
 \item{model}{model for simulating dose (estimation model)}
+
+\item{covariates}{covariates object}
 
 \item{omega}{IIV matrix, for estimation model, for probability of target
 attainment target types.}

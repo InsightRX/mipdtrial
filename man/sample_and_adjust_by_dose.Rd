@@ -12,6 +12,7 @@ sample_and_adjust_by_dose(
   covariates = NULL,
   sim_model,
   sim_ruv = NULL,
+  est_parameters = NULL,
   pars_true_i = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,

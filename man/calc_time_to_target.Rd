@@ -4,7 +4,15 @@
 \alias{calc_time_to_target}
 \title{Calculate time to target attainment}
 \usage{
-calc_time_to_target(regimen, target_design, auc_comp, model, ...)
+calc_time_to_target(
+  regimen,
+  target_design,
+  auc_comp,
+  model,
+  parameters,
+  covariates,
+  ...
+)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}

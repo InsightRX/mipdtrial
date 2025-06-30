@@ -7,6 +7,7 @@
 dose_grid_search(
   est_model = NULL,
   regimen,
+  parameters,
   target_design = create_target_design(targettype = "conc", targetvalue = 10, time = 24),
   auc_comp = NULL,
   pta = NULL,

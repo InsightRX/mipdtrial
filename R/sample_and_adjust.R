@@ -136,7 +136,7 @@ sample_and_adjust_by_dose <- function(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
       res_var = ruv_i[collect_idx,],
-      pars_i = pars_true_i,
+      parameters = pars_true_i,
       regimen = regimen,
       covariates = covariates,
       lloq = sampling_design$lloq,
