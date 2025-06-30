@@ -23,6 +23,10 @@ calc_time_to_target(
 
 \item{model}{PKPDsim model object}
 
+\item{parameters}{list of parameters}
+
+\item{covariates}{list of covariates}
+
 \item{...}{arguments passed on to \code{PKPDsim::sim}}
 }
 \value{

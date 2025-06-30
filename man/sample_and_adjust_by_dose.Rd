@@ -38,6 +38,8 @@ and when to update the regimen in the MIPD trial. Schemes are created using
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
 
+\item{est_parameters}{list of parameters of estimation model}
+
 \item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
 
 \item{verbose}{verbose output?}

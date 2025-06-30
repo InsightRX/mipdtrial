@@ -34,6 +34,8 @@ dose_grid_search(
 
 \item{regimen}{PKPDsim regimen object}
 
+\item{parameters}{list of parameters}
+
 \item{target_design}{object specifying target design, created using function
 \code{create_target_design()}}
 

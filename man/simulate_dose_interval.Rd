@@ -42,6 +42,8 @@ specific conc or auc.}
 
 \item{model}{model for simulating dose (estimation model)}
 
+\item{parameters}{list of parameters}
+
 \item{covariates}{covariates object}
 
 \item{omega}{IIV matrix, for estimation model, for probability of target

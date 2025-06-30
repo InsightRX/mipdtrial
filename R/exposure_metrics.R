@@ -143,6 +143,8 @@ calc_auc_from_regimen <- function(
 #' @param target_design target design, created using `create_target_design()`
 #' @param auc_comp compartment to look for AUC
 #' @param model PKPDsim model object
+#' @param parameters list of parameters
+#' @param covariates list of covariates
 #' @param ... arguments passed on to `PKPDsim::sim`
 #' @return a numeric value indicating the time, in hours, if a dosing interval
 #'   contained the target metric within range. Returns Inf if target was never

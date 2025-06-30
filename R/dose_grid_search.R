@@ -37,6 +37,7 @@
 #' @param n_cores Number of cores over which to simulate doses
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
+#' @param parameters list of parameters
 #' @param covariates covariates object
 #' @param verbose verbose output?
 #' @param ... passed on to PKPDsim function
@@ -241,6 +242,7 @@ dose_grid_search <- function(
 #'
 #' @inheritParams dose_grid_search
 #' @param model model for simulating dose (estimation model)
+#' @param parameters list of parameters
 #' @param value element of the dose/interval grid
 #' @param grid_type either `dose` grid or `interval` grid
 #' @param obs Value of `obs` as determined by [dose_grid_search()] (i.e. either "obs" or AUC compartment)

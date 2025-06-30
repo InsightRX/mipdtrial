@@ -114,7 +114,7 @@ run_trial <- function(
   }
   if(threads > 1) {
     future::plan(future::multisession, workers = threads)
-    res <- furrr:::future_map(
+    res <- furrr::future_map(
       sim_ids,
       .f = f,
       .options = furrr::furrr_options(seed = seed)

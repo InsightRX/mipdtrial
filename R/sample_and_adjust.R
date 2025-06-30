@@ -19,6 +19,7 @@
 #' `create_sampling_design()`.
 #' @param target_design target design created using `create_target_design()`
 #' @param regimen PKPDsim regimen object, containing initial dosing regimen.
+#' @param est_parameters list of parameters of estimation model
 #' @param covariates named list of PKPDsim covariates.
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
 #' @param sim_model model to use for simulating "true" patient response.
