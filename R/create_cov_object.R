@@ -11,7 +11,7 @@
 #' The function returns NULL if required columns are missing or NA.
 #'
 #' @param dat_i a rectangular data set, containing only rows for an individual
-#' @param mapping named vector indicating which columns to extract, and what
+#' @param mapping named vector or list indicating which columns to extract, and what
 #'   the covariate names are expected in the model. Names should be model
 #'   covariates and values should be data frame column names.
 #' @param implementation named vector indicating covariate implementation, one
@@ -33,6 +33,9 @@ create_cov_object <- function(
   implementation = NULL,
   time_column = NULL
 ) {
+  if(inherits(mapping, "list")) {
+    mapping <- unlist(mapping)
+  }
   if (!all(mapping %in% colnames(dat_i)) || any(is.na(dat_i[mapping]))) {
     missing_cov <- setdiff(mapping, colnames(dat_i))
     non_missing <- setdiff(
@@ -41,7 +44,10 @@ create_cov_object <- function(
     )
     mapping <- mapping[non_missing]
     missing_cov <- c(missing_cov, mapping[is.na(dat_i[mapping])])
-    warning("missing covariates: ", paste0(missing_cov, collapse = ", "))
+    cli::cli_warn(paste0(
+      "Missing covariates: ",
+      paste0(missing_cov, collapse = ", ")
+    ))
     return(NULL)
   }
 
@@ -50,7 +56,8 @@ create_cov_object <- function(
     dat_i$t <- 0
   } else {
     if (!time_column %in% colnames(dat_i)) {
-      warning("missing time column: ", time_column)
+      cli::cli_warn(
+        paste0("Missing time column: ", time_column))
       return(NULL)
     }
     dat_i$t <- dat_i[[time_column]]

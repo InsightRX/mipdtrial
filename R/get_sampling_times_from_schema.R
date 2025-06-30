@@ -51,7 +51,7 @@ get_sampling_time_core <- function(row, regimen) {
     if(row$base %in% c("trough", "cmin")) {
       msg <- c(msg, " For `cmin`, `middle`, or `random` calculation, you will need one more dose in the regimen than the dose for which the `cmin` is calculated.")
     }
-    stop(msg)
+    cli::cli_abort(msg)
   }
   scatter <- 0
   if(!is.null(row$scatter)) {
