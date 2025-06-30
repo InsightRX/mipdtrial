@@ -34,7 +34,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          pak-version: devel
+          extra-packages:
+            any::pkgdown
+            local::.
+            InsightRX/PKPDsim
           needs: website
 
       - name: Build site
