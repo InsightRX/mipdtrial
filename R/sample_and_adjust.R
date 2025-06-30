@@ -42,15 +42,14 @@ sample_and_adjust_by_dose <- function(
   target_design,
   regimen,
   covariates = NULL,
-  pars_true_i,
   sim_model,
   sim_ruv = NULL,
+  pars_true_i = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
 ) {
 
-  if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
 
   ## Get times to adjust dose

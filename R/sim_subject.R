@@ -2,16 +2,19 @@
 #'
 #' @inheritParams run_trial
 #' @param data data for subject
-#' @param parameters list of model parameters for subject
+#' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
+#' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
+#'   function.
 #'
 #' @export
 #'
 sim_subject <- function(
   data,
   cov_mapping,
-  parameters,
+  pars_true_i,
   design,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 ) {
 
   ############################################################################
@@ -43,11 +46,11 @@ sim_subject <- function(
     target_design = design$target,
     regimen = initial_reg,
     covariates = covs,
-    pars_true_i = parameters,
+    pars_true_i = pars_true_i,
     sim_model = design$sim$model,
     sim_ruv = design$sim$ruv,
-    est_model = design$est$model,
-    parameters = design$est$parameters,
+    est_model = design$est$model, # not a formal parameters, passed onwards using ...!
+    parameters = design$est$parameters, # not a formal parameters, passed onwards using ...!
     omega = design$est$omega_matrix,
     ruv = design$est$ruv,
     verbose = verbose
@@ -57,7 +60,7 @@ sim_subject <- function(
   if(design$target$type %in% target_types_auc) {
     auc_true <- calc_auc_from_regimen(
       regimen = res$final_regimen,
-      parameters = parameters, # true patient parameters
+      parameters = pars_true_i, # true patient parameters
       model = design$sim$model,
       target_design = design$target,
       covariates = covs
@@ -78,7 +81,7 @@ sim_subject <- function(
       target_design = design$target,
       auc_comp = attr(design$sim$model, "size"),
       model = design$sim$model,
-      parameters = parameters,
+      parameters = pars_true_i,
       covariates = covs
     )
     final_exposure <- data.frame(
@@ -90,7 +93,7 @@ sim_subject <- function(
   } else if (design$target$type %in% target_types_conc) {
     conc_true <- calc_concentration_from_regimen(
       regimen = res$final_regimen,
-      parameters = parameters, # true patient parameters
+      parameters = pars_true_i, # true patient parameters
       model = design$sim$model,
       target_design = design$target,
       covariates = covs
@@ -111,7 +114,7 @@ sim_subject <- function(
       target_design = design$target,
       auc_comp = NULL,
       model = design$sim$model,
-      parameters = parameters,
+      parameters = pars_true_i,
       covariates = covs
     )
     final_exposure <- data.frame(
@@ -137,7 +140,7 @@ sim_subject <- function(
       }
       exposure_metric <- f_calc(
         regimen = res$final_regimen,
-        parameters = parameters, # true patient parameters
+        parameters = pars_true_i, # true patient parameters
         model = design$sim$model,
         target_design = tmp_eval_design,
         covariates = covs

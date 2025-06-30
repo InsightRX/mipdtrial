@@ -105,7 +105,7 @@ run_trial <- function(
     sim_subject(
       data = data[i, ],
       cov_mapping = cov_mapping,
-      parameters = all_pars[i, ] |>
+      pars_true_i = all_pars[i, ] |>
         dplyr::select(-id, -iteration) |>
         as.list(),
       design = design,

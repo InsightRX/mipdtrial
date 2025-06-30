@@ -10,9 +10,9 @@ sample_and_adjust_by_dose(
   target_design,
   regimen,
   covariates = NULL,
-  pars_true_i,
   sim_model,
   sim_ruv = NULL,
+  pars_true_i = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
   ...
@@ -32,12 +32,12 @@ and when to update the regimen in the MIPD trial. Schemes are created using
 
 \item{covariates}{named list of PKPDsim covariates.}
 
-\item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
-
 \item{sim_model}{model to use for simulating "true" patient response.}
 
 \item{sim_ruv}{residual variability for \code{sim_model}. Named list for
 proportional (\code{prop}) and additive (\code{add}) error.}
+
+\item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
 
 \item{verbose}{verbose output?}
 

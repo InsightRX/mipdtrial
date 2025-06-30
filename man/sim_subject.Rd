@@ -4,7 +4,7 @@
 \alias{sim_subject}
 \title{Core function to simulate a single subject}
 \usage{
-sim_subject(data, cov_mapping, parameters, design, verbose = FALSE)
+sim_subject(data, cov_mapping, pars_true_i, design, verbose = FALSE, ...)
 }
 \arguments{
 \item{data}{data for subject}
@@ -14,11 +14,14 @@ covariates and data frame columns. Vector names should reflect all
 covariates defined by the model, and vector values should represent the
 associated column in the provided data set.}
 
-\item{parameters}{list of model parameters for subject}
+\item{pars_true_i}{PK parameters for the individual. See \code{generate_iiv}.}
 
 \item{design}{trial design, created using \code{create_trial_design()}}
 
 \item{verbose}{verbose output?}
+
+\item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
+function.}
 }
 \description{
 Core function to simulate a single subject
