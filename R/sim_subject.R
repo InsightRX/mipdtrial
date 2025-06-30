@@ -49,11 +49,12 @@ sim_subject <- function(
     pars_true_i = pars_true_i,
     sim_model = design$sim$model,
     sim_ruv = design$sim$ruv,
-    est_model = design$est$model, # not a formal parameters, passed onwards using ...!
-    parameters = design$est$parameters, # not a formal parameters, passed onwards using ...!
     omega = design$est$omega_matrix,
     ruv = design$est$ruv,
-    verbose = verbose
+    verbose = verbose,
+    ##
+    est_model = design$est$model, # not a formal parameters, passed onwards using ...!
+    est_parameters = design$est$parameters, # not a formal parameters, passed onwards using ...!
   )
 
   # post-processing to get common exposure read-outs

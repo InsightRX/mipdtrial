@@ -44,6 +44,7 @@ sample_and_adjust_by_dose <- function(
   covariates = NULL,
   sim_model,
   sim_ruv = NULL,
+  est_parameters = NULL,
   pars_true_i = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
@@ -183,6 +184,7 @@ sample_and_adjust_by_dose <- function(
       dose_update = adjust_at_dose[j],
       regimen = regimen,
       target_design = target_design,
+      parameters = est_parameters,
       covariates = covariates
     ))
     method_args <- append(method_args, list(...))

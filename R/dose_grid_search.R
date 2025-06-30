@@ -46,6 +46,7 @@
 dose_grid_search <- function(
     est_model = NULL,
     regimen,
+    parameters,
     target_design = create_target_design(
       targettype = "conc",
       targetvalue = 10,
@@ -127,11 +128,12 @@ dose_grid_search <- function(
     pta = pta,
     target_design = target_design,
     model = est_model,
+    parameters = parameters,
+    covariates = covariates,
     omega = omega,
     obs = obs,
     ruv = ruv,
     mc.cores = n_cores,
-    covariates = covariates,
     ...
   )
 
@@ -250,6 +252,8 @@ simulate_dose_interval <- function(
     pta,
     target_design,
     model,
+    parameters,
+    covariates,
     omega,
     obs,
     ruv,
@@ -300,6 +304,8 @@ simulate_dose_interval <- function(
   tmp <- PKPDsim::sim(
     model,
     regimen = reg,
+    parameters = parameters,
+    covariates = covariates,
     t_obs = t_obs,
     output_include = list(variables=TRUE),
     only_obs = FALSE,
