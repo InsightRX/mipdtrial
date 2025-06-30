@@ -49,11 +49,9 @@ if (!requireNamespace("pkbusulfanshukla", quietly = TRUE)) {
 library(mipdtrial)
 if(!requireNamespace("pkbusulfanmccune", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")
-  loadNamespace("pkbusulfanmccune")
 }
 if (!requireNamespace("pkbusulfanshukla")) {
   PKPDsim::install_default_literature_model("pk_busulfan_shukla")
-  loadNamespace("pkbusulfanshukla")
 }
 
 # For data handling/plotting
