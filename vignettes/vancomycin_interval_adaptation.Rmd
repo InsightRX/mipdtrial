@@ -173,7 +173,7 @@ in the model:
 cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
-  CL_HEMO = "cl_hemo"
+  CL_HEMO = "CL_HEMO"
 )
 
 ```
