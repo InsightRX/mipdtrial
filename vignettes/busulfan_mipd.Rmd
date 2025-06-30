@@ -96,8 +96,8 @@ initial_method <- create_initial_regimen_design(
     type = "infusion"
   )
 )
-sim_mod_design <- create_model_design(lib = "pkbusulfanshukla")
-est_mod_design <- create_model_design(lib = "pkbusulfanmccune")
+sim_mod_design <- create_model_design(lib = "pkbusulfanmccune")
+est_mod_design <- create_model_design(lib = "pkbusulfanshukla")
 
 design <- create_trial_design(
   sampling_design = tdm_design,

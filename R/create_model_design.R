@@ -49,10 +49,12 @@ create_model_design <- function(
     design <- list()
   }
   ## potentially override using user-specified details
-  for(key in params) {
-    tmp <- get(key)
-    if(!is.null(tmp)) {
-      design[[key]] <- tmp
+  args <- as.list(match.call())
+  for(key in args) {
+    if(key %in% params) {
+      if(!is.null(args[[key]])) {
+        design[[key]] <- args[[key]]
+      }
     }
   }
   design
