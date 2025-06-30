@@ -4,7 +4,7 @@
 \alias{collect_tdms}
 \title{Simulate TDM collection}
 \usage{
-collect_tdms(sim_model, t_obs, res_var, parameters, lloq = NULL, ...)
+collect_tdms(sim_model, t_obs, res_var, pars_i, lloq = NULL, ...)
 }
 \arguments{
 \item{sim_model}{model used for simulated patient response ("truth").}
@@ -16,7 +16,7 @@ collect_tdms(sim_model, t_obs, res_var, parameters, lloq = NULL, ...)
 added in the linear domain, so log-transformed models should supply error
 as proportional error with 0 additive error.}
 
-\item{parameters}{true parameters for the individual (named list)}
+\item{pars_i}{true parameters for the individual (named list)}
 
 \item{lloq}{lower limit of quantification. If non-NULL, all TDMs below LLOQ
 will be set to half the LLOQ.}

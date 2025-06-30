@@ -10,7 +10,7 @@
 #'   `pregenerate_ruv` for details. Expects columns `prop` and `add`. Error is
 #'   added in the linear domain, so log-transformed models should supply error
 #'   as proportional error with 0 additive error.
-#' @param parameters true parameters for the individual (named list)
+#' @param pars_i true parameters for the individual (named list)
 #' @param lloq lower limit of quantification. If non-NULL, all TDMs below LLOQ
 #'   will be set to half the LLOQ.
 #' @param ... arguments passed on to PKPDsim::sim
@@ -22,7 +22,7 @@ collect_tdms <- function(
   sim_model,
   t_obs,
   res_var,
-  parameters,
+  pars_i,
   lloq = NULL,
   ...
 ) {
@@ -36,7 +36,7 @@ collect_tdms <- function(
   # simulate TDM collection (no residual error)
   true_tdm <- sim(
     ode = sim_model,
-    parameters = as.list(parameters),
+    parameters = pars_i,
     t_obs = t_obs,
     only_obs = TRUE,
     ...
