@@ -9,7 +9,16 @@ sim_subject(data, cov_mapping, parameters, design, verbose = FALSE)
 \arguments{
 \item{data}{data for subject}
 
-\item{i}{index number of subject}
+\item{cov_mapping}{a named vector indicating correspondence between model
+covariates and data frame columns. Vector names should reflect all
+covariates defined by the model, and vector values should represent the
+associated column in the provided data set.}
+
+\item{design}{trial design, created using \code{create_trial_design()}}
+
+\item{verbose}{verbose output?}
+
+\item{parameter}{list of model parameters for subject}
 }
 \description{
 Core function to simulate a single subject

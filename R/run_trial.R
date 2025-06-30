@@ -108,7 +108,8 @@ run_trial <- function(
       parameters = all_pars[i, ] |>
         dplyr::select(-id, -iteration) |>
         as.list(),
-      design = design
+      design = design,
+      verbose = verbose
     )
   }
   if(threads > 1) {

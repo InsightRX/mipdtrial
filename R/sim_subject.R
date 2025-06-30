@@ -1,7 +1,8 @@
 #' Core function to simulate a single subject
 #'
-#' @param i index number of subject
+#' @inheritParams run_trial
 #' @param data data for subject
+#' @param parameter list of model parameters for subject
 #'
 #' @export
 #'
@@ -16,7 +17,6 @@ sim_subject <- function(
   ############################################################################
   ## Create individual
   ############################################################################
-  # get patient covariates
   id <- data$id
   covs <- create_cov_object(
     data,
