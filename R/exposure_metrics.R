@@ -59,6 +59,9 @@ calc_concentration_from_regimen <- function(
   if (!all(attr(model, "parameters") %in% names(parameters))) {
     cli::cli_abort("Model/parameter mismatch")
   }
+  if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
+    parameters <- as.list(parameters)
+  }
 
   iov <- PKPDsim::get_model_iov(model)
 
