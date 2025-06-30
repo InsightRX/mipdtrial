@@ -50,6 +50,7 @@ sample_and_adjust_by_dose <- function(
   ...
 ) {
 
+  if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
 
   ## Get times to adjust dose
