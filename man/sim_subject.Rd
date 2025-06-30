@@ -14,11 +14,11 @@ covariates and data frame columns. Vector names should reflect all
 covariates defined by the model, and vector values should represent the
 associated column in the provided data set.}
 
+\item{parameters}{list of model parameters for subject}
+
 \item{design}{trial design, created using \code{create_trial_design()}}
 
 \item{verbose}{verbose output?}
-
-\item{parameter}{list of model parameters for subject}
 }
 \description{
 Core function to simulate a single subject

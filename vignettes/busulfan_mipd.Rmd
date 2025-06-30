@@ -182,7 +182,6 @@ cov_map <- c(
   T_CL_EFF = "T_CL_EFF",
   REGI = "REGI"
 )
-
 ```
 
 
@@ -205,7 +204,6 @@ sample.
 
 ```{r echo = FALSE}
 res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1, progress = FALSE)
-
 ```
 
 Here are the first few rows of our simulation results:

@@ -2,7 +2,7 @@
 #'
 #' @inheritParams run_trial
 #' @param data data for subject
-#' @param parameter list of model parameters for subject
+#' @param parameters list of model parameters for subject
 #'
 #' @export
 #'
