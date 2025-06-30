@@ -22,11 +22,12 @@ test_that("trial by dose change works", {
       anchor = "dose"
     ),
     regimen = regimen,
-    pars_true_i = generate_iiv(mod, omega, par, seed = 1),
+    pars_true_i = list(CL = 0.818241297818582,
+                       V = 8.67165976672737),
     sim_model = mod,
     sim_ruv = list(prop = 0.1, add = 1),
     est_model = mod,
-    parameters = par,
+    est_parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
@@ -94,7 +95,7 @@ test_that("Supplying true pars as list also works", {
     sim_model = mod,
     sim_ruv = list(prop = 0.1, add = 1),
     est_model = mod,
-    parameters = par,
+    est_parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(
@@ -328,7 +329,7 @@ test_that("TDMs below LOQ are handled correctly", {
     sim_model = mod,
     sim_ruv = list(prop = 0.1, add = 1),
     est_model = mod,
-    parameters = par,
+    est_parameters = par,
     omega = omega,
     ruv = list(prop = 0.1, add = 1),
     target = create_target_design(

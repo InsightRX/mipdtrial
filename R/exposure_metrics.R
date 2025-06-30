@@ -59,9 +59,6 @@ calc_concentration_from_regimen <- function(
   if (!all(attr(model, "parameters") %in% names(parameters))) {
     cli::cli_abort("Model/parameter mismatch")
   }
-  if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
-    parameters <- as.list(parameters)
-  }
 
   iov <- PKPDsim::get_model_iov(model)
 
@@ -71,7 +68,7 @@ calc_concentration_from_regimen <- function(
   )
   sim_output <- PKPDsim::sim(
     model,
-    parameters = parameters,
+    parameters = as.list(parameters),
     regimen = regimen,
     t_obs = target_time,
     iov_bins = iov[["bins"]],
@@ -117,7 +114,7 @@ calc_auc_from_regimen <- function(
   }
   sim_output <- PKPDsim::sim(
     model,
-    parameters = parameters,
+    parameters = as.list(parameters),
     regimen = regimen,
     t_obs = target_time_sim,
     iov_bins = iov[["bins"]],
@@ -156,6 +153,8 @@ calc_time_to_target <- function(
     target_design,
     auc_comp,
     model,
+    parameters,
+    covariates,
     ...
 ) {
   target_type <- match.arg(tolower(target_design$type), mipd_target_types())
@@ -175,6 +174,8 @@ calc_time_to_target <- function(
     t_obs_target <- c(regimen$dose_times, tail(regimen$dose_times, 1) + terminal_interval)
     sim_target <- PKPDsim::sim(
       model,
+      parameters = as.list(parameters),
+      covariates = covariates,
       regimen = regimen,
       only_obs = FALSE,
       t_obs = t_obs_target,
@@ -197,6 +198,8 @@ calc_time_to_target <- function(
     t_obs_target <- c(regimen$dose_times, tail(regimen$dose_times, 1) + terminal_interval)
     sim_target <- PKPDsim::sim(
       model,
+      parameters = as.list(parameters),
+      covariates = covariates,
       regimen = regimen,
       only_obs = FALSE,
       t_obs = t_obs_target,

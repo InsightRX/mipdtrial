@@ -191,6 +191,7 @@ dose_grid_search <- function(
         refine = refine,
         check_boundaries = FALSE, # !!
         md = md,
+        parameters = parameters,
         covariates = covariates,
         ...
       )
@@ -217,6 +218,7 @@ dose_grid_search <- function(
       refine = FALSE, # !!
       check_boundaries = FALSE,
       md = md,
+      parameters = parameters,
       covariates = covariates,
       ...
     )
@@ -341,6 +343,8 @@ simulate_dose_interval <- function(
     }
   } else {
     sd <- PKPDsim::get_var_y(model,
+                             parameters = parameters,
+                             covariates = covariates,
                              regimen = reg,
                              t_obs = t_obs,
                              omega = omega,
