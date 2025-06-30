@@ -308,7 +308,7 @@ simulate_dose_interval <- function(
   tmp <- PKPDsim::sim(
     model,
     regimen = reg,
-    parameters = parameters,
+    parameters = as.list(parameters),
     covariates = covariates,
     t_obs = t_obs,
     output_include = list(variables=TRUE),
@@ -345,7 +345,7 @@ simulate_dose_interval <- function(
     }
   } else {
     sd <- PKPDsim::get_var_y(model,
-                             parameters = parameters,
+                             parameters = as.list(parameters),
                              covariates = covariates,
                              regimen = reg,
                              t_obs = t_obs,
