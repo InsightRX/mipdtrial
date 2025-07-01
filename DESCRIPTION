@@ -19,7 +19,12 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.2.0),
-    tidyr
+    tidyr,
+    cli,
+    purrr,
+    furrr,
+    future,
+    progressr
 Config/testthat/edition: 3
 Imports: 
     PKPDmap,
