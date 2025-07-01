@@ -203,20 +203,8 @@ variability described in the model, and residual variability will be added to
 each sample collected using the error model described in the model.
 
 ```{r}
-res1 <- run_trial(
-  data = dat,
-  design = design1,
-  cov_mapping = cov_map,
-  progress = FALSE,
-  seed = 15
-)
-res2 <- run_trial(
-  data = dat,
-  design = design2,
-  cov_mapping = cov_map,
-  progress = FALSE,
-  seed = 15
-)
+res1 <- run_trial(data = dat, design = design1, cov_mapping = cov_map, seed = 15)
+res2 <- run_trial(data = dat, design = design2, cov_mapping = cov_map, seed = 15)
 ```
 
 We can look at final exposure estimates for each arm:

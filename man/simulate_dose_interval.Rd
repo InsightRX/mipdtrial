@@ -9,8 +9,6 @@ simulate_dose_interval(
   grid_type = "dose",
   dose_update,
   regimen,
-  parameters,
-  covariates = NULL,
   md,
   pta,
   target_design,
@@ -29,10 +27,6 @@ simulate_dose_interval(
 \item{dose_update}{update dose from which dose?}
 
 \item{regimen}{PKPDsim regimen object}
-
-\item{parameters}{list of model parameters}
-
-\item{covariates}{covariates object}
 
 \item{md}{metadata object (only needed if we have to use
 \code{get_quantity_from_variable()} to generate target value)}

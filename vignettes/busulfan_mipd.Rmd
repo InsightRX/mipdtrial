@@ -204,14 +204,8 @@ simulated concentration to produced a measured therapeutic drug monitoring
 sample.
 
 ```{r echo = FALSE}
-res <- run_trial(
-  data = dat, 
-  design = design,
-  cov_mapping = cov_map, 
-  progress = FALSE,
-  threads = 1,
-  seed = 1
-)
+res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1)
+
 ```
 
 Here are the first few rows of our simulation results:

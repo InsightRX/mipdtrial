@@ -4,16 +4,7 @@
 \alias{run_trial}
 \title{Run an MIPD trial}
 \usage{
-run_trial(
-  data,
-  design,
-  cov_mapping,
-  n_ids = NULL,
-  seed = 0,
-  verbose = FALSE,
-  progress = TRUE,
-  threads = 1
-)
+run_trial(data, design, cov_mapping, n_ids = NULL, seed = 0, progress = TRUE)
 }
 \arguments{
 \item{data}{data set to use for simulation, a data frame. Should contain
@@ -33,13 +24,7 @@ will use all subjects in \code{data}.}
 \item{seed}{argument passed to \code{set.seed()} to set the seed for all random
 variability generation.}
 
-\item{verbose}{verbose output?}
-
 \item{progress}{show progress bar? (default is \code{TRUE})}
-
-\item{threads}{number of threads to run the simulations on. By default the
-simulations will run on 4 cores, or less if less are available (one core will
-always be reserved). The user can override by specifying manually.}
 }
 \description{
 This function is a wrapper function to make it easier to run a basic MIPD
