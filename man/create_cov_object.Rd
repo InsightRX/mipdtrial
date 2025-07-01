@@ -9,7 +9,7 @@ create_cov_object(dat_i, mapping, implementation = NULL, time_column = NULL)
 \arguments{
 \item{dat_i}{a rectangular data set, containing only rows for an individual}
 
-\item{mapping}{named vector or list indicating which columns to extract, and what
+\item{mapping}{named vector indicating which columns to extract, and what
 the covariate names are expected in the model. Names should be model
 covariates and values should be data frame column names.}
 

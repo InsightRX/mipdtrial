@@ -86,7 +86,7 @@ generate_iiv <- function(
       ...
     )$p
     pars_i <- as.data.frame(pars_i[names(parameters)])
-    iiv[i, names(parameters)] <- pars_i
+    iiv[i,names(parameters)] <- pars_i
   }
 
   iiv

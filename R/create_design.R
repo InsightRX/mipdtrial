@@ -46,7 +46,7 @@ create_design <- function(
   anchor = c("dose", "day")
 ) {
   if(!is.null(time) && (!is.null(when) | !is.null(offset))) {
-    cli::cli_abort("`time` cannot be specified at the same with `when` and/or `offset` arguments.")
+    stop("`time` cannot be specified at the same with `when` and/or `offset` arguments.")
   }
   anchor <- match.arg(anchor)
   if(is.null(time)) {
@@ -77,7 +77,7 @@ create_design <- function(
     )
   } else {
     if(! all(is.numeric(time))) {
-      cli::cli_abort("When not anchoring times to `dose` or `day`, `time` must be all numeric.")
+      stop("When not anchoring times to `dose` or `day`, `time` must be all numeric.")
     }
     scheme <- data.frame(
       base = "dose",
@@ -95,19 +95,17 @@ create_design <- function(
 #'
 check_when <- function(when, offset, at) {
   if(length(at) != length(offset)) {
-    cli::cli_abort("Please specify `at` with same length as `offset`")
+    stop("Please specify `at` with same length as `offset`")
   }
   if(length(when) == 1) when <- rep(when, length(offset))
   if(length(when) != length(offset)) {
-    cli::cli_abort("Please specify `when` with same length as `offset`, or as single value.")
+    stop("Please specify `when` with same length as `offset`, or as single value.")
   }
   allowed_bases <- c("dose", "trough", "peak", "cmax", "cmin", "middle", "cmid", "random")
   if(!all(unique(when) %in% c(allowed_bases))) {
-    cli::cli_abort(
-      paste0(
-        "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
-        " when using adaptive times."
-      )
+    stop(
+      "Please specify only any of: ", paste(allowed_bases, collapse = ", "),
+      " when using adaptive times."
     )
   }
   when
