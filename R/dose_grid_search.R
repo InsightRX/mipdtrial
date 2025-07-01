@@ -108,7 +108,7 @@ dose_grid_search <- function(
   if(is.null(target_design$value) || length(target_design$value) == 0) {
     cli::cli_abort("Target not specified!")
   }
-  if (FALSE || is.null(refine)){
+  if (is.null(refine)){
     # unless specified otherwise, do not refine if model is linear
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
     # time-based target methods also need to be refined since this target
@@ -147,7 +147,6 @@ dose_grid_search <- function(
       y = unlist(y)
     )
   }
-  print(tab)
 
   ## get best dose:
   if (target_design$type %in% target_types_time) {

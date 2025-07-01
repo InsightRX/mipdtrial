@@ -37,7 +37,7 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
-  est_par <- parameters
+  est_par <- fit$parameters
   gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
@@ -56,7 +56,8 @@ map_adjust_dose <- function(
     grid = grid,
     grid_type = "dose",
     covariates = covariates,
-    iov_bins = PKPDsim::get_model_iov(est_model)$bins
+    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
+    ...
   )
   # return new regimen
   regimen <- update_regimen(
