@@ -120,10 +120,14 @@ run_trial <- function(
       .options = furrr::furrr_options(seed = seed)
     )
   } else {
-    res <- lapply(
-      X = sim_ids,
-      FUN = f
-    )
+    res <- list()
+    for(i in seq(sim_ids)) {
+      res[[i]] <- f(i)
+    }
+    # res <- lapply(
+    #   X = sim_ids,
+    #   FUN = f
+    # )
   }
 
   ## Return simulation results as list of data.frames
