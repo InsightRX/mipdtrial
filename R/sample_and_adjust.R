@@ -203,10 +203,10 @@ sample_and_adjust_by_dose <- function(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
-    # if (!is.null(out$gof) & inherits(out$gof, "data.frame")) {
-    #   out$gof$update <- j
-    #   gof <- rbind(gof, out$gof)
-    # }
+    if (!is.null(out$gof) & inherits(out$gof, "data.frame")) {
+      out$gof$update <- j
+      gof <- rbind(gof, out$gof)
+    }
   }
 
   ## Calculate AUC for final regimen
