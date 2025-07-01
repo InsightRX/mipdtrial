@@ -27,7 +27,11 @@
 #' @param progress show progress bar? (default is `TRUE`)
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.
-#'
+#' @param verbose verbose output?
+#' @param threads number of threads to run the simulations on. By default the
+#' simulations will run on 4 cores, or less if less are available (one core will
+#' always be reserved). The user can override by specifying manually.
+
 #' @export
 #'
 run_trial <- function(
@@ -36,14 +40,23 @@ run_trial <- function(
     cov_mapping,
     n_ids = NULL,
     seed = 0,
-    progress = TRUE
+    verbose = FALSE,
+    progress = TRUE,
+    threads = 1
 ) {
+
+  ## Determine number of threads
+  n_cores <- max(c(1, parallel::detectCores() - 1))
+  if(threads > (n_cores-1)) {
+    cli::cli_alert_warning("Number of threads ({threads}) cannot be equal to or higher than the number of cores available ({n_cores}). Reducing to {n_cores-1}")
+    threads <- n_cores - 1
+  }
+  cli::cli_alert_info("Starting simulations in {threads} threads")
 
   ## Set up data collectors
   tdms <- data.frame()
   dose_updates <- data.frame()
   additional_info <- list() # keep generic for other methods
-  sim_parameters <- data.frame()
   gof <- data.frame()
   final_exposure <- data.frame()
   eval_exposure <- data.frame()
@@ -55,188 +68,66 @@ run_trial <- function(
     if(n_ids <= nrow(data)) {
       data <- data[1:n_ids,]
     } else {
-      stop("`n_ids` cannot be larger than number of subjects in dataset.")
+      cli::cli_abort("`n_ids` cannot be larger than number of subjects in dataset.")
     }
+  }
+
+  ## Draw individual parameters up front
+  if("ID" %in% names(data)) { # ensure we have a lower case `id`
+    data <- data |>
+      dplyr::rename(id = ID)
+  }
+  if(any(duplicated(data$id)))
+    cli::cli_abort("Input dataset cannot have duplicate `id`.")
+  sim_ids <- data$id
+  all_pars <- generate_iiv(
+    sim_model  = design$sim$model,
+    omega      = design$sim$omega_matrix,
+    parameters = design$sim$parameters,
+    n_iter = length(sim_ids)
+  ) |>
+    dplyr::mutate(id = sim_ids)
+
+  ## Set up progress bars
+  ## Need to loop this through the progressr package
+  ## because furrr currently doesn't support progressbars with cli.
+  if(progress) {
+    progressr::handlers(global = TRUE)
+    progressr::handlers("cli")
+    p <- progressr::progressor(along = sim_ids)
+  } else {
+    p <- function() { }
   }
 
   ## Main loop
-  if(progress) pb <- txtProgressBar(min = 1, max = n_ids, style = 2)
-  for (i in data$ID) {
-    if(progress) setTxtProgressBar(pb, i)
-    ############################################################################
-    ## Create individual
-    ############################################################################
-    # get patient covariates
-    covs <- create_cov_object(
-      data[data$ID == i,],
-      mapping = cov_mapping
-    )
-
-    # randomly draw individual PK parameters
-    set.seed(seed + i) # reset seed before each patient to ensure reproducibility
-    pars_true_i <- generate_iiv(
-      sim_model  = design$sim$model,
-      omega      = design$sim$omega_matrix,
-      parameters = design$sim$parameters
-    )
-
-    ############################################################################
-    ## find initial starting dose: define basic regimen, then update
-    ## the function that is called should be ble to take `design`, `covariates`,
-    ## and `cov_mapping`.
-    ############################################################################
-    initial_reg <- design$initial_regimen$method(
+  f <- function(i) {
+    p()
+    sim_subject(
+      data = data[i, ],
+      cov_mapping = cov_mapping,
+      pars_true_i = all_pars[i, ] |>
+        dplyr::select(-id, -iteration) |>
+        as.list(),
       design = design,
-      covariates = covs,
-      cov_mapping = cov_mapping
+      verbose = verbose
     )
-
-    ############################################################################
-    ## Main patient-level loop: run through regimen optimization
-    ############################################################################
-    res <- sample_and_adjust_by_dose(
-      regimen_update_design = design$regimen_update,
-      sampling_design = design$sampling,
-      target_design = design$target,
-      regimen = initial_reg,
-      covariates = covs,
-      pars_true_i = pars_true_i,
-      sim_model = design$sim$model,
-      sim_ruv = design$sim$ruv,
-      est_model = design$est$model,
-      parameters = design$est$parameters,
-      omega = design$est$omega_matrix,
-      ruv = design$est$ruv
+  }
+  if(threads > 1) {
+    future::plan(future::multisession, workers = threads)
+    res <- furrr::future_map(
+      sim_ids,
+      .f = f,
+      .options = furrr::furrr_options(seed = seed)
     )
-
-    # post-processing to get common exposure read-outs
-    if(design$target$type %in% target_types_auc) {
-      auc_true <- calc_auc_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      auc_est <- calc_auc_from_regimen(
-        regimen = res$final_regimen,
-        parameters = tail(res$additional_info, 1)[[1]],
-        model = design$est$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      time_to_target <- calc_time_to_target(
-        regimen = res$final_regimen,
-        target_design = design$target,
-        auc_comp = attr(design$sim$model, "size"),
-        model = design$sim$model,
-        parameters = pars_true_i,
-        covariates = covs
-      )
-      final_exposure <- rbind(
-        final_exposure,
-        data.frame(
-          id = i,
-          auc_true = auc_true,
-          auc_est = auc_est,
-          tta = time_to_target
-        )
-      )
-    } else if (design$target$type %in% target_types_conc) {
-      conc_true <- calc_concentration_from_regimen(
-        regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters
-        model = design$sim$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      conc_est <- calc_concentration_from_regimen(
-        regimen = res$final_regimen,
-        parameters = tail(res$additional_info, 1)[[1]],
-        model = design$est$model,
-        target_design = design$target,
-        covariates = covs
-      )
-      time_to_target <- calc_time_to_target(
-        regimen = res$final_regimen,
-        target_design = design$target,
-        auc_comp = NULL,
-        model = design$sim$model,
-        parameters = pars_true_i,
-        covariates = covs
-      )
-      final_exposure <- rbind(
-        final_exposure,
-        data.frame(
-          id = i,
-          conc_true = conc_true,
-          conc_est = conc_est,
-          tta = time_to_target
-        )
-      )
-    }
-
-    # post-processing to get evaluation metrics
-    if (!is.null(design$evaluation)){
-      for (design_type in names(design$evaluation)){
-        tmp_eval_design <- list(
-          type = design_type,
-          scheme = design$evaluation[[design_type]]
-        )
-        if (design_type %in% target_types_auc){
-          f_calc <- calc_auc_from_regimen
-        } else if (design_type %in% target_types_conc){
-          f_calc <- calc_concentration_from_regimen
-        }
-        exposure_metric <- f_calc(
-          regimen = res$final_regimen,
-          parameters = pars_true_i, # true patient parameters
-          model = design$sim$model,
-          target_design = tmp_eval_design,
-          covariates = covs
-        )
-        eval_time <- get_sampling_times_from_scheme(
-          tmp_eval_design$scheme,
-          res$final_regimen
-        )
-        eval_exposure <- rbind(
-          eval_exposure,
-          data.frame(
-            id = i,
-            time = eval_time,
-            value = exposure_metric,
-            type = design_type
-          )
-        )
-      }
-    }
-
-    ############################################################################
-    ## Collect data into object
-    ############################################################################
-    res$tdms$id <- i
-    res$dose_updates$id <- i
-    res$additional_info$id <- i
-    sim_pars_i <- pars_true_i
-    sim_pars_i$id <- i
-    res$gof$id <-  i
-    tdms <- rbind(tdms, res$tdms)
-    dose_updates <- rbind(dose_updates, res$dose_updates)
-    additional_info <- c(additional_info, res$additional_info)
-    sim_parameters <- rbind(sim_parameters, sim_pars_i)
-    gof <- rbind(gof, res$gof)
+  } else {
+    res <- lapply(
+      X = sim_ids,
+      FUN = f
+    )
   }
 
-  out <- list(
-    tdms = tdms,
-    dose_updates = dose_updates,
-    additional_info = additional_info,
-    sim_parameters = sim_parameters,
-    design = design,
-    gof = gof,
-    final_exposure = final_exposure,
-    eval_exposure = eval_exposure
-  )
-  class(out) <- c("mipdtrial_results", "list")
-  out
+  ## Return simulation results as list of data.frames
+  cli::cli_alert_info("Post-processing results")
+  bind_sim_output(res)
+
 }

@@ -26,7 +26,6 @@ map_adjust_interval <- function(
     grid = NULL,
     ...
 ) {
-
   # get MAP fit, using model for estimation
   fit <- simulate_fit(
     est_model = est_model,
@@ -38,12 +37,15 @@ map_adjust_interval <- function(
     regimen = regimen,
     ...
   )
+  if("error" %in% class(fit)) {
+    cli::cli_abort("Fit to simulated data failed, please check model and simulation designs.")
+  }
   est_par <- fit$parameters
   gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
-    stop("Interval-optimization requires `grid` argument.")
+    cli::cli_abort("Interval-optimization requires `grid` argument.")
   }
   new_interval <- dose_grid_search(
     est_model = est_model,
