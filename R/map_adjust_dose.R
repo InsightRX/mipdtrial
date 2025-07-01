@@ -37,7 +37,7 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
-  if(inherits(fit, "error")) {
+  if(!all(names(fit$parameters) %in% names(parameters))) {
     cli::cli_warn("Fit error, please investigate. Contrinuing but using population estimates.")
     est_par <- parameters
     gof <- data.frame(pred = NA, ipred = NA, dv = NA, weights = NA)
