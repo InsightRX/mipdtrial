@@ -236,24 +236,10 @@ interindividual variability described in the model, and residual
 variability will be added to each sample collected using the error model
 described in the model.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">design1</span>,</span>
-<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
-<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">15</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Starting simulations in 1 threads</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Post-processing results</span></span>
-<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">design2</span>,</span>
-<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
-<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">15</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Starting simulations in 1 threads</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Post-processing results</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design1</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span>
+<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design2</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span></code></pre></div>
 <p>We can look at final exposure estimates for each arm:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_exp1</span> <span class="op">&lt;-</span> <span class="va">res1</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -262,13 +248,13 @@ described in the model.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>arm <span class="op">=</span> <span class="st">"mid-interval"</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">final_exp1</span>, <span class="va">final_exp2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id auc_true   auc_est tta         arm</span></span>
-<span><span class="co">#&gt; 1  1 517.5119  434.0717  13 peak-trough</span></span>
-<span><span class="co">#&gt; 2  2 469.7266  351.9784  13 peak-trough</span></span>
-<span><span class="co">#&gt; 3  3 455.3000  568.9690 121 peak-trough</span></span>
-<span><span class="co">#&gt; 4  4 402.2116  387.9840   1 peak-trough</span></span>
-<span><span class="co">#&gt; 5  5 527.2202  488.7515   1 peak-trough</span></span>
-<span><span class="co">#&gt; 6  6 428.2764 1051.9062 121 peak-trough</span></span></code></pre></div>
+<span><span class="co">#&gt;   id auc_true  auc_est tta         arm</span></span>
+<span><span class="co">#&gt; 1  1 455.5427 500.0427  37 peak-trough</span></span>
+<span><span class="co">#&gt; 2  2 376.8851 499.8176  13 peak-trough</span></span>
+<span><span class="co">#&gt; 3  3 408.3171 499.9847   1 peak-trough</span></span>
+<span><span class="co">#&gt; 4  4 432.2175 499.9052   1 peak-trough</span></span>
+<span><span class="co">#&gt; 5  5 500.6255 499.9565  13 peak-trough</span></span>
+<span><span class="co">#&gt; 6  6 376.1044 500.0055  25 peak-trough</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>

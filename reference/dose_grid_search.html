@@ -65,8 +65,8 @@ iteratively.</p>
 <span>  check_boundaries <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  max_dose <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  min_dose <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  md <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  parameters <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -156,13 +156,13 @@ should grid be expanded?</p></dd>
 <dd><p>minimum dose cap</p></dd>
 
 
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
+<dd><p>Number of cores over which to simulate doses</p></dd>
+
+
 <dt id="arg-md">md<a class="anchor" aria-label="anchor" href="#arg-md"></a></dt>
 <dd><p>metadata object (only needed if we have to use
 <code><a href="get_quantity_from_variable.html">get_quantity_from_variable()</a></code> to generate target value)</p></dd>
-
-
-<dt id="arg-parameters">parameters<a class="anchor" aria-label="anchor" href="#arg-parameters"></a></dt>
-<dd><p>list of model parameters</p></dd>
 
 
 <dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>

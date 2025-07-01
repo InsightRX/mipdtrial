@@ -241,23 +241,18 @@ error, etc.). This function creates a data frame of error to add to each
 simulated concentration to produced a measured therapeutic drug
 monitoring sample.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">design</span>,</span>
-<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
-<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span></code></pre></div>
 <p>Here are the first few rows of our simulation results:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   id conc_true conc_est tta</span></span>
-<span><span class="co">#&gt; 1  1  319.7854 237.0674 673</span></span>
-<span><span class="co">#&gt; 2  2  336.5482 370.8973 673</span></span>
-<span><span class="co">#&gt; 3  3  319.5743 213.4729 673</span></span>
-<span><span class="co">#&gt; 4  4  284.3309 283.7652 673</span></span>
-<span><span class="co">#&gt; 5  5  223.2109 293.5500 337</span></span>
-<span><span class="co">#&gt; 6  6  282.6174 580.3190   1</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  1  290.6750 299.9586 673</span></span>
+<span><span class="co">#&gt; 2  2  326.4004 299.9957 673</span></span>
+<span><span class="co">#&gt; 3  3  289.9764 299.9648 673</span></span>
+<span><span class="co">#&gt; 4  4  315.6666 300.0880 673</span></span>
+<span><span class="co">#&gt; 5  5  291.9871 300.1848 673</span></span>
+<span><span class="co">#&gt; 6  6  389.1166 299.9973 Inf</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
