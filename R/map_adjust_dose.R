@@ -37,8 +37,14 @@ map_adjust_dose <- function(
     regimen = regimen,
     ...
   )
-  est_par <- parameters
-  gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
+  if(inherits(fit, "error")) {
+    cli::cli_warn("Fit error, please investigate. Contrinuing but using population estimates.")
+    est_par <- parameters
+    gof <- data.frame(pred = NA, ipred = NA, dv = NA, weights = NA)
+  } else {
+    est_par <- fit$parameters
+    gof <- data.frame(pred = fit$pred, ipred = fit$ipred, dv = fit$dv, weights = fit$weights)
+  }
 
   # calculate new dose, using the estimation model
   if (is.null(grid)) {
