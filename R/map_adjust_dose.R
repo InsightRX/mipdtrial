@@ -46,8 +46,8 @@ map_adjust_dose <- function(
     d1 <- regimen$dose_amts[1]
     grid <- seq(d1/5, d1 * 5, length.out = 10)
   }
-  warning(covariates)
-  warning(porameters)
+  message(covariates)
+  message(parameters)
   new_dose <- dose_grid_search(
     est_model = est_model,
     regimen = regimen,
