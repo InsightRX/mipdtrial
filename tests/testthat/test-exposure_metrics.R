@@ -118,6 +118,35 @@ test_that("calc_auc_from_regimen: correct AUC calculated", {
   )
 })
 
+test_that("calc_auc_from_regimen: handle duplicate t_obs", {
+  # parameters as list
+  target <- create_target_design(
+    targettype = "auc24",
+    targetvalue = 10,
+    at = 1:7,
+    anchor = "day"
+  )
+  reg <- PKPDsim::new_regimen(
+    amt = 1500,
+    n = 14,
+    interval = 12,
+    type = "infusion"
+  )
+  out <- calc_auc_from_regimen(
+    regimen = reg,
+    parameters = list(CL = 5, V = 50),
+    model = mod_1cmt_iv,
+    target = target
+  )
+  # expect one AUC for evaluated time point:
+  expect_equal(length(out), length(target$scheme$at))
+  # check values too
+  expect_equal(
+    round(out),
+    c(476, 589, 599, 600, 600, 600, 600)
+  )
+})
+
 test_that("handles IOV correctly", {
   regimen <- PKPDsim::new_regimen(
     amt = 200,
@@ -287,13 +316,16 @@ test_that("calc_time_to_target: return NA when unsupported type", {
     at = 6,
     anchor = "day"
   )
-  time_to_target_unsupported <- calc_time_to_target(
-    regimen = regimen,
-    target_design = unsupported_target,
-    auc_comp = NULL,
-    model = mod_1cmt_iv,
-    covariates = NULL,
-    parameters = list(CL = 5, V = 50)
+  expect_warning(
+    time_to_target_unsupported <- calc_time_to_target(
+      regimen = regimen,
+      target_design = unsupported_target,
+      auc_comp = NULL,
+      model = mod_1cmt_iv,
+      covariates = NULL,
+      parameters = list(CL = 5, V = 50)
+    ),
+    "The target type cum_auc is not yet supported"
   )
   expect_true(is.na(time_to_target_unsupported))
 })
