@@ -64,6 +64,7 @@ dose_grid_search <- function(
     max_dose = NULL,
     min_dose = NULL,
     md = list(),
+    parameters = NULL,
     covariates = NULL,
     verbose = FALSE,
     ...
@@ -128,6 +129,7 @@ dose_grid_search <- function(
     omega = omega,
     obs = obs,
     ruv = ruv,
+    parameters = porameters,
     covariates = covariates,
     ...
   )
