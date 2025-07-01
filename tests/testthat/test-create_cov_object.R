@@ -13,7 +13,7 @@ test_that("handle missing columns", {
   mapping <- c(WT = "weight", MISSING = "missing_column")
   expect_warning(
     out <- create_cov_object(dat, mapping),
-    "missing covariates: missing_column"
+    "Missing covariates: missing_column"
   )
   expect_null(out)
 })
@@ -23,7 +23,7 @@ test_that("handle NA values in columns", {
   mapping <- c(WT = "weight", CRCL = "CRCL")
   expect_warning(
     out <- create_cov_object(dat, mapping),
-    "missing covariates: weight"
+    "Missing covariates: weight"
   )
   expect_null(out)
 })
@@ -33,7 +33,7 @@ test_that("handle combined NA and missing columns", {
   mapping <- c(A = "a", B = "b", C = "c", D = "d")
   expect_warning(
     out <- create_cov_object(dat, mapping),
-    "missing covariates: d, a"
+    "Missing covariates: d, a"
   )
   expect_null(out)
 })
@@ -43,7 +43,7 @@ test_that("handle missing time column", {
   mapping <- c(WT = "weight", CRCL = "CRCL")
   expect_warning(
     out <- create_cov_object(dat, mapping, time_column = "time"),
-    "missing time column: time"
+    "Missing time column: time"
   )
   expect_null(out)
 })
