@@ -46,8 +46,6 @@ map_adjust_dose <- function(
     d1 <- regimen$dose_amts[1]
     grid <- seq(d1/5, d1 * 5, length.out = 10)
   }
-  message(covariates)
-  message(parameters)
   new_dose <- dose_grid_search(
     est_model = est_model,
     regimen = regimen,
@@ -58,8 +56,7 @@ map_adjust_dose <- function(
     grid = grid,
     grid_type = "dose",
     covariates = covariates,
-    iov_bins = PKPDsim::get_model_iov(est_model)$bins,
-    ...
+    iov_bins = PKPDsim::get_model_iov(est_model)$bins
   )
   # return new regimen
   regimen <- update_regimen(
