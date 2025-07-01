@@ -208,7 +208,13 @@ etc.). This function creates a data frame of error to add to each simulated
 concentration to produced a measured therapeutic drug monitoring sample.
 
 ```{r}
-res <- run_trial(data = dat, design = design, cov_mapping = cov_map, seed = 1)
+res <- run_trial(
+  data = dat,
+  design = design,
+  cov_mapping = cov_map,
+  progress = FALSE,
+  seed = 1
+)
 ```
 
 Here are the first few rows of our simulation results:
