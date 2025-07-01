@@ -69,7 +69,7 @@ sim_subject <- function(
     if(!is.null(res$additional_info)) {
       auc_est <- calc_auc_from_regimen(
         regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters tail(res$additional_info, 1)[[1]],
+        parameters = design$est$parameters, # tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
@@ -102,7 +102,7 @@ sim_subject <- function(
     if(!is.null(res$additional_info)) {
       conc_est <- calc_concentration_from_regimen(
         regimen = res$final_regimen,
-        parameters = pars_true_i, # true patient parameters tail(res$additional_info, 1)[[1]],
+        parameters = design$est$parameters, # true patient parameters tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
