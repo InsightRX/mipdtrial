@@ -109,7 +109,7 @@ dose_grid_search <- function(
     cli::cli_abort("Target not specified!")
   }
   if (is.null(refine)){
-    # unless specified otherwise, do not refine if model is linear
+    # unless specified otherwise, do not refine if model is linear.
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
     # time-based target methods also need to be refined since this target
     # is non-linear
@@ -188,6 +188,7 @@ dose_grid_search <- function(
         refine = refine,
         check_boundaries = FALSE, # !!
         md = md,
+        parameters = parameters,
         covariates = covariates,
         ...
       )
@@ -214,6 +215,7 @@ dose_grid_search <- function(
       refine = FALSE, # !!
       check_boundaries = FALSE,
       md = md,
+      parameters = parameters,
       covariates = covariates,
       ...
     )
@@ -245,6 +247,8 @@ simulate_dose_interval <- function(
     grid_type = "dose",
     dose_update,
     regimen,
+    parameters,
+    covariates = NULL,
     md,
     pta,
     target_design,
@@ -303,6 +307,8 @@ simulate_dose_interval <- function(
     output_include = list(variables=TRUE),
     only_obs = FALSE,
     checks = FALSE,
+    parameters = parameters,
+    covariates = covariates,
     ...
   )
   if (is.null(pta)) {
@@ -335,6 +341,8 @@ simulate_dose_interval <- function(
   } else {
     sd <- PKPDsim::get_var_y(model,
                              regimen = reg,
+                             parameters = parameters,
+                             covariates = covariates,
                              t_obs = t_obs,
                              omega = omega,
                              obs_comp = obs,
