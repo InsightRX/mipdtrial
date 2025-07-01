@@ -11,8 +11,10 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/adjust_dose_checks.html</loc></url>
+<url><loc>/reference/bind_sim_output.html</loc></url>
 <url><loc>/reference/calc_auc_from_sim.html</loc></url>
 <url><loc>/reference/calc_time_to_target.html</loc></url>
+<url><loc>/reference/check_design.html</loc></url>
 <url><loc>/reference/check_when.html</loc></url>
 <url><loc>/reference/collect_tdms.html</loc></url>
 <url><loc>/reference/create_cov_object.html</loc></url>
@@ -45,6 +47,7 @@
 <url><loc>/reference/round_to_multiple.html</loc></url>
 <url><loc>/reference/run_trial.html</loc></url>
 <url><loc>/reference/sample_and_adjust_by_dose.html</loc></url>
+<url><loc>/reference/sim_subject.html</loc></url>
 <url><loc>/reference/simulate_dose_interval.html</loc></url>
 <url><loc>/reference/simulate_fit.html</loc></url>
 <url><loc>/reference/update_regimen.html</loc></url>

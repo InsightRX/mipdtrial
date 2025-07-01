@@ -86,24 +86,26 @@ PKPDsim regimen object.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     reg_def &lt;- design$initial_regimen$regimen</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (is.null(design$initial_regimen$mgkg)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("For weight-based initial dosing, ", "specify `create_initial_regimen_design(mgkg = ...)`")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cli::cli_abort(paste0("For weight-based initial dosing, ", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             "specify `create_initial_regimen_design(mgkg = ...)`"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (is.null(design$initial_regimen$dosing_weight)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("For weight-based initial dosing, ", "specify `create_initial_regimen_design(dosing_weight = ...)`")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cli::cli_abort(paste0("For weight-based initial dosing, ", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             "specify `create_initial_regimen_design(dosing_weight = ...)`"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     cov_for_dosing &lt;- names(which(cov_mapping == design$initial_regimen$dosing_weight))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (is.null(cov_for_dosing) || length(cov_for_dosing) == </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         0) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("dosing_weight covariate missing from `cov_mapping`")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cli::cli_abort("dosing_weight covariate missing from `cov_mapping`")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     weight_for_dosing &lt;- covariates[[cov_for_dosing]]$value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (is.null(weight_for_dosing)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("Dosing weight not available in data set")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cli::cli_abort("Dosing weight not available in data set")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     reg_def$amt &lt;- weight_for_dosing * design$initial_regimen$mgkg</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     do.call(PKPDsim::new_regimen, reg_def)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x556690d4b4f8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x55670001f868&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:mipdtrial&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mgkg</span>
@@ -138,7 +140,7 @@ PKPDsim regimen object.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
