@@ -34,7 +34,6 @@
 #' should grid be expanded?
 #' @param max_dose maximum dose cap
 #' @param min_dose minimum dose cap
-#' @param n_cores Number of cores over which to simulate doses
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
 #' @param covariates covariates object
@@ -61,10 +60,9 @@ dose_grid_search <- function(
     dose_resolution = 1,
     refine = NULL,
     refine_range = c(0.7, 1.4),
-    check_boundaries = TRUE,
+    check_boundaries = FALSE,
     max_dose = NULL,
     min_dose = NULL,
-    n_cores = 1,
     md = list(),
     covariates = NULL,
     verbose = FALSE,
@@ -130,7 +128,6 @@ dose_grid_search <- function(
     omega = omega,
     obs = obs,
     ruv = ruv,
-    mc.cores = n_cores,
     covariates = covariates,
     ...
   )
