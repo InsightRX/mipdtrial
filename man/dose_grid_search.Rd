@@ -79,6 +79,8 @@ should grid be expanded?}
 \item{md}{metadata object (only needed if we have to use
 \code{get_quantity_from_variable()} to generate target value)}
 
+\item{parameters}{list of model parameters}
+
 \item{covariates}{covariates object}
 
 \item{verbose}{verbose output?}

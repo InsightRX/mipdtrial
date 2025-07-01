@@ -36,6 +36,7 @@
 #' @param min_dose minimum dose cap
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
+#' @param parameters list of model parameters
 #' @param covariates covariates object
 #' @param verbose verbose output?
 #' @param ... passed on to PKPDsim function

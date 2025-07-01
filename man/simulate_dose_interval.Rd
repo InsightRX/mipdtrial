@@ -30,6 +30,8 @@ simulate_dose_interval(
 
 \item{regimen}{PKPDsim regimen object}
 
+\item{parameters}{list of model parameters}
+
 \item{covariates}{covariates object}
 
 \item{md}{metadata object (only needed if we have to use
