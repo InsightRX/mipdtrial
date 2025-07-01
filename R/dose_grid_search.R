@@ -116,7 +116,7 @@ dose_grid_search <- function(
     refine <- target_design$type %in% target_types_time || refine
   }
 
-  y <- mclapply(
+  y <- lapply(
     grid,
     simulate_dose_interval,
     grid_type = grid_type,
@@ -129,7 +129,7 @@ dose_grid_search <- function(
     omega = omega,
     obs = obs,
     ruv = ruv,
-    parameters = porameters,
+    parameters = parameters,
     covariates = covariates,
     ...
   )
@@ -147,6 +147,7 @@ dose_grid_search <- function(
       y = unlist(y)
     )
   }
+  print(tab)
 
   ## get best dose:
   if (target_design$type %in% target_types_time) {
