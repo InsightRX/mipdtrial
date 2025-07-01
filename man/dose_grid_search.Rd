@@ -21,8 +21,8 @@ dose_grid_search(
   check_boundaries = TRUE,
   max_dose = NULL,
   min_dose = NULL,
-  n_cores = 1,
   md = list(),
+  parameters = NULL,
   covariates = NULL,
   verbose = FALSE,
   ...
@@ -75,8 +75,6 @@ should grid be expanded?}
 \item{max_dose}{maximum dose cap}
 
 \item{min_dose}{minimum dose cap}
-
-\item{n_cores}{Number of cores over which to simulate doses}
 
 \item{md}{metadata object (only needed if we have to use
 \code{get_quantity_from_variable()} to generate target value)}

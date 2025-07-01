@@ -60,7 +60,7 @@ dose_grid_search <- function(
     dose_resolution = 1,
     refine = NULL,
     refine_range = c(0.7, 1.4),
-    check_boundaries = FALSE,
+    check_boundaries = TRUE,
     max_dose = NULL,
     min_dose = NULL,
     md = list(),
