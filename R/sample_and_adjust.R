@@ -117,7 +117,7 @@ sample_and_adjust_by_dose <- function(
   }
 
   out <- list()
-  for (j in 1:length(adjust_at_dose)) {
+  for (j in seq_along(adjust_at_dose)) {
     if(verbose) {
       cli::cli_alert_info(paste0("Adjustment of dose# ", adjust_at_dose[j]))
     }

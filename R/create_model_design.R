@@ -36,6 +36,7 @@ create_model_design <- function(
   omega_matrix = NULL,
   ruv = NULL
 ) {
+  args <- as.list(environment())
   design <- list()
   params <- c("model", "parameters", "omega_matrix", "ruv")
   if(!is.null(lib)) {
@@ -49,7 +50,6 @@ create_model_design <- function(
     design <- list()
   }
   ## potentially override using user-specified details
-  args <- as.list(match.call())
   for(key in names(args)) {
     if(key %in% params) {
       if(!is.null(args[[key]])) {
