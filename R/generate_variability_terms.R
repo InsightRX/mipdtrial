@@ -83,6 +83,7 @@ generate_iiv <- function(
       regimen = reg,
       covariates = covs,
       return_design = TRUE,
+      checks = FALSE,
       ...
     )$p
     pars_i <- as.data.frame(pars_i[names(parameters)])

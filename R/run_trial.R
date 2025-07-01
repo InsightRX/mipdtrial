@@ -73,6 +73,7 @@ run_trial <- function(
   }
 
   ## Draw individual parameters up front
+  set.seed(seed)
   if("ID" %in% names(data)) { # ensure we have a lower case `id`
     data <- data |>
       dplyr::rename(id = ID)
@@ -102,6 +103,7 @@ run_trial <- function(
   ## Main loop
   f <- function(i) {
     p()
+    set.seed(seed + i)
     sim_subject(
       data = data[i, ],
       cov_mapping = cov_mapping,
