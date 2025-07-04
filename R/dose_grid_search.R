@@ -34,9 +34,9 @@
 #' should grid be expanded?
 #' @param max_dose maximum dose cap
 #' @param min_dose minimum dose cap
-#' @param n_cores Number of cores over which to simulate doses
 #' @param md metadata object (only needed if we have to use
 #'   `get_quantity_from_variable()` to generate target value)
+#' @param parameters list of model parameters
 #' @param covariates covariates object
 #' @param verbose verbose output?
 #' @param ... passed on to PKPDsim function
@@ -64,8 +64,8 @@ dose_grid_search <- function(
     check_boundaries = TRUE,
     max_dose = NULL,
     min_dose = NULL,
-    n_cores = 1,
     md = list(),
+    parameters = NULL,
     covariates = NULL,
     verbose = FALSE,
     ...
@@ -110,14 +110,14 @@ dose_grid_search <- function(
     cli::cli_abort("Target not specified!")
   }
   if (is.null(refine)){
-    # unless specified otherwise, do not refine if model is linear
+    # unless specified otherwise, do not refine if model is linear.
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
     # time-based target methods also need to be refined since this target
     # is non-linear
     refine <- target_design$type %in% target_types_time || refine
   }
 
-  y <- mclapply(
+  y <- lapply(
     grid,
     simulate_dose_interval,
     grid_type = grid_type,
@@ -130,7 +130,7 @@ dose_grid_search <- function(
     omega = omega,
     obs = obs,
     ruv = ruv,
-    mc.cores = n_cores,
+    parameters = parameters,
     covariates = covariates,
     ...
   )
@@ -189,6 +189,7 @@ dose_grid_search <- function(
         refine = refine,
         check_boundaries = FALSE, # !!
         md = md,
+        parameters = parameters,
         covariates = covariates,
         ...
       )
@@ -215,6 +216,7 @@ dose_grid_search <- function(
       refine = FALSE, # !!
       check_boundaries = FALSE,
       md = md,
+      parameters = parameters,
       covariates = covariates,
       ...
     )
@@ -246,6 +248,8 @@ simulate_dose_interval <- function(
     grid_type = "dose",
     dose_update,
     regimen,
+    parameters,
+    covariates = NULL,
     md,
     pta,
     target_design,
@@ -304,6 +308,8 @@ simulate_dose_interval <- function(
     output_include = list(variables=TRUE),
     only_obs = FALSE,
     checks = FALSE,
+    parameters = parameters,
+    covariates = covariates,
     ...
   )
   if (is.null(pta)) {
@@ -336,6 +342,8 @@ simulate_dose_interval <- function(
   } else {
     sd <- PKPDsim::get_var_y(model,
                              regimen = reg,
+                             parameters = parameters,
+                             covariates = covariates,
                              t_obs = t_obs,
                              omega = omega,
                              obs_comp = obs,

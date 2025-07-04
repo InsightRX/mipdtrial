@@ -45,12 +45,14 @@ test_that("Can also run trial without sampling and dose optimization (initial do
   res <- run_trial(
     data = data,
     design = trial,
-    cov_mapping = list(WT = "WT")
+    cov_mapping = list(WT = "WT"),
+    progress = FALSE,
+    seed = 1
   )
   expect_equal(
     round(res$final_exposure$auc_true, 1),
-    c(840.6, 905.4, 859.6, 599.8, 1053.2, 583.5, 308.2, 795.3, 753.6,
-      667.7)
+    c(840.6, 1081.3, 557.8, 670.4, 563.1, 482.1, 583.9, 503.4, 791.7,
+      599.6)
   )
   expect_true(all(is.na(res$final_exposure$auc_est)))
 })
