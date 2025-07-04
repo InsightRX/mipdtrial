@@ -6,8 +6,6 @@
 #' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
 #'   function.
 #'
-#' @export
-#'
 sim_subject <- function(
   data,
   cov_mapping,
@@ -162,12 +160,14 @@ sim_subject <- function(
   ############################################################################
   ## Collect data into object
   ############################################################################
-  if(nrow(res$tdms) > 0)
+  if(nrow(res$tdms) > 0) {
     res$tdms$id <- id
+  }
   res$dose_updates$id <- id
   res$additional_info$id <- id
-  if(nrow(res$gof) > 0)
+  if(nrow(res$gof) > 0) {
     res$gof$id <-  id
+  }
 
   ## Return object
   list(

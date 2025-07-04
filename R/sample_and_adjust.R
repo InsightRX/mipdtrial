@@ -225,6 +225,45 @@ sample_and_adjust_by_dose <- function(
     covariates = covariates
   )
 
+  dose_updates <- rbind(
+    dose_updates,
+    bind_results_from_adjustments(
+      out,
+      dose_updates,
+      j,
+      regimen,
+      adjust_at_dose,
+      dose_before_update,
+      auc_final,
+      trough_final
+    )
+  )
+
+  list(
+    final_regimen = regimen,
+    tdms = tdms_i,
+    aucs = aucs_i,
+    dose_updates = dose_updates,
+    additional_info = additional_info,
+    gof = gof
+  )
+
+}
+
+#' Bind together the results from sampling and dose adjusting
+#'
+#' @returns a data.frame with results
+#'
+bind_results_from_adjustments <- function(
+  out,
+  dose_updates,
+  j,
+  regimen,
+  adjust_at_dose,
+  dose_before_update,
+  auc_final,
+  trough_final
+) {
   ## Calculate AUC for final regimen
   if(length(adjust_at_dose) > 0) {
     t <- regimen$dose_times[adjust_at_dose[j]]
@@ -241,25 +280,13 @@ sample_and_adjust_by_dose <- function(
   } else {
     interval_before_update <- rep(NA, length(auc_final))
   }
-  dose_updates <- rbind(
-    dose_updates,
-    data.frame(
-      t = t,
-      dose_update = NA,
-      t_adjust = NA,
-      dose_before_update = dose_before_update,
-      interval_before_update = interval_before_update,
-      auc_before_update = auc_final,
-      trough_before_update = trough_final
-    )
-  )
-
-  list(
-    final_regimen = regimen,
-    tdms = tdms_i,
-    aucs = aucs_i,
-    dose_updates = dose_updates,
-    additional_info = additional_info,
-    gof = gof
+  data.frame(
+    t = t,
+    dose_update = NA,
+    t_adjust = NA,
+    dose_before_update = dose_before_update,
+    interval_before_update = interval_before_update,
+    auc_before_update = auc_final,
+    trough_before_update = trough_final
   )
 }

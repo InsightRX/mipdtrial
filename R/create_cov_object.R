@@ -56,8 +56,7 @@ create_cov_object <- function(
     dat_i$t <- 0
   } else {
     if (!time_column %in% colnames(dat_i)) {
-      cli::cli_warn(
-        paste0("Missing time column: ", time_column))
+      cli::cli_warn(paste0("Missing time column: ", time_column))
       return(NULL)
     }
     dat_i$t <- dat_i[[time_column]]

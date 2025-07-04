@@ -1,9 +1,11 @@
 #' Bind simulated subject-level output together
-#' (from list into data.frames)
+#'
+#' Binds data from list containing the individual simulations into a
+#' data.frames that summarises the trial results).
 #'
 #' @param res temporary result object (list) in `run_trial()`
 #'
-#' @export
+#' @returns list with various data.frames with summaries of the trial
 #'
 bind_sim_output <- function(res) {
   out <- list()
