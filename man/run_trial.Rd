@@ -31,7 +31,9 @@ associated column in the provided data set.}
 will use all subjects in \code{data}.}
 
 \item{seed}{argument passed to \code{set.seed()} to set the seed for all random
-variability generation.}
+variability generation to ensure reproducibility of results.
+Even when run in parallel, reproducibility is ensures since each
+thread will receive a reproducible seed number.}
 
 \item{verbose}{verbose output?}
 

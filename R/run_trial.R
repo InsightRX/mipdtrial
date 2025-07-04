@@ -23,7 +23,9 @@
 #'   covariates defined by the model, and vector values should represent the
 #'   associated column in the provided data set.
 #' @param seed argument passed to `set.seed()` to set the seed for all random
-#'   variability generation.
+#'   variability generation to ensure reproducibility of results.
+#'   Even when run in parallel, reproducibility is ensures since each
+#'   thread will receive a reproducible seed number.
 #' @param progress show progress bar? (default is `TRUE`)
 #' @param n_ids number of subjects to use in simulated trial. If not specified,
 #' will use all subjects in `data`.
@@ -103,7 +105,7 @@ run_trial <- function(
   ## Main loop
   f <- function(i) {
     p()
-    set.seed(seed + i)
+    set.seed(seed + i) # ensures reproducibility across threads
     sim_subject(
       data = data[i, ],
       cov_mapping = cov_mapping,
