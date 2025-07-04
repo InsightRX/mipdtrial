@@ -229,7 +229,6 @@ sample_and_adjust_by_dose <- function(
     dose_updates,
     bind_results_from_adjustments(
       out,
-      dose_updates,
       j,
       regimen,
       adjust_at_dose,
@@ -251,12 +250,20 @@ sample_and_adjust_by_dose <- function(
 }
 
 #' Bind together the results from sampling and dose adjusting
-#'
+#' 
+#' @param out output object
+#' @param j index number
+#' @param regimen regimen
+#' @param adjust_at_dose adjust at dose number
+#' @param dose_before_update dose before update
+#' @param auc_final final AUC
+#' @param trouch_final final Ctrough
+#'  
 #' @returns a data.frame with results
 #'
+#' 
 bind_results_from_adjustments <- function(
   out,
-  dose_updates,
   j,
   regimen,
   adjust_at_dose,

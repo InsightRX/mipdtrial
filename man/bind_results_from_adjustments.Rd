@@ -6,7 +6,6 @@
 \usage{
 bind_results_from_adjustments(
   out,
-  dose_updates,
   j,
   regimen,
   adjust_at_dose,
@@ -14,6 +13,21 @@ bind_results_from_adjustments(
   auc_final,
   trough_final
 )
+}
+\arguments{
+\item{out}{output object}
+
+\item{j}{index number}
+
+\item{regimen}{regimen}
+
+\item{adjust_at_dose}{adjust at dose number}
+
+\item{dose_before_update}{dose before update}
+
+\item{auc_final}{final AUC}
+
+\item{trouch_final}{final Ctrough}
 }
 \value{
 a data.frame with results

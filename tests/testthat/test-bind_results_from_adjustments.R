@@ -1,5 +1,5 @@
 test_that("bind_results_from_adjustments works correctly", {
-  
+
   # Setup test data
   regimen <- list(dose_times = c(0, 24, 48, 72))
   adjust_at_dose <- c(2, 3)
@@ -10,10 +10,9 @@ test_that("bind_results_from_adjustments works correctly", {
   
   # Test case 1: out has new_dose and new_interval
   out1 <- list(new_dose = 600, new_interval = 12)
-  dose_updates1 <- data.frame()
   
   result1 <- bind_results_from_adjustments(
-    out1, dose_updates1, j, regimen, adjust_at_dose, 
+    out1, j, regimen, adjust_at_dose, 
     dose_before_update, auc_final, trough_final
   )
   
@@ -29,7 +28,7 @@ test_that("bind_results_from_adjustments works correctly", {
   out2 <- list(new_dose = NULL, new_interval = NULL)
   
   result2 <- bind_results_from_adjustments(
-    out2, dose_updates1, j, regimen, adjust_at_dose, 
+    out2, j, regimen, adjust_at_dose, 
     dose_before_update, auc_final, trough_final
   )
   
@@ -44,7 +43,7 @@ test_that("bind_results_from_adjustments works correctly", {
   auc_final_vec <- c(100, 110)
   
   result3 <- bind_results_from_adjustments(
-    out1, dose_updates1, j, regimen, adjust_at_dose_empty, 
+    out1, j, regimen, adjust_at_dose_empty, 
     dose_before_update, auc_final_vec, trough_final
   )
   
