@@ -257,7 +257,7 @@ sample_and_adjust_by_dose <- function(
 #' @param adjust_at_dose adjust at dose number
 #' @param dose_before_update dose before update
 #' @param auc_final final AUC
-#' @param trouch_final final Ctrough
+#' @param trough_final final Ctrough
 #'  
 #' @returns a data.frame with results
 #'
