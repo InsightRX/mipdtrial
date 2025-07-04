@@ -27,7 +27,7 @@ bind_results_from_adjustments(
 
 \item{auc_final}{final AUC}
 
-\item{trouch_final}{final Ctrough}
+\item{trough_final}{final Ctrough}
 }
 \value{
 a data.frame with results
