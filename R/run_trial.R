@@ -222,8 +222,9 @@ run_trial <- function(
     ############################################################################
     ## Collect data into object
     ############################################################################
-    if(nrow(res$tdms) > 0)
+    if(nrow(res$tdms) > 0) {
       res$tdms$id <- i
+    }
     res$dose_updates$id <- i
     res$additional_info$id <- i
     sim_pars_i <- pars_true_i

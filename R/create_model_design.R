@@ -29,6 +29,7 @@
 #' }
 #'
 #' @export
+#'
 create_model_design <- function(
   lib = NULL,
   model = NULL,

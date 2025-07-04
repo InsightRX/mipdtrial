@@ -2,15 +2,17 @@
 % Please edit documentation in R/bind_sim_output.R
 \name{bind_sim_output}
 \alias{bind_sim_output}
-\title{Bind simulated subject-level output together
-(from list into data.frames)}
+\title{Bind simulated subject-level output together}
 \usage{
 bind_sim_output(res)
 }
 \arguments{
 \item{res}{temporary result object (list) in \code{run_trial()}}
 }
+\value{
+list with various data.frames with summaries of the trial
+}
 \description{
-Bind simulated subject-level output together
-(from list into data.frames)
+Binds data from list containing the individual simulations into a
+data.frames that summarises the trial results).
 }
