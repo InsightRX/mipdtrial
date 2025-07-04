@@ -16,7 +16,7 @@ bind_results_from_adjustments(
 )
 }
 \value{
-a list with results
+a data.frame with results
 }
 \description{
 Bind together the results from sampling and dose adjusting
