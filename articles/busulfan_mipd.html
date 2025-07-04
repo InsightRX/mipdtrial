@@ -233,25 +233,16 @@ estimation model and the measured TDMs we “collect”.</p>
 error (assay error, etc.). This function creates a data frame of error
 to add to each “true” simulated concentration to produced a measured
 therapeutic drug monitoring sample.</p>
-<pre><code><span><span class="co">#&gt; =========</span></span>
-<span><span class="co">#&gt; ==================</span></span>
-<span><span class="co">#&gt; ===========================</span></span>
-<span><span class="co">#&gt; ====================================</span></span>
-<span><span class="co">#&gt; ============================================</span></span>
-<span><span class="co">#&gt; =====================================================</span></span>
-<span><span class="co">#&gt; ==============================================================</span></span>
-<span><span class="co">#&gt; =======================================================================</span></span>
-<span><span class="co">#&gt; ================================================================================</span></span></code></pre>
 <p>Here are the first few rows of our simulation results:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id  auc_true  auc_est tta</span></span>
-<span><span class="co">#&gt; 1  1  92962.84 89982.81  NA</span></span>
-<span><span class="co">#&gt; 2  2  85853.55 90072.38  NA</span></span>
-<span><span class="co">#&gt; 3  3  89234.78 89975.88  NA</span></span>
-<span><span class="co">#&gt; 4  4  91292.73 90075.52  NA</span></span>
-<span><span class="co">#&gt; 5  5  99287.78 89945.65  NA</span></span>
-<span><span class="co">#&gt; 6  6 110214.05 89998.78  NA</span></span></code></pre></div>
+<span><span class="co">#&gt;   id  auc_true   auc_est tta</span></span>
+<span><span class="co">#&gt; 1  1  93179.69 109528.17  NA</span></span>
+<span><span class="co">#&gt; 2  2 109987.20  99401.04  NA</span></span>
+<span><span class="co">#&gt; 3  3  92201.45  91907.12  NA</span></span>
+<span><span class="co">#&gt; 4  4 100699.10 100003.16  NA</span></span>
+<span><span class="co">#&gt; 5  5  92522.30  90871.20  NA</span></span>
+<span><span class="co">#&gt; 6  6  95381.91  92141.17  NA</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">6. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
@@ -260,7 +251,7 @@ therapeutic drug monitoring sample.</p>
 that target attainment would be very high (all patients have an AUC very
 close to 90 mg*h/L), but “true” AUC was higher than that due to some
 model misspecification!</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">auc_true</span>, <span class="va">auc_est</span><span class="op">)</span>,</span>
@@ -280,7 +271,7 @@ model misspecification!</p>
 <p><img src="busulfan_mipd_files/figure-html/unnamed-chunk-12-1.png" width="192"></p>
 <p>Even with some model misspecification, target attainment (within 20%
 of target AUC) was still high:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">target_attainment</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    ontarget <span class="op">=</span> <span class="fu"><a href="../reference/is_on_target.html">is_on_target</a></span><span class="op">(</span><span class="va">auc_true</span>, <span class="va">target_design</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>

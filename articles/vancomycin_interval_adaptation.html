@@ -225,10 +225,24 @@ interindividual variability described in the model, and residual
 variability will be added to each sample collected using the error model
 described in the model.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design1</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span>
-<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, design <span class="op">=</span> <span class="va">design2</span>, cov_mapping <span class="op">=</span> <span class="va">cov_map</span>, seed <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
+<span>  design <span class="op">=</span> <span class="va">design1</span>,</span>
+<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
+<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">15</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Starting simulations in 1 threads</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Post-processing results</span></span>
+<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
+<span>  design <span class="op">=</span> <span class="va">design2</span>,</span>
+<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
+<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">15</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Starting simulations in 1 threads</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Post-processing results</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">5. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>
