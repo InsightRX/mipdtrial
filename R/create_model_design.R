@@ -29,6 +29,7 @@
 #' }
 #'
 #' @export
+#'
 create_model_design <- function(
   lib = NULL,
   model = NULL,
@@ -36,6 +37,7 @@ create_model_design <- function(
   omega_matrix = NULL,
   ruv = NULL
 ) {
+  args <- as.list(environment())
   design <- list()
   params <- c("model", "parameters", "omega_matrix", "ruv")
   if(!is.null(lib)) {
@@ -49,10 +51,11 @@ create_model_design <- function(
     design <- list()
   }
   ## potentially override using user-specified details
-  for(key in params) {
-    tmp <- get(key)
-    if(!is.null(tmp)) {
-      design[[key]] <- tmp
+  for(key in names(args)) {
+    if(key %in% params) {
+      if(!is.null(args[[key]])) {
+        design[[key]] <- args[[key]]
+      }
     }
   }
   design

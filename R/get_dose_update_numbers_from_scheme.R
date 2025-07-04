@@ -39,9 +39,9 @@ get_dose_update_core <- function(row, regimen) {
 #' @param regimen PKPDsim regimen
 adjust_dose_checks <- function(adjust_at_dose, regimen) {
   if (max(adjust_at_dose) > length(regimen$dose_times)) {
-    stop("Insufficient doses in `regimen` for all dose adjustments specified.")
+    cli::cli_abort("Insufficient doses in `regimen` for all dose adjustments specified.")
   }
   if (any(adjust_at_dose <= 1)) {
-    stop("TDM collection before the first dose is not yet supported")
+    cli::cli_abort("TDM collection before the first dose is not yet supported")
   }
 }

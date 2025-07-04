@@ -13,6 +13,7 @@
 #' @param eval_design Design for evaluation metrics, from `create_eval_design()`
 #'
 #' @export
+#' 
 create_trial_design <- function(
     file = NULL,
     sampling_design = NULL,
@@ -37,19 +38,8 @@ create_trial_design <- function(
     )
   }
 
-  ## Design checks / parsing:
-  ##  - `regimen_update_design$dose_optimization_method` can be passed as
-  ##    reference to function, not a function itself, in that case we need to
-  ##    `get()` the actual function.
-  if(inherits(design$regimen_update$dose_optimization_method, "character")) {
-    design$regimen_update$dose_optimization_method <- get(design$regimen_update$dose_optimization_method)
-  }
-  ##  - `initial_regimen$method`: same, can be passed as character or function.
-  if(inherits(design$initial_regimen$method, "character")) {
-    design$initial_regimen$method <- get(design$initial_regimen$method)
-  }
-
-  design
+  ## Design checks / parsing before returning
+  check_trial_design(design)
 }
 
 #' Parse YAML spec file to trial design
@@ -68,10 +58,13 @@ parse_spec_file_to_trial_design <- function(file) {
   }
   missing <- setdiff(c("target", "sampling", "regimen_update", "sim", "est"), names(design))
   if(length(missing) > 0) {
-    warning(
-      "Subdesigns are missing from design specification file: ",
-      paste0(missing, collapse = ", ")
+    cli::cli_warn(
+      paste(
+        "Subdesigns are missing from design specification file: ",
+        paste0(missing, collapse = ", ")
+      )
     )
   }
   design
 }
+

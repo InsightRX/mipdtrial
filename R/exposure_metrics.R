@@ -57,7 +57,7 @@ calc_concentration_from_regimen <- function(
     ...
 ){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
-    stop("Model/parameter mismatch")
+    cli::cli_abort("Model/parameter mismatch")
   }
   if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
     parameters <- as.list(parameters)
@@ -97,7 +97,7 @@ calc_auc_from_regimen <- function(
   ...
 ){
   if (!all(attr(model, "parameters") %in% names(parameters))) {
-    stop("Model/parameter mismatch")
+    cli::cli_abort("Model/parameter mismatch")
   }
   if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
     parameters <- as.list(parameters)
@@ -162,13 +162,6 @@ calc_time_to_target <- function(
 
   supported_targets <- c("auc24", "auc12", "trough", "cmin")
   if (!(target_type %in% supported_targets)){
-    warning(
-      paste(
-        "Warning: The target type", target_type,
-        "is not yet supported. Supported types are:",
-        paste(supported_targets, collapse = ", "), "."
-      )
-    )
     return(NA_real_)
   }
 
@@ -200,7 +193,7 @@ calc_time_to_target <- function(
       dose_idx <- min(aucs_on_target)
     }
   } else if (target_type %in% c("trough", "cmin")){
-    terminal_interval <- regimen$t[nrow(regimen)] - regimen$t[nrow(regimen)-1]
+    terminal_interval <- regimen$dose_times[length(regimen$dose_times)] - regimen$dose_times[length(regimen$dose_times)-1]
     t_obs_target <- c(regimen$dose_times, tail(regimen$dose_times, 1) + terminal_interval)
     sim_target <- PKPDsim::sim(
       model,

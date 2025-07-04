@@ -53,16 +53,28 @@ sample_and_adjust_by_dose <- function(
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
 
-  adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
-  first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
-  tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
-  if (!any(tdm_times < first_adjust_time)) {
-    msg <- paste0(
-      "At least one TDM must be collected before dose adjustment.\n",
-      "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
-      "Dose adjustment times: ", paste0(regimen$dose_times[adjust_at_dose], collapse = ", ")
-    )
-    stop(msg)
+  ## Get times to adjust dose
+  if(!is.null(regimen_update_design)) {
+    adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
+    first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
+  } else {
+    adjust_at_dose <- c()
+    first_adjust_time <- NA
+  }
+
+  ## Get sampling times
+  if(!is.null(sampling_design)) {
+    tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
+    if (!any(tdm_times < first_adjust_time)) {
+      msg <- paste0(
+        "At least one TDM must be collected before dose adjustment.\n",
+        "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
+        "Dose adjustment times: ", paste0(regimen$dose_times[adjust_at_dose], collapse = ", ")
+      )
+      cli::cli_abort(msg)
+    }
+  } else {
+    tdm_times <- c()
   }
 
   # randomly draw error terms
@@ -101,21 +113,24 @@ sample_and_adjust_by_dose <- function(
   )
 
   if(verbose) {
-    message("Starting dose: ", round(regimen$dose_amts[1]))
+    cli::cli_alert_info(paste0("Starting dose: ", round(regimen$dose_amts[1])))
   }
 
-  for (j in 1:length(adjust_at_dose)) {
-    if(verbose) message("Adjustment of dose# ", adjust_at_dose[j])
+  out <- list()
+  for (j in seq_along(adjust_at_dose)) {
+    if(verbose) {
+      cli::cli_alert_info(paste0("Adjustment of dose# ", adjust_at_dose[j]))
+    }
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
     tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
-      stop("No new samples in current adjustment interval, check target and sampling settings.")
+      cli::cli_abort("No new samples in current adjustment interval, check target and sampling settings.")
     }
     last_adjust_time <- adjust_time
     if(verbose) {
-      message("Samples times: ", paste0(tdm_times[collect_idx], collapse=", "))
+      cli::cli_alert_info(paste0("Sample times: ", paste0(tdm_times[collect_idx], collapse=", ")))
     }
     new_tdms <- collect_tdms(
       sim_model = sim_model,
@@ -142,7 +157,7 @@ sample_and_adjust_by_dose <- function(
       covariates = covariates
     )
     if(verbose) {
-      message("TDMs: ", paste(round(new_tdms$y, 1), collapse=", "))
+      cli::cli_alert_info(paste0("TDMs: ", paste(round(new_tdms$y, 1), collapse=", ")))
     }
     if(accumulate_data) {
       tdms_i <- rbind(tdms_i, new_tdms)
@@ -175,7 +190,7 @@ sample_and_adjust_by_dose <- function(
     out <- do.call(regimen_update_design$dose_optimization_method, method_args)
     regimen <- out$regimen
     if(verbose) {
-      message("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval)
+      cli::cli_alert_info(paste0("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval))
     }
 
     ## update the vector of dose_udpate numbers, if needed
@@ -188,7 +203,7 @@ sample_and_adjust_by_dose <- function(
       additional_info,
       setNames(list(out$additional_info), paste0("dose_", adjust_at_dose[j]))
     )
-    if (!is.null(out$gof)) {
+    if (!is.null(out$gof) & inherits(out$gof, "data.frame")) {
       out$gof$update <- j
       gof <- rbind(gof, out$gof)
     }
@@ -209,16 +224,17 @@ sample_and_adjust_by_dose <- function(
     target_design = target_design,
     covariates = covariates
   )
+
   dose_updates <- rbind(
     dose_updates,
-    data.frame(
-      t = regimen$dose_times[adjust_at_dose[j]],
-      dose_update = NA,
-      t_adjust = NA,
-      dose_before_update = out$new_dose,
-      interval_before_update = out$new_interval,
-      auc_before_update = auc_final,
-      trough_before_update = trough_final
+    bind_results_from_adjustments(
+      out,
+      j,
+      regimen,
+      adjust_at_dose,
+      dose_before_update,
+      auc_final,
+      trough_final
     )
   )
 
@@ -229,5 +245,55 @@ sample_and_adjust_by_dose <- function(
     dose_updates = dose_updates,
     additional_info = additional_info,
     gof = gof
+  )
+
+}
+
+#' Bind together the results from sampling and dose adjusting
+#' 
+#' @param out output object
+#' @param j index number
+#' @param regimen regimen
+#' @param adjust_at_dose adjust at dose number
+#' @param dose_before_update dose before update
+#' @param auc_final final AUC
+#' @param trough_final final Ctrough
+#'  
+#' @returns a data.frame with results
+#'
+#' 
+bind_results_from_adjustments <- function(
+  out,
+  j,
+  regimen,
+  adjust_at_dose,
+  dose_before_update,
+  auc_final,
+  trough_final
+) {
+  ## Calculate AUC for final regimen
+  if(length(adjust_at_dose) > 0) {
+    t <- regimen$dose_times[adjust_at_dose[j]]
+  } else {
+    t <- rep(NA, length(auc_final))
+  }
+  if(!is.null(out$new_dose)) {
+    dose_before_update <- out$new_dose
+  } else {
+    dose_before_update <- rep(NA, length(auc_final))
+  }
+  if(!is.null(out$new_interval)) {
+    interval_before_update <- out$new_interval
+  } else {
+    interval_before_update <- rep(NA, length(auc_final))
+  }
+  data.frame(
+    t = t,
+    dose_update = NA,
+    t_adjust = NA,
+    dose_before_update = dose_before_update,
+    interval_before_update = interval_before_update,
+    auc_before_update = auc_final,
+    trough_before_update = trough_final
   )
 }

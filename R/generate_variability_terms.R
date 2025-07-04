@@ -31,12 +31,14 @@ NULL
 #' @param n_iter number of sets of individual parameters to generate per id
 #' @param seed set random seed
 #' @param ... arguments passed on to PKPDsim::sim
+#'
 #' @returns `generate_iiv` a data frame with columns `id` (corresponding to
 #'   `ids`), `iter` ( numbers 1 to n_iter) and columns for each individual
 #'   parameter value.
+#'
 #' @rdname generate_variability
+#'
 #' @export
-
 generate_iiv <- function(
   sim_model,
   omega,
@@ -83,10 +85,11 @@ generate_iiv <- function(
       regimen = reg,
       covariates = covs,
       return_design = TRUE,
+      checks = FALSE,
       ...
     )$p
     pars_i <- as.data.frame(pars_i[names(parameters)])
-    iiv[i,names(parameters)] <- pars_i
+    iiv[i, names(parameters)] <- pars_i
   }
 
   iiv
