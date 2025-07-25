@@ -114,7 +114,8 @@ sample_and_adjust_by_dose <- function(
     weights = numeric(0),
     update = numeric(0)
   )
-
+  tmp_target_design <- get_single_target_design(target_design)
+  
   if(verbose) {
     cli::cli_alert_info(paste0("Starting dose: ", round(regimen$dose_amts[1])))
   }
