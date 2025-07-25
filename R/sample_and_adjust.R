@@ -199,7 +199,7 @@ sample_and_adjust_by_dose <- function(
     ))
     method_args <- append(method_args, list(...))
     out <- do.call(
-      regimen_update_design$dose_optimization_method, 
+      regimen_update_design$dose_optimization_method,
       method_args
     )
     regimen <- out$regimen
