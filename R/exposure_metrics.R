@@ -152,11 +152,11 @@ calc_auc_from_regimen <- function(
 #'   achieved. Returns NA if the target type is not supported.
 #' @export
 calc_time_to_target <- function(
-    regimen,
-    target_design,
-    auc_comp,
-    model,
-    ...
+  regimen,
+  target_design,
+  auc_comp,
+  model,
+  ...
 ) {
   target_type <- match.arg(tolower(target_design$type), mipd_target_types())
 

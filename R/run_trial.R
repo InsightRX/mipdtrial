@@ -124,9 +124,9 @@ run_trial <- function(
       .options = furrr::furrr_options(seed = seed)
     )
   } else {
-    res <- lapply(
-      X = sim_ids,
-      FUN = f
+    res <- purrr::map(
+      sim_ids,
+      .f = f
     )
   }
 

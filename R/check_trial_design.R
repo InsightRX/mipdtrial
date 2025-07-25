@@ -14,6 +14,11 @@ check_trial_design <- function(design) {
   if(is.null(design$regimen_update)) {
     cli::cli_warn("No `regimen_update_design` provided, will not perform regimen optimization.")
   }
+  ## Check that target vector length is either 1, or same as 
+  ## regimen update vector length.
+  if(! (nrow(design$target$scheme) == 1 || nrow(design$target$scheme) == nrow(design$regimen_update$scheme))) {
+    cli::cli_abort("The number of target instances should be either 1 or the same length as the number of regimen update instances.")
+  }
   ##  `regimen_update_design$dose_optimization_method` can be passed as
   ##  reference to function, not a function itself, in that case we need to
   ##  `get()` the actual function.

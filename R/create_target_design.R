@@ -6,9 +6,18 @@
 #'
 #' @param targettype target type, one of accepted types (see
 #'   [mipd_target_types()])
-#' @param targetmin minimum value acceptable, must be specified with `targetmax`
-#' @param targetmax maximum value acceptable, must be specified with `targetmin`
-#' @param targetvalue single value for a target, overrides min and max values.
+#' @param targetmin minimum value acceptable, must be specified with 
+#' `targetmax`. Can be a vector. In that case, length has to match length of
+#' other vector-arguments to this function, and length of regimen update
+#' occasions.
+#' @param targetmax maximum value acceptable, must be specified with 
+#' `targetmin`. Can be a vector. In that case, length has to match length of
+#' other vector-arguments to this function, and length of regimen update
+#' occasions.
+#' @param targetvalue value for a target, overrides min and max values.
+#' Can be a vector. In that case, length has to match length of
+#' other vector-arguments to this function, and length of regimen update
+#' occasions.
 #' @param single_point_variation acceptable variation from targetvalue. By
 #'   default 20%. Considered for assessment of target attainment a posteriori,
 #'   not used for dose-finding logic.
@@ -62,6 +71,14 @@
 #'   anchor = "day"
 #' )
 #'
+#' ## Target cmin first at dose 4 (15 mg/L), then at dose 8 (25 mg/L)
+#' create_target_design(
+#'   targettype = c("cmin", "cmin"),
+#'   targetvalue = c(15, 25),
+#'   at = c(4, 8),
+#'   anchor = "day"
+#' )
+
 create_target_design <- function(
     targettype = mipd_target_types(),
     targetmin = NULL,
@@ -109,18 +126,18 @@ create_target_design <- function(
     stop("Either targetmin + targetmax or midpoint must be supplied")
   }
   if (!is.null(targetmin) && !is.null(targetmax)) {
-    if (!is_single_valid_number(targetmin) || !is_single_valid_number(targetmax)) {
-      stop("targetmin or targetmax misspecified/not numeric")
+    if (!is.numeric(targetmin) || !is.numeric(targetmax) || length(targetmin) != length(targetmax)) {
+      stop("targetmin or targetmax misspecified/not numeric, or not of same length")
     }
-    midpoint <- mean(c(targetmin, targetmax))
+    midpoint <- apply(cbind(targetmin, targetmax), 1, mean)
     lowerbound <- targetmin
     upperbound <- targetmax
   }
   if (!is.null(targetvalue)) {
-    if (!is_single_valid_number(targetvalue)) {
+    if (!is.numeric(targetvalue)) {
       stop("targetvalue misspecified/not numeric")
     }
-    if (!is_single_valid_number(single_point_variation)) {
+    if (!is.numeric(single_point_variation)) {
       stop("single_point_variation misspecified/not numeric")
     }
     midpoint <- targetvalue

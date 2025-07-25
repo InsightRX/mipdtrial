@@ -21,11 +21,20 @@ create_target_design(
 \item{targettype}{target type, one of accepted types (see
 \code{\link[=mipd_target_types]{mipd_target_types()}})}
 
-\item{targetmin}{minimum value acceptable, must be specified with \code{targetmax}}
+\item{targetmin}{minimum value acceptable, must be specified with
+\code{targetmax}. Can be a vector. In that case, length has to match length of
+other vector-arguments to this function, and length of regimen update
+occasions.}
 
-\item{targetmax}{maximum value acceptable, must be specified with \code{targetmin}}
+\item{targetmax}{maximum value acceptable, must be specified with
+\code{targetmin}. Can be a vector. In that case, length has to match length of
+other vector-arguments to this function, and length of regimen update
+occasions.}
 
-\item{targetvalue}{single value for a target, overrides min and max values.}
+\item{targetvalue}{value for a target, overrides min and max values.
+Can be a vector. In that case, length has to match length of
+other vector-arguments to this function, and length of regimen update
+occasions.}
 
 \item{single_point_variation}{acceptable variation from targetvalue. By
 default 20\%. Considered for assessment of target attainment a posteriori,
@@ -88,4 +97,11 @@ create_target_design(
   anchor = "day"
 )
 
+## Target cmin first at dose 4 (15 mg/L), then at dose 8 (25 mg/L)
+create_target_design(
+  targettype = c("cmin", "cmin"),
+  targetvalue = c(15, 25),
+  at = c(4, 8),
+  anchor = "day"
+)
 }
