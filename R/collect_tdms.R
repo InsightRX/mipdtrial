@@ -34,7 +34,7 @@ collect_tdms <- function(
   }
 
   # simulate TDM collection (no residual error)
-  true_tdm <- sim(
+  true_tdm <- PKPDsim::sim(
     ode = sim_model,
     parameters = pars_i,
     t_obs = t_obs,

@@ -45,6 +45,7 @@ simulate_fit <- function(
       fixed = iov_obj$fixed,
       verbose = FALSE,
       skip_hessian = TRUE, # faster
+      int_step_size = 0.01,
       ...
     )},
     error = function(e) list(parameters = NULL)
