@@ -88,7 +88,7 @@ sim_subject <- function(
       auc_true = auc_true,
       auc_est = auc_est,
       tta = time_to_target,
-      target_index = seq_along(conc_true)
+      target_index = seq_along(auc_true)
     )
   } else if (design$target$type %in% target_types_conc) {
     conc_true <- calc_concentration_from_regimen(
