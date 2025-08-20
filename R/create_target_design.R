@@ -73,7 +73,7 @@
 #'
 #' ## Target cmin first at dose 4 (15 mg/L), then at dose 8 (25 mg/L)
 #' create_target_design(
-#'   targettype = c("cmin", "cmin"),
+#'   targettype = "cmin",
 #'   targetvalue = c(15, 25),
 #'   at = c(4, 8),
 #'   anchor = "day"
