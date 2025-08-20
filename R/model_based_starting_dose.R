@@ -36,7 +36,7 @@ model_based_starting_dose <- function(
   # want to reach the target
   initial_target <- get_single_target_design(design$target, idx = 1)
   scheme <- initial_target$scheme[1,]
-  n_doses <- get_n_doses_from_scheme(scheme) 
+  n_doses <- get_n_doses_from_scheme(scheme, interval) 
   
   ## create a dummy regimen as input to dose_grid_search:
   reg <- PKPDsim::new_regimen(
