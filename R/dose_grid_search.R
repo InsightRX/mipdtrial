@@ -71,6 +71,10 @@ dose_grid_search <- function(
     ...
 ) {
 
+  if(nrow(target_design$scheme) > 1) {
+    cli::cli_abort("Please provide only single non-time-varying target designs to `dose_grid_search()`")
+  }
+  
   if(target_design$type %in% target_types_time) { #
     if(min(target_design$range) >= 100) {
       target_design$variable <- ifelse(
