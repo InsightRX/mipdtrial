@@ -38,6 +38,7 @@
     <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
     <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
+    <li><a class="dropdown-item" href="../articles/vancomycin_timevarying_targets.html">Time-varying exposure targets (vancomycin)</a></li>
   </ul>
 </li>
       </ul>
@@ -262,13 +263,13 @@ described in the model.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>arm <span class="op">=</span> <span class="st">"mid-interval"</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">final_exp1</span>, <span class="va">final_exp2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id auc_true  auc_est tta         arm</span></span>
-<span><span class="co">#&gt; 1  1 552.4977 606.6156  25 peak-trough</span></span>
-<span><span class="co">#&gt; 2  2 698.4163 558.1195  25 peak-trough</span></span>
-<span><span class="co">#&gt; 3  3 445.3772 408.7287 121 peak-trough</span></span>
-<span><span class="co">#&gt; 4  4 535.3845 591.1874  13 peak-trough</span></span>
-<span><span class="co">#&gt; 5  5 584.2482 423.0838   1 peak-trough</span></span>
-<span><span class="co">#&gt; 6  6 415.9350 551.6020  13 peak-trough</span></span></code></pre></div>
+<span><span class="co">#&gt;   id auc_true auc_est tta target_index         arm</span></span>
+<span><span class="co">#&gt; 1  1 552.5932     500  25            1 peak-trough</span></span>
+<span><span class="co">#&gt; 2  2 698.4312     500  25            1 peak-trough</span></span>
+<span><span class="co">#&gt; 3  3 445.3675     500 121            1 peak-trough</span></span>
+<span><span class="co">#&gt; 4  4 535.3908     500  13            1 peak-trough</span></span>
+<span><span class="co">#&gt; 5  5 584.2675     500   1            1 peak-trough</span></span>
+<span><span class="co">#&gt; 6  6 415.9173     500  13            1 peak-trough</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>

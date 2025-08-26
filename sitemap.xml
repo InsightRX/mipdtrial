@@ -8,6 +8,7 @@
 <url><loc>/articles/sample_timing.html</loc></url>
 <url><loc>/articles/sample_timing_yaml.html</loc></url>
 <url><loc>/articles/vancomycin_interval_adaptation.html</loc></url>
+<url><loc>/articles/vancomycin_timevarying_targets.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/adjust_dose_checks.html</loc></url>
@@ -36,9 +37,12 @@
 <url><loc>/reference/get_quantity_from_variable.html</loc></url>
 <url><loc>/reference/get_sampling_time_core.html</loc></url>
 <url><loc>/reference/get_sampling_times_from_scheme.html</loc></url>
+<url><loc>/reference/get_single_target_design.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/is_on_target.html</loc></url>
 <url><loc>/reference/is_single_valid_number.html</loc></url>
+<url><loc>/reference/is_valid_number.html</loc></url>
+<url><loc>/reference/is_valid_numeric_vector.html</loc></url>
 <url><loc>/reference/map_adjust_dose.html</loc></url>
 <url><loc>/reference/map_adjust_interval.html</loc></url>
 <url><loc>/reference/mipd_target_types.html</loc></url>

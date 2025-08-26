@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
     <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
+    <li><a class="dropdown-item" href="../articles/vancomycin_timevarying_targets.html">Time-varying exposure targets (vancomycin)</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -122,12 +123,12 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         auc_comp = PKPDsim::get_model_auc_compartment(est_model), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         dose_update = dose_update, grid = grid, grid_type = "dose", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         covariates = covariates, iov_bins = PKPDsim::get_model_iov(est_model)$bins, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dose_resolution = NULL, ...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     regimen &lt;- update_regimen(regimen, new_dose = new_dose, dose_update_number = dose_update)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     list(regimen = regimen, dose_update = dose_update, new_dose = new_dose, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         new_interval = NA, additional_info = est_par, gof = gof)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x564e126e5ed0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x56400652b608&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:mipdtrial&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
@@ -173,7 +174,7 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         new_interval = new_interval, additional_info = est_par, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         gof = gof)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x564e124fb808&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5640062f4dd0&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:mipdtrial&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>

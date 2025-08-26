@@ -38,6 +38,7 @@
     <li><a class="dropdown-item" href="../articles/sample_timing_yaml.html">Effect of sample timing (YAML example)</a></li>
     <li><a class="dropdown-item" href="../articles/sample_timing.html">Effect of sample timing (R example)</a></li>
     <li><a class="dropdown-item" href="../articles/vancomycin_interval_adaptation.html">Dose and interval adaptation (vancomycin)</a></li>
+    <li><a class="dropdown-item" href="../articles/vancomycin_timevarying_targets.html">Time-varying exposure targets (vancomycin)</a></li>
   </ul>
 </li>
       </ul>
@@ -251,13 +252,13 @@ monitoring sample.</p>
 <p>Here are the first few rows of our simulation results:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">final_exposure</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id conc_true conc_est tta</span></span>
-<span><span class="co">#&gt; 1  1  335.4921 281.7624 673</span></span>
-<span><span class="co">#&gt; 2  2  352.3227 377.0874 673</span></span>
-<span><span class="co">#&gt; 3  3  336.6051 267.9695 673</span></span>
-<span><span class="co">#&gt; 4  4  270.6762 828.0150 337</span></span>
-<span><span class="co">#&gt; 5  5  320.0143 363.9706 337</span></span>
-<span><span class="co">#&gt; 6  6  291.4928 229.9212 337</span></span></code></pre></div>
+<span><span class="co">#&gt;   id conc_true conc_est tta target_index</span></span>
+<span><span class="co">#&gt; 1  1  335.4693      300 673            1</span></span>
+<span><span class="co">#&gt; 2  2  352.3897      300 673            1</span></span>
+<span><span class="co">#&gt; 3  3  336.5061      300 673            1</span></span>
+<span><span class="co">#&gt; 4  4  270.6816      300 337            1</span></span>
+<span><span class="co">#&gt; 5  5  320.0965      300 337            1</span></span>
+<span><span class="co">#&gt; 6  6  291.4013      300 337            1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="analyze-results">4. Analyze results<a class="anchor" aria-label="anchor" href="#analyze-results"></a>

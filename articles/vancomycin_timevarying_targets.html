@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Dose and interval adaptation (vancomycin) • mipdtrial</title>
+<title>Time-varying exposure targets (vancomycin) • mipdtrial</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Dose and interval adaptation (vancomycin)">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Time-varying exposure targets (vancomycin)">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -59,11 +59,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Dose and interval adaptation (vancomycin)</h1>
+      <h1>Time-varying exposure targets (vancomycin)</h1>
             
       
 
-      <div class="d-none name"><code>vancomycin_interval_adaptation.Rmd</code></div>
+      <div class="d-none name"><code>vancomycin_timevarying_targets.Rmd</code></div>
     </div>
 
     
@@ -72,16 +72,10 @@
 <ul>
 <li>using {mipdtrial} to simulate a trial, with the trial design
 specified using R code.</li>
-<li>comparing two different algorithms for determining the next dose by
-different calls to <code><a href="../reference/create_regimen_update_design.html">create_regimen_update_design()</a></code>
-</li>
+<li>using timevarying exposure targets in the trial simulations. This is
+not so relevant for vancomycin, but we’ll just use that here as an
+example drug.</li>
 </ul>
-<div class="section level2">
-<h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
-</h2>
-<p>In model-informed precision dosing we can update doses, but of course
-we can also reduce or increase the dosing interval length. This can also
-be studied using the <code>mipdtrial</code> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mipdtrial</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>   <span class="co"># for easier data manipulation </span></span>
@@ -95,7 +89,6 @@ be studied using the <code>mipdtrial</code> package.</p>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># for plotting our results</span></span></code></pre></div>
-</div>
 <div class="section level2">
 <h2 id="define-the-trial-design">1. Define the trial design<a class="anchor" aria-label="anchor" href="#define-the-trial-design"></a>
 </h2>
@@ -108,70 +101,50 @@ collected in dose 1 and 3.</p>
 <span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>We assume that we can update the dose amount or dosing interval at
-dose 3 and 5 and aim for an AUC24 of 400-600 mg*h/L by day 6. We create
-different regimen update designs for dose-optimization and interval-
-optimization.</p>
+<p>We assume that we can update the dose amount at dose 3 and 7, and aim
+for an AUC24 of 500 mg*h/L and 300 by dose 5 and 10, respectively.<br></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">target_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_target_design.html">create_target_design</a></span><span class="op">(</span></span>
 <span>  targettype <span class="op">=</span> <span class="st">"auc24"</span>, </span>
-<span>  targetmin <span class="op">=</span> <span class="fl">400</span>,</span>
-<span>  targetmax <span class="op">=</span> <span class="fl">600</span>,</span>
-<span>  at <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  anchor <span class="op">=</span> <span class="st">"day"</span></span>
+<span>  targetvalue <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">300</span><span class="op">)</span>,</span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>  anchor <span class="op">=</span> <span class="st">"dose"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dose_update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
-<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span>,</span>
 <span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
 <span>  update_type <span class="op">=</span> <span class="st">"dose"</span>,</span>
 <span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_dose</span> <span class="co"># fixed interval, optimize dose</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">interval_update_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_regimen_update_design.html">create_regimen_update_design</a></span><span class="op">(</span></span>
-<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  anchor <span class="op">=</span> <span class="st">"dose"</span>,</span>
-<span>  update_type <span class="op">=</span> <span class="st">"interval"</span>,</span>
-<span>  dose_optimization_method <span class="op">=</span> <span class="va">map_adjust_interval</span>, <span class="co"># allow interval to vary</span></span>
-<span>  grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span>, <span class="fl">36</span>, <span class="fl">48</span><span class="op">)</span> <span class="co"># allowable intervals</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We will be using the Thomson (2009) model for simulation and
 estimation:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_model_design.html">create_model_design</a></span><span class="op">(</span>lib <span class="op">=</span> <span class="st">"pkvancothomson"</span><span class="op">)</span></span></code></pre></div>
-<p>For both trial arms, we will start with a dose estimated to attain
-the target exposure metrics based on population PK parameters, assuming
-a 12-hour interval. For one arm of the trial, this interval will stay
-fixed at 12 hours, while for the other arm, we will allow the interval
-to vary.</p>
+<p>We will start with a dose estimated to attain the target exposure
+metrics based on population PK parameters, assuming a 12-hour
+interval.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">initial_method</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_initial_regimen_design.html">create_initial_regimen_design</a></span><span class="op">(</span></span>
 <span>  method <span class="op">=</span> <span class="va">model_based_starting_dose</span>,</span>
 <span>  regimen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    interval <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>    type <span class="op">=</span> <span class="st">"infusion"</span>,</span>
-<span>    t_inf <span class="op">=</span> <span class="fl">1</span></span>
+<span>    t_inf <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>    n <span class="op">=</span> <span class="fl">24</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  settings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    auc_comp <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>    dose_resolution <span class="op">=</span> <span class="fl">250</span>,</span>
 <span>    dose_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">5000</span>, <span class="fl">250</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span>      </span></code></pre></div>
-<p>Now we can combine these design choices into two trial arm
-designs:</p>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Now we can combine these design choices into a single trial
+design:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">design1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
 <span>  sampling_design <span class="op">=</span> <span class="va">tdm_design</span>, </span>
 <span>  target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
 <span>  regimen_update_design <span class="op">=</span> <span class="va">dose_update_design</span>, <span class="co"># arm 1</span></span>
-<span>  initial_regimen_design <span class="op">=</span> <span class="va">initial_method</span>,</span>
-<span>  sim_design <span class="op">=</span> <span class="va">model_design</span>, est_design <span class="op">=</span> <span class="va">model_design</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">design2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_trial_design.html">create_trial_design</a></span><span class="op">(</span></span>
-<span>  sampling_design <span class="op">=</span> <span class="va">tdm_design</span>,</span>
-<span>  target_design <span class="op">=</span> <span class="va">target_design</span>,</span>
-<span>  regimen_update_design <span class="op">=</span> <span class="va">interval_update_design</span>, <span class="co"># arm 2</span></span>
 <span>  initial_regimen_design <span class="op">=</span> <span class="va">initial_method</span>,</span>
 <span>  sim_design <span class="op">=</span> <span class="va">model_design</span>, est_design <span class="op">=</span> <span class="va">model_design</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -219,25 +192,37 @@ expected in the model:</p>
 <h2 id="simulate-a-trial">4. Simulate a trial!<a class="anchor" aria-label="anchor" href="#simulate-a-trial"></a>
 </h2>
 <p>Patients will get a model-based dose (using population PK
-parameters), and then we will adjust either the dose or the interval
-based on the MAP Bayesian fit made using the collected samples.</p>
+parameters), and then we will adjust the dose based on the MAP Bayesian
+fit made using the collected samples, first to target an AUC of 500, and
+then later targeting an AUC of 300.</p>
 <p>Individual PK parameters will be randomly generated based on the
 interindividual variability described in the model, and residual
 variability will be added to each sample collected using the error model
 described in the model.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">design1</span>,</span>
-<span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
-<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">15</span></span>
+<code class="sourceCode R"><span><span class="va">covs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_cov_object.html">create_cov_object</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>,</span>
+<span>  mapping <span class="op">=</span> <span class="va">cov_map</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Starting simulations in 1 threads</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Post-processing results</span></span>
-<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/model_based_starting_dose.html">model_based_starting_dose</a></span><span class="op">(</span></span>
+<span>  design <span class="op">=</span> <span class="va">design</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="va">covs</span>,</span>
+<span>  cov_mapping <span class="op">=</span> <span class="va">cov_mapping</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;      t     type  amt t_inf</span></span>
+<span><span class="co">#&gt; 1    0 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 2   12 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 3   24 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 4   36 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 5   48 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 6   60 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 7   72 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 8   84 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 9   96 infusion 1500     1</span></span>
+<span><span class="co">#&gt; 10 108 infusion 1500     1</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_trial.html">run_trial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">design2</span>,</span>
+<span>  design <span class="op">=</span> <span class="va">design</span>,</span>
 <span>  cov_mapping <span class="op">=</span> <span class="va">cov_map</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">15</span></span>
@@ -255,45 +240,14 @@ approach the middle of the range more closely, as more TDM is available
 to optimize the dose. Since we’re keeping the interval fixed, each
 patient will have the same dose update times on the x-axis.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res1</span><span class="op">$</span><span class="va">dose_updates</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">dose_updates</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">auc_before_update</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
-<span>    xmin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, xmax <span class="op">=</span> <span class="cn">Inf</span>, ymin <span class="op">=</span> <span class="fl">400</span>, ymax <span class="op">=</span> <span class="fl">600</span>,</span>
-<span>    fill <span class="op">=</span> <span class="st">"#3870FA"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">500</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time of regimen update (Dose update algorithm)"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Resulting AUC at t=6 days (mg*h/L)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vancomycin_interval_adaptation_files/figure-html/unnamed-chunk-13-1.png" width="480"></p>
-<p>We can do the same for the intervan update algorithm:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res2</span><span class="op">$</span><span class="va">dose_updates</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">auc_before_update</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span></span>
-<span>    xmin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, xmax <span class="op">=</span> <span class="cn">Inf</span>, ymin <span class="op">=</span> <span class="fl">400</span>, ymax <span class="op">=</span> <span class="fl">600</span>,</span>
-<span>    fill <span class="op">=</span> <span class="st">"#3870FA"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time of regimen update (Interval update algorithm)"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Resulting AUC at t=6 days (mg*h/L)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vancomycin_interval_adaptation_files/figure-html/unnamed-chunk-14-1.png" width="480"></p>
-<p>When we plot the results of this simulation, we now see that dose
-update times are flexible, and not the same for each patient. We again
-see that the resulting steady state AUC24 also approaches the middle of
-the targeted AUC range. So this shows that the dosing interval can also
-be used very easily to obtain optimal drug exposure.</p>
-<p>We can also look to see which intervals were chosen per patient. Some
-patients stayed on an interval of 12 hours throughout the treatment
-course, while for other patients, interval changed 1 or more times.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res2</span><span class="op">$</span><span class="va">dose_updates</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">interval_before_update</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">id</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Interval"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vancomycin_interval_adaptation_files/figure-html/unnamed-chunk-15-1.png" width="672"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Resulting AUC at time points initial dose, and dose 3, 5 (mg*h/L)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="vancomycin_timevarying_targets_files/figure-html/unnamed-chunk-13-1.png" width="480"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
