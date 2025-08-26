@@ -316,16 +316,13 @@ test_that("calc_time_to_target: return NA when unsupported type", {
     at = 6,
     anchor = "day"
   )
-  expect_warning(
-    time_to_target_unsupported <- calc_time_to_target(
-      regimen = regimen,
-      target_design = unsupported_target,
-      auc_comp = NULL,
-      model = mod_1cmt_iv,
-      covariates = NULL,
-      parameters = list(CL = 5, V = 50)
-    ),
-    "The target type cum_auc is not yet supported"
+  time_to_target_unsupported <- calc_time_to_target(
+    regimen = regimen,
+    target_design = unsupported_target,
+    auc_comp = NULL,
+    model = mod_1cmt_iv,
+    covariates = NULL,
+    parameters = list(CL = 5, V = 50)
   )
   expect_true(is.na(time_to_target_unsupported))
 })

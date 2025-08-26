@@ -99,3 +99,13 @@ test_that("is_single_valid_number returns FALSE for NA, Inf, and NaN values", {
 test_that("is_single_valid_number returns FALSE for non-atomic types", {
   expect_false(is_single_valid_number(data.frame(a = 1)))
 })
+
+test_that("is_single_valid_numeric_vector behaves appropriately", {
+  expect_true(is_valid_numeric_vector(c(1, 2, 3)))      # TRUE
+  expect_false(is_valid_numeric_vector(c(1, NA, 3)))     # FALSE
+  expect_false(is_valid_numeric_vector(c(1, NaN, 3)))    # FALSE
+  expect_false(is_valid_numeric_vector(NULL))            # FALSE
+  expect_false(is_valid_numeric_vector(c("a", 3)))       # FALSE
+  expect_false(is_valid_numeric_vector(numeric(0)))      # FALSE
+  expect_false(is_valid_numeric_vector(c(1, Inf)))
+})

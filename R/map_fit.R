@@ -43,9 +43,9 @@ simulate_fit <- function(
       iov_bins = iov_obj$bins,
       as_eta = iov_obj$kappa,
       fixed = iov_obj$fixed,
-      int_step_size = 0.01,
       verbose = FALSE,
       skip_hessian = TRUE, # faster
+      int_step_size = 0.01,
       ...
     )},
     error = function(e) list(parameters = NULL)

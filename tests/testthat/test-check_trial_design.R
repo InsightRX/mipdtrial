@@ -6,14 +6,21 @@ test_that("check_trial_design works correctly", {
     sampling = list(times = c(0, 24)),
     regimen_update = list(dose_optimization_method = "map_adjust_dose"),
     sim = list(ruv = list(proportional = 0.1)),
-    est = list(ruv = list(proportional = 0.1))
+    est = list(ruv = list(proportional = 0.1)),
+    target = list(
+      type = "auc24", value = 500, min = 400, max = 600, 
+      scheme = structure(list(
+        base = "dose", offset = 24, at = 6, anchor = "day", scatter = 0), 
+        class = "data.frame", row.names = c(NA, -1L))
+    )
   ) {
     list(
       initial_regimen = initial_regimen,
       sampling = sampling,
       regimen_update = regimen_update,
       sim = sim,
-      est = est
+      est = est,
+      target = target
     )
   }
   
@@ -106,5 +113,26 @@ test_that("check_trial_design works correctly", {
   result <- check_trial_design(design_complex_nonzero_ruv)
   expect_equal(result$est$ruv$proportional, 0.1)
   expect_equal(result$est$ruv$additive, 0.05)
+  
+  # Test case 12: missing target design should pass fine
+  design_no_target <- create_mock_design(target = NULL)
+  result <- check_trial_design(design_no_target)
+  
+  # Test case 13: time-varying target design passes
+  tv_target <- create_target_design(
+    targettype = "auc24", 
+    targetvalue = c(500, 300),
+    at = c(5, 10),
+    anchor = "dose"
+  )
+  dose_update_design <- create_regimen_update_design(
+    at = c(3, 7),
+    anchor = "dose",
+    update_type = "dose",
+    dose_optimization_method = map_adjust_dose
+  )
+  design_tv_target <- create_mock_design(target = tv_target, regimen_update = dose_update_design)
+  result <- check_trial_design(design_tv_target)
+  expect_equal(nrow(result$target$scheme), 2)
 })
 

@@ -67,7 +67,7 @@ sim_subject <- function(
     if(!is.null(res$additional_info)) {
       auc_est <- calc_auc_from_regimen(
         regimen = res$final_regimen,
-        parameters = design$est$parameters, # tail(res$additional_info, 1)[[1]],
+        parameters = tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
@@ -77,7 +77,7 @@ sim_subject <- function(
     }
     time_to_target <- calc_time_to_target(
       regimen = res$final_regimen,
-      target_design = design$target,
+      target_design = get_single_target_design(design$target),
       auc_comp = attr(design$sim$model, "size"),
       model = design$sim$model,
       parameters = pars_true_i,
@@ -87,7 +87,8 @@ sim_subject <- function(
       id = id,
       auc_true = auc_true,
       auc_est = auc_est,
-      tta = time_to_target
+      tta = time_to_target,
+      target_index = seq_along(auc_true)
     )
   } else if (design$target$type %in% target_types_conc) {
     conc_true <- calc_concentration_from_regimen(
@@ -100,7 +101,7 @@ sim_subject <- function(
     if(!is.null(res$additional_info)) {
       conc_est <- calc_concentration_from_regimen(
         regimen = res$final_regimen,
-        parameters = design$est$parameters, # true patient parameters tail(res$additional_info, 1)[[1]],
+        parameters = tail(res$additional_info, 1)[[1]],
         model = design$est$model,
         target_design = design$target,
         covariates = covs
@@ -110,7 +111,7 @@ sim_subject <- function(
     }
     time_to_target <- calc_time_to_target(
       regimen = res$final_regimen,
-      target_design = design$target,
+      target_design = get_single_target_design(design$target),
       auc_comp = NULL,
       model = design$sim$model,
       parameters = pars_true_i,
@@ -120,7 +121,8 @@ sim_subject <- function(
       id = id,
       conc_true = conc_true,
       conc_est = conc_est,
-      tta = time_to_target
+      tta = time_to_target,
+      target_index = seq_along(conc_true)
     )
   }
 

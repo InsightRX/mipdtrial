@@ -55,7 +55,10 @@ sample_and_adjust_by_dose <- function(
 
   ## Get times to adjust dose
   if(!is.null(regimen_update_design)) {
-    adjust_at_dose <- get_dose_update_numbers_from_design(regimen_update_design, regimen)
+    adjust_at_dose <- get_dose_update_numbers_from_design(
+      regimen_update_design, 
+      regimen
+    )
     first_adjust_time <- regimen$dose_times[adjust_at_dose[1]]
   } else {
     adjust_at_dose <- c()
@@ -111,7 +114,8 @@ sample_and_adjust_by_dose <- function(
     weights = numeric(0),
     update = numeric(0)
   )
-
+  tmp_target_design <- get_single_target_design(target_design)
+  
   if(verbose) {
     cli::cli_alert_info(paste0("Starting dose: ", round(regimen$dose_amts[1])))
   }
@@ -123,7 +127,10 @@ sample_and_adjust_by_dose <- function(
     }
     # collect TDMs from today (use model for simulation!)
     adjust_time <- regimen$dose_times[adjust_at_dose[j]]
-    tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
+    tdm_times <- get_sampling_times_from_scheme(
+      sampling_design$scheme, 
+      regimen
+    )
     collect_idx <- (tdm_times >= last_adjust_time & tdm_times < adjust_time)
     if(!any(collect_idx)) {
       cli::cli_abort("No new samples in current adjustment interval, check target and sampling settings.")
@@ -132,6 +139,10 @@ sample_and_adjust_by_dose <- function(
     if(verbose) {
       cli::cli_alert_info(paste0("Sample times: ", paste0(tdm_times[collect_idx], collapse=", ")))
     }
+    tmp_target_design <- get_single_target_design(
+      target_design,
+      j
+    )
     new_tdms <- collect_tdms(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
@@ -146,14 +157,14 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       parameters = pars_true_i, # true patient parameters
       model = sim_model,
-      target_design = target_design,
+      target_design = tmp_target_design,
       covariates = covariates
     )
     trough_current_regimen <- calc_concentration_from_regimen(
       regimen = regimen,
       parameters = pars_true_i, # true patient parameters
       model = sim_model,
-      target_design = target_design,
+      target_design = tmp_target_design,
       covariates = covariates
     )
     if(verbose) {
@@ -183,11 +194,14 @@ sample_and_adjust_by_dose <- function(
       tdms = tdms_i,
       dose_update = adjust_at_dose[j],
       regimen = regimen,
-      target_design = target_design,
+      target_design = tmp_target_design,
       covariates = covariates
     ))
     method_args <- append(method_args, list(...))
-    out <- do.call(regimen_update_design$dose_optimization_method, method_args)
+    out <- do.call(
+      regimen_update_design$dose_optimization_method,
+      method_args
+    )
     regimen <- out$regimen
     if(verbose) {
       cli::cli_alert_info(paste0("New dose / interval: ", out$regimen$dose_amts[adjust_at_dose[j]], " / ", out$regimen$interval))
@@ -214,14 +228,14 @@ sample_and_adjust_by_dose <- function(
     regimen = regimen,
     parameters = pars_true_i, # true patient parameters
     model = sim_model,
-    target_design = target_design,
+    target_design = tmp_target_design,
     covariates = covariates
   )
   trough_final <- calc_concentration_from_regimen(
     regimen = regimen,
     parameters = pars_true_i, # true patient parameters
     model = sim_model,
-    target_design = target_design,
+    target_design = tmp_target_design,
     covariates = covariates
   )
 

@@ -34,14 +34,10 @@ model_based_starting_dose <- function(
 
   # number of doses for initial regimen evaluation: get the dose # at which we
   # want to reach the target
-  scheme <- design$target$scheme[1,]
-  if(scheme$anchor == "dose") {
-    n_doses <- scheme$at
-  } else {
-    t_aim <- (scheme$at-1) * 24
-    n_doses <- which.min(abs(seq(0, 100*interval, interval) - t_aim))
-  }
-
+  initial_target <- get_single_target_design(design$target, idx = 1)
+  scheme <- initial_target$scheme[1,]
+  n_doses <- get_n_doses_from_scheme(scheme, interval) 
+  
   ## create a dummy regimen as input to dose_grid_search:
   reg <- PKPDsim::new_regimen(
     amt = 1,
@@ -53,7 +49,7 @@ model_based_starting_dose <- function(
   args <- list(
     est_model = design$est$model,
     regimen = reg,
-    target_design = design$target,
+    target_design = initial_target,
     parameters = design$est$parameters,
     omega = design$est$omega_matrix,
     ruv = design$est$ruv,
@@ -73,8 +69,36 @@ model_based_starting_dose <- function(
 
   ## Call core function
   starting_dose <- do.call(dose_grid_search, args)
-
-  ## set all amounts in regimen to selected dose
-  reg$dose_amts <- rep(starting_dose, length(reg$dose_amts))
+  
+  ## elongate regimen, if multiple time-varying targets specified
+  ## For a target design specified with multiple time-varying targets,
+  ## the initial dose regimen will need to be determined on the initial target.
+  ## However, the total regimen will need to have at least sufficient doses
+  ## to also support the final target time. Therefore we need to increase the
+  ## length of the initial regimen.
+  if(nrow(design$target$scheme) > 1) {
+    final_target <- get_single_target_design(design$target)
+    final_scheme <- final_target$scheme[1,]
+    n_doses_final <- get_n_doses_from_scheme(final_scheme, interval)
+    reg <- PKPDsim::new_regimen(
+      amt = starting_dose,
+      n = n_doses_final,
+      type = type,
+      t_inf = t_inf,
+      interval = interval
+    )
+  } else { ## otherwise, just set all amounts in regimen to selected dose
+    reg$dose_amts <- rep(starting_dose, length(reg$dose_amts))
+  }
+  
   reg
+}
+
+get_n_doses_from_scheme <- function(scheme, interval) {
+  if(scheme$anchor == "dose") {
+    n_doses <- scheme$at
+  } else {
+    t_aim <- (scheme$at-1) * 24
+    n_doses <- which.min(abs(seq(0, 100*interval, interval) - t_aim))
+  }
 }
