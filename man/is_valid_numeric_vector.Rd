@@ -8,7 +8,7 @@ with no NA or NaN or Inf}
 is_valid_numeric_vector(x)
 }
 \arguments{
-\item{n}{an object to check}
+\item{x}{an object to check}
 }
 \description{
 Checks that an object represents a vectir of finite number

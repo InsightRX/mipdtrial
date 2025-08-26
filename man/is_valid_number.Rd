@@ -4,10 +4,10 @@
 \alias{is_valid_number}
 \title{Checks that an object represents a single finite number}
 \usage{
-is_valid_number(n)
+is_valid_number(x)
 }
 \arguments{
-\item{n}{an object to check}
+\item{x}{an object to check}
 }
 \description{
 Checks that an object represents a single finite number

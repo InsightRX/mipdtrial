@@ -48,20 +48,20 @@ is_single_valid_number <- function(n) {
 }
 
 #' Checks that an object represents a single finite number
-#' @param n an object to check
+#' @param x an object to check
 #' @examples
 #' mipdtrial:::is_single_valid_number(9)
 #' mipdtrial:::is_single_valid_number(mtcars)
 #' mipdtrial:::is_single_valid_number(c(1, 2))
 
-is_valid_number <- function(n) {
-  length(n) == 1 && is.atomic(n) && is.numeric(n) && !is.na(n) && is.finite(n)
+is_valid_number <- function(x) {
+  length(x) == 1 && is.atomic(x) && is.numeric(x) && !is.na(x) && is.finite(x)
 }
 
 #' Checks that an object represents a vectir of finite number
 #' with no NA or NaN or Inf
 #' 
-#' @param n an object to check
+#' @param x an object to check
 #' 
 #' @examples
 #' mipdtrial:::is_valid_numeric_vector(9)
