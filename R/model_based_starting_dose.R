@@ -71,6 +71,11 @@ model_based_starting_dose <- function(
   starting_dose <- do.call(dose_grid_search, args)
   
   ## elongate regimen, if multiple time-varying targets specified
+  ## For a target design specified with multiple time-varying targets,
+  ## the initial dose regimen will need to be determined on the initial target.
+  ## However, the total regimen will need to have at least sufficient doses
+  ## to also support the final target time. Therefore we need to increase the
+  ## length of the initial regimen.
   if(nrow(design$target$scheme) > 1) {
     final_target <- get_single_target_design(design$target)
     final_scheme <- final_target$scheme[1,]

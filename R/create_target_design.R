@@ -126,7 +126,7 @@ create_target_design <- function(
     stop("Either targetmin + targetmax or midpoint must be supplied")
   }
   if (!is.null(targetmin) && !is.null(targetmax)) {
-    if (!is.numeric(targetmin) || !is.numeric(targetmax) || length(targetmin) != length(targetmax)) {
+    if (!is_valid_numeric_vector(targetmin) || !is_valid_numeric_vector(targetmax) || length(targetmin) != length(targetmax)) {
       stop("targetmin or targetmax misspecified/not numeric, or not of same length")
     }
     midpoint <- apply(cbind(targetmin, targetmax), 1, mean)
@@ -134,10 +134,10 @@ create_target_design <- function(
     upperbound <- targetmax
   }
   if (!is.null(targetvalue)) {
-    if (!is.numeric(targetvalue)) {
+    if (!is_valid_numeric_vector(targetvalue)) {
       stop("targetvalue misspecified/not numeric")
     }
-    if (!is.numeric(single_point_variation)) {
+    if (!is_valid_numeric_vector(single_point_variation)) {
       stop("single_point_variation misspecified/not numeric")
     }
     midpoint <- targetvalue
