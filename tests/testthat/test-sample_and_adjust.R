@@ -343,3 +343,39 @@ test_that("TDMs below LOQ are handled correctly", {
   # if simulated TDM is below lower limit of quantification, set to half LOQ
   expect_equal(out$tdms$y[out$tdms$t == 20], 10)
 })
+
+test_that("dose rounding works", {
+  out <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose",
+      settings = list(dose_resolution = 25)
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    pars_true_i = generate_iiv(mod, omega, par, seed = 1),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.1, add = 1),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
+    target = create_target_design(
+      targettype = "conc",
+      targetvalue = 15,
+      at = 5,
+      anchor = "dose"
+    ),
+    dose_optimization_method = map_adjust_dose
+  )
+  
+  expect_equal(
+    out$dose_updates$dose_before_update,
+    c(2000, 1225, 1175)
+  )
+})
