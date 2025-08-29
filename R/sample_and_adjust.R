@@ -198,6 +198,7 @@ sample_and_adjust_by_dose <- function(
       covariates = covariates
     ))
     method_args <- append(method_args, list(...))
+    method_args$dose_optimization_method <- NULL
     out <- do.call(
       regimen_update_design$dose_optimization_method,
       method_args

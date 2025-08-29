@@ -21,7 +21,6 @@ test_that("trough concentration search works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    return_obj = FALSE,
     target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 50% should be the same thing
@@ -33,8 +32,6 @@ test_that("trough concentration search works", {
     omega = omega, # needs omega now!
     pta = list(prob = .5, type="gt"),
     auc_comp = 1,
-    target_time = intv * n,
-    return_obj = FALSE,
     target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% should require a higher dose
@@ -45,8 +42,6 @@ test_that("trough concentration search works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .9, type="gt"),
-    target_time = intv * n,
-    return_obj = FALSE,
     target_design = create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
   #setting a probability of 90% + ruv should require an even higher dose
@@ -58,8 +53,6 @@ test_that("trough concentration search works", {
     omega = omega, # needs omega now!
     pta = list(prob = .9, type="gt"),
     ruv = list(prop = .1, add = .5),
-    target_time = intv * n,
-    return_obj = FALSE,
     target_design= create_target_design(time = 72, targettype = "conc", targetvalue = 5)
   )
 
@@ -81,7 +74,6 @@ test_that("trough concentration search with interval optimization works", {
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    return_obj = FALSE,
     verbose = T,
     target_design = create_target_design(
       at = 6,
@@ -103,8 +95,6 @@ test_that("trough concentration search with interval optimization works", {
     omega = omega, # needs omega now!
     pta = list(prob = .5, type="gt"),
     auc_comp = 1,
-    target_time = intv * n,
-    return_obj = FALSE,
     target_design = create_target_design(
       at = 6,
       targettype = "conc",
@@ -124,8 +114,6 @@ test_that("trough concentration search with interval optimization works", {
     regimen = reg,
     omega = omega, # needs omega now!
     pta = list(prob = .01, type="gt"),
-    target_time = intv * n,
-    return_obj = FALSE,
     target_design = create_target_design(
       at = 6,
       targettype = "conc",
@@ -140,12 +128,10 @@ test_that("trough concentration search with interval optimization works", {
 test_that("peak concentration search works", {
   dose_cpeak <- dose_grid_search(
     est_model = mod,
-    dose_grid = seq(from = 50, to = 300, by = (300 - 50) / 10 ),
+    grid = seq(from = 50, to = 300, by = (300 - 50) / 10 ),
     parameters = par,
     regimen = reg,
     refine = FALSE,
-    target_time = intv * (n-1) + t_inf,
-    return_obj = FALSE,
     target = create_target_design(
       targettype = "conc",
       targetvalue = 10,
@@ -165,7 +151,6 @@ test_that("AUC search works", {
     regimen = reg,
     auc_comp = 2,
     refine = FALSE,
-    target_time = 5*intv,
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
@@ -219,7 +204,7 @@ test_that("AUC search works", {
 test_that("Probability: less than target", {
   dose_auc_prob3 <- dose_grid_search(
     est_model = mod,
-    dose_grid = seq(from = 50, to = 600, by = (500 - 50) / 10 ),
+    grid = seq(from = 50, to = 600, by = (500 - 50) / 10 ),
     parameters = par,
     regimen = reg,
     pta = list(prob = .9,
@@ -227,7 +212,6 @@ test_that("Probability: less than target", {
     auc_comp = 2,  # take AUC, not conc!
     omega = omega,
     dose_resolution = 5,
-    return_obj = FALSE,
     target = create_target_design(
       targetvalue = 1500,
       targettype = "cum_auc",
@@ -325,8 +309,7 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_design = target,
-      return_obj = FALSE
+      target_design = target
     ),
     dose_grid_error
   )
@@ -337,7 +320,6 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      return_obj = FALSE,
       target_design = target
     ),
     dose_grid_error
@@ -349,8 +331,6 @@ test_that("user-friendly error if no dose_grid", {
       parameters = par,
       regimen = reg,
       refine = FALSE,
-      target_time = intv * (n-1) + t_inf,
-      return_obj = FALSE,
       target_design = target
     ),
     dose_grid_error

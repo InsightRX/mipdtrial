@@ -16,7 +16,6 @@ model_based_starting_dose <- function(
     cov_mapping,
     ...
 ) {
-
   ## Parsing and checking design specs
   reg_md <- design$initial_regimen$regimen
   interval <- reg_md$interval
@@ -64,6 +63,7 @@ model_based_starting_dose <- function(
   # convert grid to actual grid from specified seq() params
   if(!is.null(settings$dose_grid)) {
     settings$grid <- seq(settings$dose_grid[1], settings$dose_grid[2], settings$dose_grid[3])
+    settings$dose_grid <- NULL
   }
   args <- c(args, settings)
 

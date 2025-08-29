@@ -203,6 +203,26 @@ variability described in the model, and residual variability will be added to
 each sample collected using the error model described in the model.
 
 ```{r}
+initial_method <- create_initial_regimen_design(
+  method = model_based_starting_dose,
+  regimen = list(
+    interval = 12,
+    type = "infusion",
+    t_inf = 1
+  ),
+  settings = list(
+    auc_comp = 3,
+    dose_resolution = 250,
+    dose_grid = c(250, 5000, 250)
+  )
+)
+design1 <- create_trial_design(
+  sampling_design = tdm_design1, # arm 1
+  target_design = target_design,
+  regimen_update_design = update_design,
+  initial_regimen_design = initial_method,
+  sim_design = model_design, est_design = model_design
+)
 res1 <- run_trial(
   data = dat,
   design = design1,
