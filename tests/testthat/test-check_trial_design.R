@@ -83,6 +83,20 @@ test_that("check_trial_design works correctly", {
   )
   result <- check_trial_design(design_char_method)
   expect_equal(result$regimen_update$dose_optimization_method, mock_optimizer)
+
+  # Test case 8a: Unknown setting in regimen update throws an error,
+  # but known settings pass.
+  design_settings <- create_mock_design()
+  design_settings$regimen_update$settings <- list(dose_resolution = 5)
+
+  result <- check_trial_design(design_settings)
+  expect_equal(result$regimen_update$settings, list(dose_resolution = 5))
+
+  design_settings$regimen_update$settings <- list(dose_resolution = 5, unknown_arg = "bla")
+  expect_error(
+    result <- check_trial_design(design_settings),
+    "Not all settings provided in the regimen update design were recognized"
+  )
   
   # Test case 9: Character method in initial_regimen gets converted to function
   mock_method <- function(x) x

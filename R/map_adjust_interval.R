@@ -6,10 +6,8 @@
 #' interval to achieve the specified PK/PD target and updates the
 #' individual's regimen accordingly.
 #'
-#' @inheritParams simulate_fit
-#' @inheritParams dose_grid_search
-#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
-#'   PKPDsim::sim
+#' @inheritParams map_adjust_dose
+#' 
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
@@ -24,6 +22,7 @@ map_adjust_interval <- function(
     target_design,
     dose_update,
     grid = NULL,
+    settings = NULL,
     ...
 ) {
   # get MAP fit, using model for estimation

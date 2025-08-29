@@ -29,6 +29,20 @@ check_trial_design <- function(design) {
       design$regimen_update$dose_optimization_method <- get(design$regimen_update$dose_optimization_method)
     }
   }
+  if(!is.null(design$regimen_update$settings)) {
+    accepted <- c("dose_resolution")
+    df <- setdiff(names(design$regimen_update$settings), accepted)
+    if(length(df) > 0) {
+      cli::cli_abort(
+        paste0(
+          "Not all settings provided in the regimen update design were recognized: ", 
+          paste0(df, collapse = ", "),
+          ". Recognized settings: ", 
+          paste0(accepted, collapse = ",")
+        )
+      )
+    }
+  }
   ##  `initial_regimen$method`: same, can be passed as character or function.
   if(inherits(design$initial_regimen$method, "character")) {
     design$initial_regimen$method <- get(design$initial_regimen$method)

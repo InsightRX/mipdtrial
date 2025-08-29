@@ -85,7 +85,10 @@ patient pharmacokinetics.
 update_design <- create_regimen_update_design(
   at = 5,
   anchor = "dose",
-  dose_optimization_method = map_adjust_dose
+  dose_optimization_method = map_adjust_dose,
+  settings = list(
+    dose_resolution = 50
+  )
 )
 target_design <- create_target_design(
   targettype = "auc24", 
@@ -110,11 +113,10 @@ initial_method <- create_initial_regimen_design(
   ),
   settings = list(
     auc_comp = 3,
-    dose_resolution = 250,
+    dose_resolution = 50,
     dose_grid = c(250, 5000, 250)
   )
 )
-      
 ```
 
 Now we can combine all these design choices together:
@@ -208,8 +210,11 @@ res1 <- run_trial(
   design = design1,
   cov_mapping = cov_map,
   progress = FALSE,
-  seed = 15
+  seed = 15,
+  n_ids = 3
 )
+res1$dose_updates
+
 res2 <- run_trial(
   data = dat,
   design = design2,

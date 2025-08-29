@@ -7,6 +7,8 @@
 #'
 #' @inheritParams simulate_fit
 #' @inheritParams dose_grid_search
+#' @param settings list of arguments to be used in dose update, e.g.
+#' `dose_resolution`.
 #' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
 #'   PKPDsim::sim
 #' @returns Returns a named list: `regimen`: the updated regimen;
@@ -24,6 +26,7 @@ map_adjust_dose <- function(
     target_design,
     dose_update,
     grid = NULL,
+    settings = NULL,
     ...
 ) {
   # get MAP fit, using model for estimation
@@ -63,7 +66,7 @@ map_adjust_dose <- function(
     grid_type = "dose",
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,
-    dose_resolution = NULL,
+    dose_resolution = settings$dose_resolution,
     ...
   )
   # return new regimen
