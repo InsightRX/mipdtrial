@@ -98,7 +98,8 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dose_optimization_method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> function (tdms, est_model, parameters, omega, ruv, regimen, covariates = NULL, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     target_design, dose_update, grid = NULL, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     target_design, dose_update, grid = NULL, settings = NULL, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ...) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     fit &lt;- simulate_fit(est_model = est_model, parameters = parameters, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         omega = omega, ruv = ruv, tdms = tdms, covariates = covariates, </span>
@@ -123,12 +124,12 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         auc_comp = PKPDsim::get_model_auc_compartment(est_model), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         dose_update = dose_update, grid = grid, grid_type = "dose", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         covariates = covariates, iov_bins = PKPDsim::get_model_iov(est_model)$bins, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         dose_resolution = NULL, ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dose_resolution = settings$dose_resolution, ...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     regimen &lt;- update_regimen(regimen, new_dose = new_dose, dose_update_number = dose_update)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     list(regimen = regimen, dose_update = dose_update, new_dose = new_dose, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         new_interval = NA, additional_info = est_par, gof = gof)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x564330b27be8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x55e87d586240&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:mipdtrial&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>
@@ -148,7 +149,8 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dose_optimization_method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> function (tdms, est_model, parameters, omega, ruv, regimen, covariates = NULL, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     target_design, dose_update, grid = NULL, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     target_design, dose_update, grid = NULL, settings = NULL, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ...) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     fit &lt;- simulate_fit(est_model = est_model, parameters = parameters, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         omega = omega, ruv = ruv, tdms = tdms, covariates = covariates, </span>
@@ -174,7 +176,7 @@ another other information useful for post-processing of trial results.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         new_interval = new_interval, additional_info = est_par, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         gof = gof)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x564336577360&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x55e87d62f2a0&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:mipdtrial&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $scheme</span>

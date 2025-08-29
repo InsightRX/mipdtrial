@@ -66,6 +66,7 @@ individual's regimen accordingly.</p>
 <span>  <span class="va">target_design</span>,</span>
 <span>  <span class="va">dose_update</span>,</span>
 <span>  grid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  settings <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -115,6 +116,11 @@ elements for <code>prop</code> (proportional) and <code>add</code> (additive).</
 <dt id="arg-grid">grid<a class="anchor" aria-label="anchor" href="#arg-grid"></a></dt>
 <dd><p>vector specifying doses or intervals to use as test grid,
 Example: <code>seq(from = 50, to = 500, by = (500 - 50) / 10)</code></p></dd>
+
+
+<dt id="arg-settings">settings<a class="anchor" aria-label="anchor" href="#arg-settings"></a></dt>
+<dd><p>list of arguments to be used in dose update, e.g.
+<code>dose_resolution</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
