@@ -117,7 +117,7 @@ know.
 
 The `mipdtrial` package is currently under development, and there will
 likely be changes to core functionality in the upcoming months. Features
-thar are on our short-term roadmap:
+that are on our short-term roadmap:
 
 - Add more optimization functions
 - Add more initial dosing functions
