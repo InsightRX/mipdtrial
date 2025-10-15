@@ -90,7 +90,7 @@ sim_subject <- function(
       tta = time_to_target,
       target_index = seq_along(auc_true)
     )
-  } else if (design$target$type %in% target_types_conc) {
+  } else if (design$target$type %in% c(target_types_conc, target_types_time)) {
     conc_true <- calc_concentration_from_regimen(
       regimen = res$final_regimen,
       parameters = pars_true_i, # true patient parameters
@@ -124,6 +124,8 @@ sim_subject <- function(
       tta = time_to_target,
       target_index = seq_along(conc_true)
     )
+  } else {
+    cli::cli_abort("Target type not recognized.")
   }
 
   # post-processing to get evaluation metrics
