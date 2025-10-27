@@ -106,7 +106,7 @@ create_target_design <- function(
         "cmin" =, "trough" = { when <- "cmin" },
         "cmax" =, "peak" = { when <- "cmax" },
         "auc24" = { offset <- 24; when <- "dose" },
-        "auc12" = { offset <- 12; when <- "dose" },
+        "auc12" = { offset <- 12; when <- "dose" }, 
         "conc" = { when <- "dose" },
         "cum_auc" = {when <- "dose"}
       )

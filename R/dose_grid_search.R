@@ -74,9 +74,9 @@ dose_grid_search <- function(
   if(nrow(target_design$scheme) > 1) {
     cli::cli_abort("Please provide only single non-time-varying target designs to `dose_grid_search()`")
   }
-  
+
   if(target_design$type %in% target_types_time) { #
-    if(min(target_design$range) >= 100) {
+    if(min(target_design$min) >= 100) {
       target_design$variable <- ifelse(
         grepl("_free", target_design$type),
         "CONCF",
@@ -87,6 +87,8 @@ dose_grid_search <- function(
       target_design$range <- rep(target_design$value, 2)
     }
   }
+
+  browser()
 
   if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
@@ -288,7 +290,7 @@ simulate_dose_interval <- function(
   if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_time)) {
     t_obs <- t_obs[1]
   }
-  if(target_design$type %in% c("auc", target_types_time)) {
+  if(target_design$type %in% c("auc")) {
     if(length(t_obs) != 2) {
       stop("Need a vector of length 2 for observation times when target type is `auc`.")
     }
@@ -304,6 +306,7 @@ simulate_dose_interval <- function(
     # need 12 hours of dosing
     t_obs <- c(t_obs - 12, t_obs)
   }
+  browse()
 
   tmp <- PKPDsim::sim(
     model,
