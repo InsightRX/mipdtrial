@@ -75,20 +75,22 @@ dose_grid_search <- function(
     cli::cli_abort("Please provide only single non-time-varying target designs to `dose_grid_search()`")
   }
 
-  if(target_design$type %in% target_types_time) { #
-    if(min(target_design$min) >= 100) {
-      target_design$variable <- ifelse(
-        grepl("_free", target_design$type),
-        "CONCF",
-        "CONC"
-      )
-      target_design$type <- "cmin"
-      target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
-      target_design$range <- rep(target_design$value, 2)
+  if(target_design$type %in% target_types_time) { 
+    if(is.null(target_design$range)) {
+      target_design$range <- c(target_design$min,target_design$max)
+    } else {
+      if(min(target_design$range) >= 100) {
+        target_design$variable <- ifelse(
+          grepl("_free", target_design$type),
+          "CONCF",
+          "CONC"
+        )
+        target_design$type <- "cmin"
+        target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
+        target_design$range <- rep(target_design$value, 2)
+      }
     }
   }
-
-  browser()
 
   if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
@@ -306,7 +308,6 @@ simulate_dose_interval <- function(
     # need 12 hours of dosing
     t_obs <- c(t_obs - 12, t_obs)
   }
-  browse()
 
   tmp <- PKPDsim::sim(
     model,
@@ -327,18 +328,13 @@ simulate_dose_interval <- function(
         return(diff(tmp[tmp$comp == obs, ]$y))
       }
     } else if (target_design$type %in% target_types_time) {
-      return(
-        tail(
-          get_quantity_from_variable(
-            var = target_design$type,
-            sim = tmp,
-            md = md,
-            times = t_obs,
-            comp = "obs"
-          ),
-          1
-        )
+      var_map <- c(
+        "t_gt_4mic_free" = "FTGT4MIC",
+        "t_gt_mic_free" = "FTGTMIC", 
+        "t_gt_4mic" = "TGT4MIC",
+        "t_gt_mic" = "TGTMIC"
       )
+      return(last(tmp[[var_map[target_design$type]]][tmp$comp == obs]))
     } else {
       if(!is.null(target_design$variable)) {
         return(tmp[[target_design$variable]][tmp$comp == obs])

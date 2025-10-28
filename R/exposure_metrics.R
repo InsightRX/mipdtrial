@@ -64,7 +64,6 @@ calc_concentration_from_regimen <- function(
   }
 
   iov <- PKPDsim::get_model_iov(model)
-
   target_time <- get_sampling_times_from_scheme(
     target_design$scheme,
     regimen
@@ -129,6 +128,51 @@ calc_auc_from_regimen <- function(
     target_time_original,
     target_design$type
   )
+}
+
+#' Get time based target attainment from a regimen
+#'
+#' @returns `calc_tgt_from_regimen` returns a numeric vector of fraction of time greater than target between
+#'   each simulated time point. 
+#'
+#' @rdname exposure_metrics
+#' @export
+
+calc_tgt_from_regimen <- function(
+    regimen,
+    parameters,
+    model,
+    target_design,
+    ...
+){
+  if (!all(attr(model, "parameters") %in% names(parameters))) {
+    cli::cli_abort("Model/parameter mismatch")
+  }
+  if (inherits(parameters, "data.frame") || is.atomic(parameters)) {
+    parameters <- as.list(parameters)
+  }
+  
+  iov <- PKPDsim::get_model_iov(model)
+  
+  target_time <- get_sampling_times_from_scheme(
+    target_design$scheme,
+    regimen
+  )
+  sim_output <- PKPDsim::sim(
+    model,
+    parameters = parameters,
+    regimen = regimen,
+    t_obs = target_time,
+    output_include = list(variables = TRUE),
+    iov_bins = iov[["bins"]],
+    ...
+  )
+  
+  tgt_use <- case_when(target_design$type == "t_gt_4mic_free" ~ "FTGT4MIC",
+                       target_design$type == "t_gt_mic_free" ~ "FTGTMIC",
+                       target_design$type == "t_gt_4mic" ~ "TGT4MIC",
+                       target_design$type == "t_gt_mic" ~ "TGTMIC")
+  sim_output[sim_output$comp == "obs",][[tgt_use]]
 }
 
 #' Calculate time to target attainment

@@ -54,7 +54,7 @@ sim_subject <- function(
     parameters = design$est$parameters,
     est_model = design$est$model
   )
-
+  
   # post-processing to get common exposure read-outs
   if(design$target$type %in% target_types_auc) {
     auc_true <- calc_auc_from_regimen(
@@ -90,7 +90,7 @@ sim_subject <- function(
       tta = time_to_target,
       target_index = seq_along(auc_true)
     )
-  } else if (design$target$type %in% c(target_types_conc, target_types_time)) {
+  } else if (design$target$type %in% target_types_conc) {
     conc_true <- calc_concentration_from_regimen(
       regimen = res$final_regimen,
       parameters = pars_true_i, # true patient parameters
@@ -106,7 +106,7 @@ sim_subject <- function(
         target_design = design$target,
         covariates = covs
       )
-    } else{
+    } else {
       conc_est <- rep(NA, length(conc_true))
     }
     time_to_target <- calc_time_to_target(
@@ -124,6 +124,40 @@ sim_subject <- function(
       tta = time_to_target,
       target_index = seq_along(conc_true)
     )
+  } else if (design$target$type %in% target_types_time) {
+    tgt_true <- calc_tgt_from_regimen(
+      regimen = res$final_regimen,
+      parameters = pars_true_i, # true patient parameters
+      model = design$sim$model,
+      target_design = design$target,
+      covariates = covs
+    )
+    if(!is.null(res$additional_info)) {
+      tgt_est <- calc_tgt_from_regimen(
+        regimen = res$final_regimen,
+        parameters = tail(res$additional_info, 1)[[1]],
+        model = design$est$model,
+        target_design = design$target,
+        covariates = covs
+      )
+    }  else {
+      tgt_est <- rep(NA, length(tgt_true))
+    }
+    time_to_target <- calc_time_to_target(
+      regimen = res$final_regimen,
+      target_design = get_single_target_design(design$target),
+      auc_comp = NULL,
+      model = design$sim$model,
+      parameters = pars_true_i,
+      covariates = covs
+    )
+    final_exposure <- data.frame(
+      id = id,
+      tgt_true = tgt_true,
+      tgt_est = tgt_est,
+      tta = time_to_target,
+      target_index = seq_along(tgt_true)
+    )
   } else {
     cli::cli_abort("Target type not recognized.")
   }
@@ -140,6 +174,8 @@ sim_subject <- function(
         f_calc <- calc_auc_from_regimen
       } else if (design_type %in% target_types_conc){
         f_calc <- calc_concentration_from_regimen
+      } else if (design_type %in% target_types_time){
+        f_calc <- calc_tgt_from_regimen
       }
       exposure_metric <- f_calc(
         regimen = res$final_regimen,
