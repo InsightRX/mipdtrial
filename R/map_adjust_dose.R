@@ -67,6 +67,7 @@ map_adjust_dose <- function(
     covariates = covariates,
     iov_bins = PKPDsim::get_model_iov(est_model)$bins,
     dose_resolution = settings$dose_resolution,
+    max_dose = settings$max_dose,
     ...
   )
   # return new regimen
