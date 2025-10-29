@@ -124,7 +124,11 @@ dose_grid_search <- function(
     # is non-linear
     refine <- target_design$type %in% target_types_time || refine
   }
-
+  
+  #if (target_design$type %in% target_types_time) {
+   # grid <- seq(1, 60000, by = 100)
+  #}
+  
   y <- lapply(
     grid,
     simulate_dose_interval,
@@ -142,6 +146,7 @@ dose_grid_search <- function(
     covariates = covariates,
     ...
   )
+
 
   if(grid_type == "interval") {
     tab <- data.frame(interval = grid, y = unlist(y))
@@ -161,7 +166,7 @@ dose_grid_search <- function(
   if (target_design$type %in% target_types_time) {
     tab <- filter_rows_0_100(tab)
   }
-
+  
   # Get two closest doses above and below target if possible, otherwise get
   # two closest doses (even if both are above or below)
   if (any(tab$y < target_design$value) && any(tab$y >= target_design$value)) {
@@ -171,6 +176,7 @@ dose_grid_search <- function(
   } else {
     tmp <- tab[order(abs(tab$y - target_design$value)),][1:2,]
   }
+
   fit <- lm(dose ~ y, data.frame(tmp))
   dose <- as.numeric(predict(fit, list(y=target_design$value)))
 
@@ -308,7 +314,7 @@ simulate_dose_interval <- function(
     # need 12 hours of dosing
     t_obs <- c(t_obs - 12, t_obs)
   }
-
+ 
   tmp <- PKPDsim::sim(
     model,
     regimen = reg,
@@ -334,7 +340,7 @@ simulate_dose_interval <- function(
         "t_gt_4mic" = "TGT4MIC",
         "t_gt_mic" = "TGTMIC"
       )
-      return(last(tmp[[var_map[target_design$type]]][tmp$comp == obs]))
+      return(last(tmp[[var_map[target_design$type]]][tmp$comp == obs])*24/regimen$interval)
     } else {
       if(!is.null(target_design$variable)) {
         return(tmp[[target_design$variable]][tmp$comp == obs])
