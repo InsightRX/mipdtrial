@@ -75,23 +75,6 @@ dose_grid_search <- function(
     cli::cli_abort("Please provide only single non-time-varying target designs to `dose_grid_search()`")
   }
 
-  if(target_design$type %in% target_types_time) { 
-    if(is.null(target_design$range)) {
-      target_design$range <- c(target_design$min,target_design$max)
-    } else {
-      if(min(target_design$range) >= 100) {
-        target_design$variable <- ifelse(
-          grepl("_free", target_design$type),
-          "CONCF",
-          "CONC"
-        )
-        target_design$type <- "cmin"
-        target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
-        target_design$range <- rep(target_design$value, 2)
-      }
-    }
-  }
-
   if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
   } else if(target_design$type %in% target_types_auc) {
@@ -125,9 +108,9 @@ dose_grid_search <- function(
     refine <- target_design$type %in% target_types_time || refine
   }
   
-  #if (target_design$type %in% target_types_time) {
-   # grid <- seq(1, 60000, by = 100)
-  #}
+  if (target_design$type %in% target_types_time) {
+    grid <- seq(1, 10000, by = 100)
+  }
   
   y <- lapply(
     grid,
@@ -179,7 +162,7 @@ dose_grid_search <- function(
 
   fit <- lm(dose ~ y, data.frame(tmp))
   dose <- as.numeric(predict(fit, list(y=target_design$value)))
-
+  
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
     if(dose == grid[1] && dose > min_dose) {
       grid <- grid / 4
