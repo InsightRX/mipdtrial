@@ -159,7 +159,7 @@ test_that("calc_tgt_from_regimen correct", {
   )
   
   reg <- PKPDsim::new_regimen(
-    amt = 2000,
+    amt = 1000,
     n = 7,
     interval = 12,
     type = "infusion"
@@ -169,20 +169,32 @@ test_that("calc_tgt_from_regimen correct", {
     PKPDsim::install_default_literature_model("pk_cefepime_an")
     loadNamespace("pkcefepimean")
   }
+  library(pkcefepimean)
+  
   
   out <- calc_tgt_from_regimen(
     regimen = reg,
-    parameters = pkcefepimean::parameters,
-    model = pkcefepimean::model,
-    target_design = target
+    parameters = pkcefepimean::parameters(),
+    model = pkcefepimean::model(),
+    target_design = target,
+    covariates = list(
+      "WT" = 70,
+      "CR" = 1.0,
+      "CL_HEMO" = 0,
+      "MIC" = 8,
+      "SEX" = 1,
+      "AGE" = 60,
+      "HT" = 165,
+      "FU" = 0.8
+    )
   )
   
   # expect one time greater than MIC for evaluated time point:
   expect_equal(length(out), length(target$scheme$at))
   # check values too
   expect_equal(
-    round(out),
-    96
+    round(out,2),
+    76.75
   )
 })
 
