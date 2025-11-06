@@ -52,7 +52,7 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
-
+  
   ## Get times to adjust dose
   if(!is.null(regimen_update_design)) {
     adjust_at_dose <- get_dose_update_numbers_from_design(
@@ -64,11 +64,13 @@ sample_and_adjust_by_dose <- function(
     adjust_at_dose <- c()
     first_adjust_time <- NA
   }
-
+  
   ## Get sampling times
   if(!is.null(sampling_design)) {
     tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
-    if (!any(tdm_times < first_adjust_time)) {
+    if (is.na(first_adjust_time)) {
+      tdm_times <- c()
+    } else if (!any(tdm_times < first_adjust_time)) {
       msg <- paste0(
         "At least one TDM must be collected before dose adjustment.\n",
         "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
@@ -251,7 +253,7 @@ sample_and_adjust_by_dose <- function(
     target_design = tmp_target_design,
     covariates = covariates
   )
-  tgt_final <- NULL
+  tgt_final <- NA
   if (tmp_target_design$type %in% target_types_time) {
     tgt_final <- calc_tgt_from_regimen(
       regimen = regimen,
