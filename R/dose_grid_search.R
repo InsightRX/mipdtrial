@@ -323,7 +323,7 @@ simulate_dose_interval <- function(
         "t_gt_4mic" = "TGT4MIC",
         "t_gt_mic" = "TGTMIC"
       )
-      return(last(tmp[[var_map[target_design$type]]][tmp$comp == obs])*24/regimen$interval)
+      return(100*diff(tmp[[var_map[target_design$type]]][tmp$comp == obs])/regimen$interval)
     } else {
       if(!is.null(target_design$variable)) {
         return(tmp[[target_design$variable]][tmp$comp == obs])

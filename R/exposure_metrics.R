@@ -158,11 +158,12 @@ calc_tgt_from_regimen <- function(
     target_design$scheme,
     regimen
   )
+  target_start <- target_time - regimen$interval
   sim_output <- PKPDsim::sim(
     model,
     parameters = parameters,
     regimen = regimen,
-    t_obs = target_time,
+    t_obs =  c(target_start, target_time),
     output_include = list(variables = TRUE),
     iov_bins = iov[["bins"]],
     ...
@@ -172,7 +173,7 @@ calc_tgt_from_regimen <- function(
                        target_design$type == "t_gt_mic_free" ~ "FTGTMIC",
                        target_design$type == "t_gt_4mic" ~ "TGT4MIC",
                        target_design$type == "t_gt_mic" ~ "TGTMIC")
-  sim_output[sim_output$comp == "obs",][[tgt_use]]*24/regimen$interval
+  100*diff(sim_output[sim_output$comp == "obs",][[tgt_use]])/regimen$interval
 }
 
 #' Calculate time to target attainment
