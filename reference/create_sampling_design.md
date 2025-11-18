@@ -1,0 +1,147 @@
+# Function for creating sampling designs.
+
+Sampling times can usually be pre-specified if the dosing schedule is
+fixed. In that case a scheme can be specified with static timepoints
+e.g. `time = c(1, 7.5, 25, 31.5)` for taking peak-trough samples at dose
+1 and 4 for an 8-hour regimen. However, when the dosing interval is
+adaptive, the peak and trough sampling times cannot stay static and have
+to be adapted on-the-fly during simulations. In that case, it is
+possible to use `when` to specify sampling at `peak`, `trough` or `dose`
+concentrations. In that case, the `time` is not allowed. If not exact
+peak and trough concentrations should be sample, use the `offset`
+parameter to sample e.g. an hour post-peak, or shortly before true
+troughs.
+
+## Usage
+
+``` r
+create_sampling_design(
+  time = NULL,
+  when = NULL,
+  offset = NULL,
+  scatter = NULL,
+  at = NULL,
+  lloq = 0,
+  anchor = c("dose", "day")
+)
+```
+
+## Arguments
+
+- time:
+
+  a vector of numeric values. If no `at` values are specified, these
+  will be used as the fixed sampling times in the simulated trial. If
+  `at` values are supplied, the sampling times will be calculated
+  adaptively during the trial. The `at` determine which dose or day is
+  used as reference, and `time` will be relative to the specified `at`
+  anchor.
+
+- when:
+
+  character vector of same length as `time` (or single value)
+  determining how to interpret the provided sampling `time`. If `NULL`
+  will use the dose time as offset (default). Other options are: `cmax`
+  or `peak`, which will use the end of infusion as the base for the
+  `time`, or `cmin` or `trough`, which will use the time of next dose as
+  the offset, or `middle` or `cmid` which will use the middle between
+  the anchored dose and the next, or `random` which takes a random time
+  point between the anchored dose and the next.
+
+- offset:
+
+  offset from standardized PK moments specified in `when`, e.g.
+  `c(1, -1)` with `when = c("peak", "trough")` to sample 1 hour after
+  peak and 1 hour before trough.
+
+- scatter:
+
+  optional random variation in time, specified as the standard
+  deviation, e.g. `scatter = 0.1` to allow for variation in sampling
+  time with an SD of 0.1 hours. Only relevant for sampling times, not
+  for regimen_update designs or target designs. Random variation does
+  not protect for peaks or troughs becoming sampled during infusion or
+  in previous / next dose. So value for `scatter` should be chosen
+  appropriately and probably used in conjunction with approriate
+  `offset` values.
+
+- at:
+
+  numeric vector of the dose or day number to "anchor" the sampling
+  times to. Vector needs to be of same length as `time`. If `anchor` is
+  set to `day`, then the first dose in that day is used. If later doses
+  in the day are preferred, the anchor can also be specified
+  fractionally, e.g. `1.5` will use the time of the first dose in the
+  second half of the 1st day.
+
+- lloq:
+
+  lower limit of quantification for TDMs
+
+- anchor:
+
+  either `day` or `dose`. Single value required, i.e. anchor types
+  cannot be mixed.
+
+## Examples
+
+``` r
+# to sample at 1.5/8.5/23.5 hours
+create_sampling_design(time = c(1.5, 11.5, 23.5))
+#> $lloq
+#> [1] 0
+#> 
+#> $scheme
+#>   base offset at anchor
+#> 1 dose    1.5  1   dose
+#> 2 dose   11.5  1   dose
+#> 3 dose   23.5  1   dose
+#> 
+
+# to sample at the peak (end of infusion) and trough (start of
+# next dose) of each dose
+create_sampling_design(
+  when = c("peak", "trough")
+)
+#> $lloq
+#> [1] 0
+#> 
+#> $scheme
+#>     base offset at anchor scatter
+#> 1   peak      0  1   dose       0
+#> 2 trough      0  1   dose       0
+#> 
+
+# to sample 30 min post-peak and 30-min pre-trough for the first dose
+create_sampling_design(
+  when = c("peak", "trough"),
+  offset = c(0.5, -0.5),
+  at = c(1, 1)
+)
+#> $lloq
+#> [1] 0
+#> 
+#> $scheme
+#>     base offset at anchor scatter
+#> 1   peak    0.5  1   dose       0
+#> 2 trough   -0.5  1   dose       0
+#> 
+
+# The same as above, but now for the first and third dose
+create_sampling_design(
+  when = c("peak", "trough", "peak", "trough"),
+  offset = c(0.5, -0.5, 0.5, -0.5),
+  at = c(1, 1, 3, 3),
+  anchor = "dose"
+)
+#> $lloq
+#> [1] 0
+#> 
+#> $scheme
+#>     base offset at anchor scatter
+#> 1   peak    0.5  1   dose       0
+#> 2 trough   -0.5  1   dose       0
+#> 3   peak    0.5  3   dose       0
+#> 4 trough   -0.5  3   dose       0
+#> 
+```

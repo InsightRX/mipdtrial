@@ -1,0 +1,73 @@
+# Create timing designs (static or adaptive) for use in simulated trial, such as sampling designs, target designs etc.
+
+This function is used by the three functions
+[`create_sampling_design()`](create_sampling_design.md),
+[`create_regimen_update_design()`](create_regimen_update_design.md) and
+[`create_target_design()`](create_target_design.md), but is itself not
+intended for direct usage.
+
+## Usage
+
+``` r
+create_design(
+  time = NULL,
+  when = NULL,
+  offset = NULL,
+  scatter = NULL,
+  at = NULL,
+  anchor = c("dose", "day")
+)
+```
+
+## Arguments
+
+- time:
+
+  a vector of numeric values. If no `at` values are specified, these
+  will be used as the fixed sampling times in the simulated trial. If
+  `at` values are supplied, the sampling times will be calculated
+  adaptively during the trial. The `at` determine which dose or day is
+  used as reference, and `time` will be relative to the specified `at`
+  anchor.
+
+- when:
+
+  character vector of same length as `time` (or single value)
+  determining how to interpret the provided sampling `time`. If `NULL`
+  will use the dose time as offset (default). Other options are: `cmax`
+  or `peak`, which will use the end of infusion as the base for the
+  `time`, or `cmin` or `trough`, which will use the time of next dose as
+  the offset, or `middle` or `cmid` which will use the middle between
+  the anchored dose and the next, or `random` which takes a random time
+  point between the anchored dose and the next.
+
+- offset:
+
+  offset from standardized PK moments specified in `when`, e.g.
+  `c(1, -1)` with `when = c("peak", "trough")` to sample 1 hour after
+  peak and 1 hour before trough.
+
+- scatter:
+
+  optional random variation in time, specified as the standard
+  deviation, e.g. `scatter = 0.1` to allow for variation in sampling
+  time with an SD of 0.1 hours. Only relevant for sampling times, not
+  for regimen_update designs or target designs. Random variation does
+  not protect for peaks or troughs becoming sampled during infusion or
+  in previous / next dose. So value for `scatter` should be chosen
+  appropriately and probably used in conjunction with approriate
+  `offset` values.
+
+- at:
+
+  numeric vector of the dose or day number to "anchor" the sampling
+  times to. Vector needs to be of same length as `time`. If `anchor` is
+  set to `day`, then the first dose in that day is used. If later doses
+  in the day are preferred, the anchor can also be specified
+  fractionally, e.g. `1.5` will use the time of the first dose in the
+  second half of the 1st day.
+
+- anchor:
+
+  either `day` or `dose`. Single value required, i.e. anchor types
+  cannot be mixed.

@@ -1,0 +1,289 @@
+# mipdtrial
+
+The goal of mipdtrial is to make it easy to simulate pharmacokinetic/
+pharmacodynamic (PK/PD) endpoints in response to dose adaptation.
+
+Existing tools are cumbersome to use for this purpose. For example,
+tools like NONMEM are optimized for model development, and assume fixed
+regimens when used for simulation. Other algorithms, like sample
+optimization simulations, optimize for information gain and not for
+attainment of clinically relevant metrics, such as AUC target
+attainment. `mipdtrial` fills in this niche by helping users simulate
+PK/PD resulting from dose adaptations informed by past PK/PD readouts.
+
+Here are some example sorts of questions:
+
+- Will fewer patients receive a therapeutic AUC if we change our
+  clinical protocol from collecting a peak and a trough sample to
+  collecting a single mid-interval sample?
+- How might model misspecification impact patient target attainment?
+- How does my institution’s nomogram compare to a model-based dose?
+
+## Installation
+
+You can install the development version of mipdtrial from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("InsightRX/mipdtrial")
+```
+
+For examples of how to use the package to answer questions about MIPD
+and target attainment, check out the vignettes listed under “Articles!”
+
+## Usage
+
+To use the `mipdtrial` package, it is crucial to understand the concept
+of “design” that is introduced in the package. The main goal of the
+designs is to allow configuration of flexible trials in which the
+sampling and regimen updates can depend on prior regimen changes, such
+as when the dosing interval is changed, but we still want to sample at
+dose 7 regardless of the dosing interval. Or, when infusion lengths are
+changed, but we still want to sample a peak sample. When times are
+pre-specified and fixed this flexibility is not possible.
+
+The following designs need to be configured for every trial simulation:
+
+- `sampling_design` : determines at what timepoints samples are taken.
+- `target_design`: determines at what timepoint the target should be
+  measured, and what the target is.
+- `regimen_update_design` : determines at what timepoint the dose can be
+  updated in response to new information sampled using the
+  `sampling_design`, and how to optimize the dosing regimen.
+
+All of these three designs can be “anchored” to a specific dose or day
+number. They can also be offset from the dosing time to e.g. sample at
+“peak” or “trough” times. Here is an example of how to set up a design
+for a simulated MIPD trial:
+
+``` r
+## sample at peak (at 1-hour infusion end), and at true trough
+## do this at dose #1 and #3
+tdm_design <- create_sampling_design(
+  when = c("peak", "trough", "peak", "trough"),
+  at = c(1, 1, 3, 3),
+  anchor = "dose"
+)
+
+## Now sample slightly more realistically, half an hour after infusion end,
+## and half an hour before true trough. We can use `offset` for this:
+tdm_design <- create_sampling_design(
+  when = c("peak", "trough", "peak", "trough"),
+  offset = c(0.5, -0.5, 0.5, -0.5), 
+  at = c(1, 1, 3, 3),
+  anchor = "dose"
+)
+
+## If you know the sampling times and dosing intervals are not going 
+## to change during the trial, you could also specify this design simply
+## using fixed times as: (assuming 12-hour intervals)
+tdm_design <- create_sampling_design(
+    time = c(1.5, 11.5, 25.5, 35.5)
+)
+
+## For targets, we follow broadly the same concept. To target an AUC4 of 
+## 400-600 at day 6, we can write:
+target_design <- create_target_design(
+  targettype = "auc24", 
+  targetmin = 400,
+  targetmax = 600,
+  at = 6,
+  anchor = "day"
+)
+
+## And for regimen update designs, it works similar as well. The following code
+## implements dose updates at dose #3 and #5, using a MAP-based optimization.
+dose_update_design <- create_regimen_update_design(
+  at = c(3, 5),
+  anchor = "dose",
+  update_type = "dose",
+  dose_optimization_method = map_adjust_dose
+)
+```
+
+The vignettes show various additional examples of how to set up the
+trial simulations using designs. If you find an example of an MIPD trial
+design that cannot be captured yet using these functions, please let us
+know.
+
+## Roadmap
+
+The `mipdtrial` package is currently under development, and there will
+likely be changes to core functionality in the upcoming months. Features
+that are on our short-term roadmap:
+
+- Add more optimization functions
+- Add more initial dosing functions
+- Add further functionality to generate more realistic trial scenarios
+
+## Contributing
+
+We welcome input from the community:
+
+- If you think you have encountered a bug, please [submit an
+  issue](https://github.com/InsightRX/mipdtrial/issues) on the GitHub
+  page. Please include a reproducible example of the unexpected
+  behavior.
+
+- Please [open a pull
+  request](https://github.com/InsightRX/mipdtrial/pulls) if you have a
+  fix or updates that would improve the package. If you’re not sure if
+  your proposed changes are useful or within scope of the package, feel
+  free to contact one of the authors of this package.
+
+## Troubleshooting
+
+If you want to debug an issue in the package, below are some pointers
+that will help you get started.
+
+- The main function that runs the simulations is
+  [`run_trial()`](reference/run_trial.md). However, most of the actual
+  computations happens quite a bit deeper. The successive function calls
+  are:
+  - [`run_trial()`](reference/run_trial.md) –\> the loop over all
+    patients
+  - [`sim_subject()`](reference/sim_subject.md) –\> loops over the
+    individual patient treatment trajectory
+  - `sample_and_adjust_` –\> this is where data fitting and dose
+    adjustment happens, and probably a good place to start if you
+    encounter issues in that area.
+- Note that the optimization function is **copied** into the design. So
+  when modifying the optimization function in your debugging workflow,
+  you will have to rerun the code that creates the design, not just
+  reload the package and rerun [`run_trial()`](reference/run_trial.md).
+- When debugging, make sure to supply the argument `progress=FALSE` to
+  [`run_trial()`](reference/run_trial.md). Otherwise you will not be
+  able to see any console output in your
+  [`browser()`](https://rdrr.io/r/base/browser.html) environment.
+
+## Disclaimer
+
+The functionality in this R package is provided “as is”. While its
+authors adhere to software development best practices, the software may
+still contain unintended errors.
+
+InsightRX Inc. and the authors of this package can not be held liable
+for any damages resulting from any use of this software. By the use of
+this software package, the user waives all warranties, expressed or
+implied, including any warranties to the accuracy, quality or
+suitability of InsightRX for any particular purpose, either medical or
+non-medical.
+
+------------------------------------------------------------------------
+
+© ![InsightRX logo](reference/figures/insightrx_logo_color.png)
+
+# Package index
+
+## All functions
+
+- [`adjust_dose_checks()`](adjust_dose_checks.md) : Checks for
+  dose_update_number obtained from dose_update scheme
+- [`bind_results_from_adjustments()`](bind_results_from_adjustments.md)
+  : Bind together the results from sampling and dose adjusting
+- [`bind_sim_output()`](bind_sim_output.md) : Bind simulated
+  subject-level output together
+- [`calc_auc_from_sim()`](calc_auc_from_sim.md) : Get AUC from a
+  simulation
+- [`calc_time_to_target()`](calc_time_to_target.md) : Calculate time to
+  target attainment
+- [`check_trial_design()`](check_trial_design.md) : Check design
+- [`check_when()`](check_when.md) : Check / clean when element
+- [`collect_tdms()`](collect_tdms.md) : Simulate TDM collection
+- [`create_cov_object()`](create_cov_object.md) : Create a list of
+  PKPDsim covariates for modeling
+- [`create_design()`](create_design.md) : Create timing designs (static
+  or adaptive) for use in simulated trial, such as sampling designs,
+  target designs etc.
+- [`create_eval_design()`](create_eval_design.md) : Create evaluation
+  object
+- [`create_initial_regimen_design()`](create_initial_regimen_design.md)
+  : Creates a design for the initial regimen for patients in the trial
+- [`create_model_design()`](create_model_design.md) : Create a design
+  for models to be used
+- [`create_regimen_update_design()`](create_regimen_update_design.md) :
+  Create scheme for updating dose or interval during dose optimization
+  trial
+- [`create_sampling_design()`](create_sampling_design.md) : Function for
+  creating sampling designs.
+- [`create_target_design()`](create_target_design.md) : Create target
+  object
+- [`create_trial_design()`](create_trial_design.md) : Combine all
+  sub-designs into the overall trial design object
+- [`dose_grid_search()`](dose_grid_search.md) : Perform a grid search
+  for a particular target by simulating a grid of doses
+- [`calc_concentration_from_regimen()`](exposure_metrics.md)
+  [`calc_auc_from_regimen()`](exposure_metrics.md) : Calculate exposure
+  metrics
+- [`filter_rows_0_100()`](filter_rows_0_100.md) : Filter rows with
+  values 0 or 100
+- [`generate_iiv()`](generate_variability.md)
+  [`generate_ruv()`](generate_variability.md) : Generate variability
+  terms
+- [`get_dose_update_core()`](get_dose_update_core.md) : Core function to
+  calculate the dose update number for a row in a regimen update
+  data.frame
+- [`get_dose_update_numbers_from_design()`](get_dose_update_numbers_from_design.md)
+  : Get dose number to update dose/interval at from the regime update
+  scheme and a provided regimen.
+- [`get_quantity_from_variable()`](get_quantity_from_variable.md) : Get
+  quantities from variables in sim results
+- [`get_sampling_time_core()`](get_sampling_time_core.md) : Core
+  function to calculate the sampling time for a row in a sampling schema
+  data.frame.
+- [`get_sampling_times_from_scheme()`](get_sampling_times_from_scheme.md)
+  : Calculate sampling times based on a given sampling schema and a
+  regimen.
+- [`get_single_target_design()`](get_single_target_design.md) : Get a
+  single target from a potentially time-varying target design
+- [`is_on_target()`](is_on_target.md) : Checks if a value (or vector of
+  values) is within the specified target range
+- [`is_single_valid_number()`](is_single_valid_number.md) : Checks that
+  an object represents a single finite number
+- [`is_valid_number()`](is_valid_number.md) : Checks that an object
+  represents a single finite number
+- [`is_valid_numeric_vector()`](is_valid_numeric_vector.md) : Checks
+  that an object represents a vectir of finite number with no NA or NaN
+  or Inf
+- [`map_adjust_dose()`](map_adjust_dose.md) : Adjust doses to achieve a
+  target metric using MAP Bayesian estimation.
+- [`map_adjust_interval()`](map_adjust_interval.md) : Adjust intervals
+  to achieve a target metric using MAP Bayesian estimation by adapting
+  the dosing interval
+- [`mipd_target_types()`](mipd_target_types.md) : Accepted PK/PD
+  exposure targets
+- [`mipdtrial`](mipdtrial-package.md)
+  [`mipdtrial-package`](mipdtrial-package.md) : MIPDtrial package
+- [`model_based_starting_dose()`](model_based_starting_dose.md) :
+  Model-based starting dose
+- [`parse_spec_file_to_trial_design()`](parse_spec_file_to_trial_design.md)
+  : Parse YAML spec file to trial design
+- [`round_to_multiple()`](round_to_multiple.md) : Round to a multiple of
+  any number (e.g. round to the nearest 5, 10, 100)
+- [`run_trial()`](run_trial.md) : Run an MIPD trial
+- [`sample_and_adjust_by_dose()`](sample_and_adjust_by_dose.md) : Adjust
+  dosing using MIPD on TDMs at specified dose numbers
+- [`sim_subject()`](sim_subject.md) : Core function to simulate a single
+  subject
+- [`simulate_dose_interval()`](simulate_dose_interval.md) : Simulate
+  different doses/intervals in a dose/interval grid
+- [`simulate_fit()`](simulate_fit.md) : Get MAP Bayesian parameters
+- [`update_regimen()`](update_regimen.md) : Update a regimen with a new
+  dose
+- [`weight_based_starting_dose()`](weight_based_starting_dose.md) :
+  Weight-based starting dose (e.g., mg/kg)
+
+# Articles
+
+### All vignettes
+
+- [Model misspecification, a busulfan case study](busulfan_mipd.md):
+- [Custom initial dose nomogram, a PEG Asparaginase case
+  study](pegasp_mipd.md):
+- [Effect of sample timing (YAML example)](sample_timing_yaml.md):
+- [Effect of sample timing (R example)](sample_timing.md):
+- [Dose and interval adaptation
+  (vancomycin)](vancomycin_interval_adaptation.md):
+- [Time-varying exposure targets
+  (vancomycin)](vancomycin_timevarying_targets.md):

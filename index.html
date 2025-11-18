@@ -156,6 +156,25 @@
 </ul>
 </div>
 <div class="section level2">
+<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
+</h2>
+<p>If you want to debug an issue in the package, below are some pointers that will help you get started.</p>
+<ul>
+<li>The main function that runs the simulations is <code><a href="reference/run_trial.html">run_trial()</a></code>. However, most of the actual computations happens quite a bit deeper. The successive function calls are:
+<ul>
+<li>
+<code><a href="reference/run_trial.html">run_trial()</a></code> –&gt; the loop over all patients</li>
+<li>
+<code><a href="reference/sim_subject.html">sim_subject()</a></code> –&gt; loops over the individual patient treatment trajectory</li>
+<li>
+<code>sample_and_adjust_</code> –&gt; this is where data fitting and dose adjustment happens, and probably a good place to start if you encounter issues in that area.</li>
+</ul>
+</li>
+<li>Note that the optimization function is <strong>copied</strong> into the design. So when modifying the optimization function in your debugging workflow, you will have to rerun the code that creates the design, not just reload the package and rerun <code><a href="reference/run_trial.html">run_trial()</a></code>.</li>
+<li>When debugging, make sure to supply the argument <code>progress=FALSE</code> to <code><a href="reference/run_trial.html">run_trial()</a></code>. Otherwise you will not be able to see any console output in your <code><a href="https://rdrr.io/r/base/browser.html" class="external-link">browser()</a></code> environment.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="disclaimer">Disclaimer<a class="anchor" aria-label="anchor" href="#disclaimer"></a>
 </h2>
 <p>The functionality in this R package is provided “as is”. While its authors adhere to software development best practices, the software may still contain unintended errors.</p>
@@ -202,7 +221,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
