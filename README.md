@@ -138,6 +138,24 @@ We welcome input from the community:
   your proposed changes are useful or within scope of the package, feel
   free to contact one of the authors of this package.
 
+## Troubleshooting
+
+If you want to debug an issue in the package, below are some pointers 
+that will help you get started.
+
+- The main function that runs the simulations is `run_trial()`. However,
+  most of the actual computations happens quite a bit deeper. The successive
+  function calls are: 
+  - `run_trial()` --> the loop over all patients
+  - `sim_subject()` --> loops over the individual patient treatment trajectory
+  - `sample_and_adjust_` --> this is where data fitting and dose adjustment happens, and probably a good place to start if you encounter issues in that area.
+- Note that the optimization function is **copied** into the design. So 
+  when modifying the optimization function in your debugging workflow, 
+  you will have to rerun the code that creates the design, not just reload 
+  the package and rerun `run_trial()`.
+- When debugging, make sure to supply the argument `progress=FALSE` to `run_trial()`.
+  Otherwise you will not be able to see any console output in your `browser()` environment.
+
 ## Disclaimer
 
 The functionality in this R package is provided “as is”. While its
