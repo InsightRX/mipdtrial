@@ -4,11 +4,14 @@
 \alias{exposure_metrics}
 \alias{calc_concentration_from_regimen}
 \alias{calc_auc_from_regimen}
+\alias{calc_tgt_from_regimen}
 \title{Calculate exposure metrics}
 \usage{
 calc_concentration_from_regimen(regimen, parameters, model, target_design, ...)
 
 calc_auc_from_regimen(regimen, parameters, model, target_design, ...)
+
+calc_tgt_from_regimen(regimen, parameters, model, target_design, ...)
 }
 \arguments{
 \item{regimen}{PKPDsim regimen object}
@@ -33,6 +36,9 @@ is estimated using \code{target_time}.
 \code{calc_auc_from_regimen} returns a numeric vector of AUCs between
 each simulated time point. Control time period over which AUC should be
 calculated using \code{target_time}.
+
+\code{calc_tgt_from_regimen} returns a numeric vector of fraction of time greater than target between
+each simulated time point.
 }
 \description{
 Calculates drug concentration or area under the curve (AUC) for a MIPD

@@ -46,7 +46,7 @@ create_trial_design <- function(
 #'
 #' @param file full filepath to yaml file
 parse_spec_file_to_trial_design <- function(file) {
-  md <- yaml::read_yaml(file)
+  md <- read_yaml_safe(file)
   design <- list()
   for(idx in names(md$designs)) {
     if(idx %in% c("sim", "est")) {

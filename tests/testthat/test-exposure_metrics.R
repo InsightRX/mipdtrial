@@ -147,6 +147,57 @@ test_that("calc_auc_from_regimen: handle duplicate t_obs", {
   )
 })
 
+test_that("calc_tgt_from_regimen correct", {
+  # parameters as list
+  target <- create_target_design(
+    targettype = "t_gt_mic_free",
+    targetmin = 90,
+    targetmax = 100,
+    when = "dose",
+    at = 7,
+    anchor = "dose"
+  )
+  
+  reg <- PKPDsim::new_regimen(
+    amt = 1000,
+    n = 7,
+    interval = 12,
+    type = "infusion"
+  )
+  
+  if (!requireNamespace("pkcefepimean", quietly = TRUE)) {
+    PKPDsim::install_default_literature_model("pk_cefepime_an")
+    loadNamespace("pkcefepimean")
+  }
+  library(pkcefepimean)
+  
+  
+  out <- calc_tgt_from_regimen(
+    regimen = reg,
+    parameters = pkcefepimean::parameters(),
+    model = pkcefepimean::model(),
+    target_design = target,
+    covariates = list(
+      "WT" = 70,
+      "CR" = 1.0,
+      "CL_HEMO" = 0,
+      "MIC" = 8,
+      "SEX" = 1,
+      "AGE" = 60,
+      "HT" = 165,
+      "FU" = 0.8
+    )
+  )
+  
+  # expect one time greater than MIC for evaluated time point:
+  expect_equal(length(out), length(target$scheme$at))
+  # check values too
+  expect_equal(
+    round(out,2),
+    76.75
+  )
+})
+
 test_that("handles IOV correctly", {
   regimen <- PKPDsim::new_regimen(
     amt = 200,

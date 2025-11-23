@@ -52,7 +52,7 @@ sample_and_adjust_by_dose <- function(
 
   if (inherits(pars_true_i, "data.frame")) pars_true_i <- as.list(pars_true_i)
   iov_bins_sim <- attr(sim_model, "iov")$bins
-
+  
   ## Get times to adjust dose
   if(!is.null(regimen_update_design)) {
     adjust_at_dose <- get_dose_update_numbers_from_design(
@@ -64,11 +64,13 @@ sample_and_adjust_by_dose <- function(
     adjust_at_dose <- c()
     first_adjust_time <- NA
   }
-
+  
   ## Get sampling times
   if(!is.null(sampling_design)) {
     tdm_times <- get_sampling_times_from_scheme(sampling_design$scheme, regimen)
-    if (!any(tdm_times < first_adjust_time)) {
+    if (is.na(first_adjust_time)) {
+      tdm_times <- c()
+    } else if (!any(tdm_times < first_adjust_time)) {
       msg <- paste0(
         "At least one TDM must be collected before dose adjustment.\n",
         "Sampling times: ", paste0(tdm_times, collapse = ", "), "\n",
@@ -104,7 +106,8 @@ sample_and_adjust_by_dose <- function(
     dose_before_update = numeric(0),
     interval_before_update = numeric(0),
     auc_before_update = numeric(0),
-    trough_before_update = numeric(0)
+    trough_before_update = numeric(0),
+    tgt_before_update = numeric(0)
   )
   aucs_i <- c()
   gof <- data.frame(
@@ -167,6 +170,16 @@ sample_and_adjust_by_dose <- function(
       target_design = tmp_target_design,
       covariates = covariates
     )
+    tgt_current_regimen <- NULL
+    if (tmp_target_design$type %in% target_types_time) {
+      tgt_current_regimen <- calc_tgt_from_regimen(
+        regimen = regimen,
+        parameters = pars_true_i, # true patient parameters
+        model = sim_model,
+        target_design = tmp_target_design,
+        covariates = covariates
+      )
+    }
     if(verbose) {
       cli::cli_alert_info(paste0("TDMs: ", paste(round(new_tdms$y, 1), collapse=", ")))
     }
@@ -184,7 +197,8 @@ sample_and_adjust_by_dose <- function(
         dose_before_update = regimen$dose_amts[adjust_at_dose[j]], # previous dose
         interval_before_update = regimen$interval, # previous interval
         auc_before_update = auc_current_regimen,
-        trough_before_update = trough_current_regimen
+        trough_before_update = trough_current_regimen,
+        tgt_before_update = tgt_current_regimen
       )
     )
 
@@ -239,6 +253,16 @@ sample_and_adjust_by_dose <- function(
     target_design = tmp_target_design,
     covariates = covariates
   )
+  tgt_final <- NA
+  if (tmp_target_design$type %in% target_types_time) {
+    tgt_final <- calc_tgt_from_regimen(
+      regimen = regimen,
+      parameters = pars_true_i, # true patient parameters
+      model = sim_model,
+      target_design = tmp_target_design,
+      covariates = covariates
+    )
+  }
 
   dose_updates <- rbind(
     dose_updates,
@@ -249,7 +273,8 @@ sample_and_adjust_by_dose <- function(
       adjust_at_dose,
       dose_before_update,
       auc_final,
-      trough_final
+      trough_final,
+      tgt_final
     )
   )
 
@@ -273,6 +298,7 @@ sample_and_adjust_by_dose <- function(
 #' @param dose_before_update dose before update
 #' @param auc_final final AUC
 #' @param trough_final final Ctrough
+#' @param tgt_final final time target percentage
 #'  
 #' @returns a data.frame with results
 #'
@@ -284,7 +310,8 @@ bind_results_from_adjustments <- function(
   adjust_at_dose,
   dose_before_update,
   auc_final,
-  trough_final
+  trough_final,
+  tgt_final
 ) {
   ## Calculate AUC for final regimen
   if(length(adjust_at_dose) > 0) {
@@ -309,6 +336,7 @@ bind_results_from_adjustments <- function(
     dose_before_update = dose_before_update,
     interval_before_update = interval_before_update,
     auc_before_update = auc_final,
-    trough_before_update = trough_final
+    trough_before_update = trough_final,
+    tgt_before_update = tgt_final
   )
 }
