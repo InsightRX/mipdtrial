@@ -170,11 +170,17 @@ sim_subject <- function(
   if(nrow(res$gof) > 0) {
     res$gof$id <-  id
   }
+  final_reg <- as.data.frame(res$final_regimen)
+  if(isTRUE(nrow(final_reg) > 0)) {
+    final_reg$id <-  id
+  }
+  
 
   ## Return object
   list(
     tdms = res$tdms,
     dose_updates = res$dose_updates,
+    final_reg = final_reg,
     additional_info = res$additional_info,
     gof = res$gof,
     final_exposure = final_exposure,

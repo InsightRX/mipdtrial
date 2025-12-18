@@ -233,9 +233,7 @@ create_eval_design <- function(
         )
       }
     }
-    if (when == "unknown"){
-      stop(paste(type_eval), " is not yet supported. Please remove this metric from your evaluation.")
-    }
+
     tmp <- create_design(
       time = time,
       when = when,
