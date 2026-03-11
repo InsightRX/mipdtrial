@@ -278,13 +278,8 @@ simulate_dose_interval <- function(
     scheme = target_design$scheme,
     regimen = reg
   )
-  if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_time)) {
+ if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_auc, target_types_time)) {
     t_obs <- t_obs[1]
-  }
-  if(target_design$type %in% c("auc")) {
-    if(length(t_obs) != 2) {
-      stop("Need a vector of length 2 for observation times when target type is `auc`.")
-    }
   }
 
   if (target_design$type %in% target_types_time || target_design$type == "auc") {
@@ -297,7 +292,16 @@ simulate_dose_interval <- function(
     # need 12 hours of dosing
     t_obs <- c(t_obs - 12, t_obs)
   }
- 
+
+  if(target_design$type %in% c(target_types_auc, target_types_time)) {                                   
+    if(length(t_obs) < 2) {
+      stop(                                                                                              
+        "Expected at least 2 observation times for AUC/time-based target after expansion, got: ",        
+        length(t_obs), ". Check your target_design scheme."
+      )
+    }
+  }
+
   tmp <- PKPDsim::sim(
     model,
     regimen = reg,
