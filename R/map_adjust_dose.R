@@ -9,8 +9,7 @@
 #' @inheritParams dose_grid_search
 #' @param settings list of arguments to be used in dose update, e.g.
 #' `dose_resolution`.
-#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
-#'   PKPDsim::sim
+#' @param ... arguments passed on to [PKPDsim::sim] via `dose_grid_search`
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `additional_info`: the MAP parameter estimates
 #' @export
@@ -37,8 +36,7 @@ map_adjust_dose <- function(
     ruv = ruv,
     tdms = tdms,
     covariates = covariates,
-    regimen = regimen,
-    ...
+    regimen = regimen
   )
   if(! all(c("parameters", "pred", "ipred", "dv", "weights") %in% names(fit))) {
     cli::cli_warn("Fit error, please investigate. Continuing but using population estimates.")

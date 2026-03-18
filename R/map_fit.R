@@ -15,7 +15,6 @@
 #' @param tdms observations to be included in MAP estimates
 #' @param covariates named list of PKPDsim covariates
 #' @param regimen PKPDsim regimen object
-#' @param ... arguments passed on to PKPDmap::get_map_estimates
 #' @returns named list of individual PK parameter estimates
 #' @export
 
@@ -26,8 +25,7 @@ simulate_fit <- function(
     ruv,
     tdms,
     covariates,
-    regimen,
-    ...
+    regimen
 ){
   iov_obj <- get_iov_specification(est_model, parameters, omega)
 
@@ -45,8 +43,7 @@ simulate_fit <- function(
       fixed = iov_obj$fixed,
       verbose = FALSE,
       skip_hessian = TRUE, # faster
-      int_step_size = 0.01,
-      ...
+      int_step_size = 0.01
     )},
     error = function(e) list(parameters = NULL)
   )
