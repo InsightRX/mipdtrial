@@ -47,6 +47,7 @@ sample_and_adjust_by_dose <- function(
   sim_ruv = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
+  est_design = NULL,
   ...
 ) {
 
@@ -92,7 +93,8 @@ sample_and_adjust_by_dose <- function(
     t = numeric(0),
     obs_type = numeric(0),
     true_y = numeric(0),
-    y = numeric(0)
+    y = numeric(0),
+    predictive_ipred = numeric(0)
   )
   last_adjust_time <- 0
 
@@ -143,6 +145,11 @@ sample_and_adjust_by_dose <- function(
       target_design,
       j
     )
+    if(j == 1) {
+      est_pars_i <- est_design$parameters
+    } else {
+      est_pars_i <- out$additional_info
+    }
     new_tdms <- collect_tdms(
       sim_model = sim_model,
       t_obs = tdm_times[collect_idx],
@@ -151,7 +158,9 @@ sample_and_adjust_by_dose <- function(
       regimen = regimen,
       covariates = covariates,
       lloq = sampling_design$lloq,
-      iov_bins = iov_bins_sim
+      iov_bins = iov_bins_sim,
+      est_model = est_design$model,
+      est_pars_i = est_pars_i
     )
     auc_current_regimen <- calc_auc_from_regimen(
       regimen = regimen,
