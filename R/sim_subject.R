@@ -50,6 +50,7 @@ sim_subject <- function(
     omega = design$est$omega_matrix,
     ruv = design$est$ruv,
     verbose = verbose,
+    est_design = design$est,
     # below are not formal parameters, passed onwards using ...!
     parameters = design$est$parameters,
     est_model = design$est$model

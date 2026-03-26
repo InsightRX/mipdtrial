@@ -28,12 +28,36 @@ test_that("output structure and content are correct", {
     regimen = reg
   )
   expect_true(inherits(result, "data.frame"))
-  expect_true(all(c("t", "true_y", "y") %in% colnames(result)))
+  expect_true(all(c("t", "true_y", "y", "predictive_ipred") %in% colnames(result)))
   expect_equal(nrow(result), length(t_obs))
   expect_equal(result$t, t_obs)
   expect_equal(
     (result$y - res_var$add)/res_var$prop, result$true_y
   )
+})
+
+test_that("predictive_ipred is NA when est_model not supplied", {
+  result <- collect_tdms(mod, t_obs, res_var, pars_i, regimen = reg)
+  expect_true("predictive_ipred" %in% colnames(result))
+  expect_true(all(is.na(result$predictive_ipred)))
+})
+
+test_that("predictive_ipred is populated when est_model and est_pars_i are supplied", {
+  result <- collect_tdms(
+    mod,
+    t_obs,
+    res_var,
+    pars_i,
+    est_model = mod,
+    est_pars_i = pars_i,
+    regimen = reg
+  )
+  expect_true("predictive_ipred" %in% colnames(result))
+  expect_true(all(!is.na(result$predictive_ipred)))
+  expect_true(is.numeric(result$predictive_ipred))
+  # predictive_ipred uses est_pars_i (== pars_i here), so it should
+  # equal true_y (no residual error applied)
+  expect_equal(result$predictive_ipred, result$true_y)
 })
 
 test_that("handles LLOQ correctly", {

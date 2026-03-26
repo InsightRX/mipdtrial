@@ -344,6 +344,85 @@ test_that("TDMs below LOQ are handled correctly", {
   expect_equal(out$tdms$y[out$tdms$t == 20], 10)
 })
 
+test_that("tdms contain predictive_ipred column when est_model_design is supplied", {
+  # est_model_design is plumbed through sim_subject -> sample_and_adjust_by_dose
+  # -> collect_tdms; this test verifies the column is present and populated,
+  # and also exercises the rbind fix (tdms_i initialised with predictive_ipred).
+  est_model_design <- list(
+    model = mod,
+    parameters = par
+  )
+  out <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    pars_true_i = list(CL = 1.5, V = 15),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.1, add = 1),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
+    target = create_target_design(
+      when = "trough",
+      at = 4,
+      anchor = "dose",
+      targettype = "conc",
+      targetvalue = 10
+    ),
+    dose_optimization_method = map_adjust_dose,
+    est_design = est_model_design
+  )
+
+  tdms <- out$tdms
+  expect_true("predictive_ipred" %in% colnames(tdms))
+  expect_true(all(!is.na(tdms$predictive_ipred)))
+  expect_true(is.numeric(tdms$predictive_ipred))
+})
+
+test_that("tdms contain predictive_ipred column (as NA) when est_model_design is NULL", {
+  out <- sample_and_adjust_by_dose(
+    regimen_update_design = create_regimen_update_design(
+      at = c(2, 4),
+      anchor = "dose"
+    ),
+    sampling_design = create_sampling_design(
+      offset = c(20, 12),
+      when = c("dose", "dose"),
+      at = c(1, 3),
+      anchor = "dose"
+    ),
+    regimen = regimen,
+    pars_true_i = list(CL = 1.5, V = 15),
+    sim_model = mod,
+    sim_ruv = list(prop = 0.1, add = 1),
+    est_model = mod,
+    parameters = par,
+    omega = omega,
+    ruv = list(prop = 0.1, add = 1),
+    target = create_target_design(
+      when = "trough",
+      at = 4,
+      anchor = "dose",
+      targettype = "conc",
+      targetvalue = 10
+    ),
+    dose_optimization_method = map_adjust_dose
+  )
+
+  tdms <- out$tdms
+  expect_true("predictive_ipred" %in% colnames(tdms))
+  expect_true(all(is.na(tdms$predictive_ipred)))
+})
+
 test_that("dose rounding works", {
   out <- sample_and_adjust_by_dose(
     regimen_update_design = create_regimen_update_design(

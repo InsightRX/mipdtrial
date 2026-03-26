@@ -15,6 +15,7 @@ sample_and_adjust_by_dose(
   sim_ruv = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
+  est_design = NULL,
   ...
 )
 }
@@ -44,6 +45,8 @@ proportional (\code{prop}) and additive (\code{add}) error.}
 \item{accumulate_data}{if \code{TRUE}, will use all available data up until the
 adjustment timepoint. If set to \code{FALSE}, will use only the data since the
 last adjustment timepoint and the current one.}
+
+\item{est_design}{design specs for model used in MAP estimation (optional).}
 
 \item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
 function.}
