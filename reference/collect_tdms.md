@@ -7,7 +7,16 @@ value (with residual error added).
 ## Usage
 
 ``` r
-collect_tdms(sim_model, t_obs, res_var, pars_i, lloq = NULL, ...)
+collect_tdms(
+  sim_model,
+  t_obs,
+  res_var,
+  pars_i,
+  lloq = NULL,
+  est_model = NULL,
+  est_pars_i = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -36,11 +45,24 @@ collect_tdms(sim_model, t_obs, res_var, pars_i, lloq = NULL, ...)
   lower limit of quantification. If non-NULL, all TDMs below LLOQ will
   be set to half the LLOQ.
 
+- est_model:
+
+  model used for estimation (e.g. the model used in MAP fitting). If
+  provided, a predictive individual prediction is simulated using
+  `est_pars_i` and stored in the `predictive_ipred` column.
+
+- est_pars_i:
+
+  parameters for `est_model`. Typically population or MAP-estimated
+  individual parameters.
+
 - ...:
 
   arguments passed on to PKPDsim::sim
 
 ## Value
 
-a data frame with columns `t` (time), `true_y` (actual level) and `y`
-(measured level), with rows corresponding to t_obs.
+a data frame with columns `t` (time), `true_y` (actual level), `y`
+(measured level), and `predictive_ipred` (predicted level from
+estimation model; `NA` if `est_model` is not supplied), with rows
+corresponding to t_obs.

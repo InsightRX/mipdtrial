@@ -52,7 +52,16 @@ residual error added).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">collect_tdms</span><span class="op">(</span><span class="va">sim_model</span>, <span class="va">t_obs</span>, <span class="va">res_var</span>, <span class="va">pars_i</span>, lloq <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">collect_tdms</span><span class="op">(</span></span>
+<span>  <span class="va">sim_model</span>,</span>
+<span>  <span class="va">t_obs</span>,</span>
+<span>  <span class="va">res_var</span>,</span>
+<span>  <span class="va">pars_i</span>,</span>
+<span>  lloq <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  est_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  est_pars_i <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,14 +92,27 @@ as proportional error with 0 additive error.</p></dd>
 will be set to half the LLOQ.</p></dd>
 
 
+<dt id="arg-est-model">est_model<a class="anchor" aria-label="anchor" href="#arg-est-model"></a></dt>
+<dd><p>model used for estimation (e.g. the model used in MAP
+fitting). If provided, a predictive individual prediction is simulated
+using <code>est_pars_i</code> and stored in the <code>predictive_ipred</code> column.</p></dd>
+
+
+<dt id="arg-est-pars-i">est_pars_i<a class="anchor" aria-label="anchor" href="#arg-est-pars-i"></a></dt>
+<dd><p>parameters for <code>est_model</code>. Typically population or
+MAP-estimated individual parameters.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>arguments passed on to PKPDsim::sim</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a data frame with columns <code>t</code> (time), <code>true_y</code> (actual level) and
-<code>y</code> (measured level), with rows corresponding to t_obs.</p>
+    <p>a data frame with columns <code>t</code> (time), <code>true_y</code> (actual level),
+<code>y</code> (measured level), and <code>predictive_ipred</code> (predicted level from
+estimation model; <code>NA</code> if <code>est_model</code> is not supplied), with rows
+corresponding to t_obs.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

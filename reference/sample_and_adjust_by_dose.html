@@ -75,6 +75,7 @@ must match the model used for simulation.</p>
 <span>  sim_ruv <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  accumulate_data <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  est_design <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -127,6 +128,10 @@ proportional (<code>prop</code>) and additive (<code>add</code>) error.</p></dd>
 <dd><p>if <code>TRUE</code>, will use all available data up until the
 adjustment timepoint. If set to <code>FALSE</code>, will use only the data since the
 last adjustment timepoint and the current one.</p></dd>
+
+
+<dt id="arg-est-design">est_design<a class="anchor" aria-label="anchor" href="#arg-est-design"></a></dt>
+<dd><p>design specs for model used in MAP estimation (optional).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

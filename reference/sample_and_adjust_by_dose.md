@@ -23,6 +23,7 @@ sample_and_adjust_by_dose(
   sim_ruv = NULL,
   verbose = FALSE,
   accumulate_data = TRUE,
+  est_design = NULL,
   ...
 )
 ```
@@ -75,6 +76,10 @@ sample_and_adjust_by_dose(
   if `TRUE`, will use all available data up until the adjustment
   timepoint. If set to `FALSE`, will use only the data since the last
   adjustment timepoint and the current one.
+
+- est_design:
+
+  design specs for model used in MAP estimation (optional).
 
 - ...:
 
