@@ -57,19 +57,22 @@ collect_tdms <- function(
   # add residual error
   true_tdm$y <- res_var$prop * true_tdm$true_y + res_var$add
 
-  # simulate prediction from current estimation model, with current parameters (for predictive analysis)
-  # and add to tdm object as `est_y`
+  # simulate prediction from current estimation model, with current parameters (for 
+  # predictive analysis) and add to tdm object as `predictive_ipred`.
+  true_tdm$predictive_ipred <- NA
   if(!is.null(est_model)) {
-    true_tdm_est <- PKPDsim::sim(
-      ode = est_model,
-      parameters = est_pars_i,
-      t_obs = t_obs,
-      only_obs = TRUE,
-      ...
-    )
-    true_tdm$predictive_ipred <- true_tdm_est$y
-  } else {
-    true_tdm$predictive_ipred <- NA
+    if(is.null(est_pars_i)) {
+      cli::cli_abort("No parameters for `est_model` provided. Can't calculate `predictive_ipred`.")
+    } else {
+      true_tdm_est <- PKPDsim::sim(
+        ode = est_model,
+        parameters = est_pars_i,
+        t_obs = t_obs,
+        only_obs = TRUE,
+        ...
+      )
+      true_tdm$predictive_ipred <- true_tdm_est$y
+    }
   }
 
   # LOQ handling

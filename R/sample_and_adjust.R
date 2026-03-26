@@ -27,6 +27,7 @@
 #' @param accumulate_data if `TRUE`, will use all available data up until the
 #' adjustment timepoint. If set to `FALSE`, will use only the data since the
 #' last adjustment timepoint and the current one.
+#' @param est_design design specs for model used in MAP estimation (optional).
 #' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
 #'   function.
 #' @param verbose verbose output?

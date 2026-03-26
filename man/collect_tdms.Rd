@@ -4,7 +4,16 @@
 \alias{collect_tdms}
 \title{Simulate TDM collection}
 \usage{
-collect_tdms(sim_model, t_obs, res_var, pars_i, lloq = NULL, ...)
+collect_tdms(
+  sim_model,
+  t_obs,
+  res_var,
+  pars_i,
+  lloq = NULL,
+  est_model = NULL,
+  est_pars_i = NULL,
+  ...
+)
 }
 \arguments{
 \item{sim_model}{model used for simulated patient response ("truth").}
@@ -21,11 +30,20 @@ as proportional error with 0 additive error.}
 \item{lloq}{lower limit of quantification. If non-NULL, all TDMs below LLOQ
 will be set to half the LLOQ.}
 
+\item{est_model}{model used for estimation (e.g. the model used in MAP
+fitting). If provided, a predictive individual prediction is simulated
+using \code{est_pars_i} and stored in the \code{predictive_ipred} column.}
+
+\item{est_pars_i}{parameters for \code{est_model}. Typically population or
+MAP-estimated individual parameters.}
+
 \item{...}{arguments passed on to PKPDsim::sim}
 }
 \value{
-a data frame with columns \code{t} (time), \code{true_y} (actual level) and
-\code{y} (measured level), with rows corresponding to t_obs.
+a data frame with columns \code{t} (time), \code{true_y} (actual level),
+\code{y} (measured level), and \code{predictive_ipred} (predicted level from
+estimation model; \code{NA} if \code{est_model} is not supplied), with rows
+corresponding to t_obs.
 }
 \description{
 Using the "ground truth" model, simulate collection of drug/biomarker levels.
