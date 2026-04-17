@@ -9,7 +9,7 @@ For more fine-grained control, use `PKPDmap` functions directly.
 ## Usage
 
 ``` r
-simulate_fit(est_model, parameters, omega, ruv, tdms, covariates, regimen, ...)
+simulate_fit(est_model, parameters, omega, ruv, tdms, covariates, regimen)
 ```
 
 ## Arguments
@@ -42,10 +42,6 @@ simulate_fit(est_model, parameters, omega, ruv, tdms, covariates, regimen, ...)
 - regimen:
 
   PKPDsim regimen object
-
-- ...:
-
-  arguments passed on to PKPDmap::get_map_estimates
 
 ## Value
 

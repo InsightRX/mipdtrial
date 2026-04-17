@@ -75,7 +75,9 @@ map_adjust_interval(
 
 - ...:
 
-  arguments passed on to PKPDmap::get_map_estimates and/or PKPDsim::sim
+  arguments passed on to
+  [PKPDsim::sim](https://insightrx.github.io/PKPDsim/reference/sim.html)
+  via `dose_grid_search`
 
 ## Value
 

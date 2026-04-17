@@ -61,7 +61,7 @@ create_regimen_update_design(
 #> {
 #>     fit <- simulate_fit(est_model = est_model, parameters = parameters, 
 #>         omega = omega, ruv = ruv, tdms = tdms, covariates = covariates, 
-#>         regimen = regimen, ...)
+#>         regimen = regimen)
 #>     if (!all(c("parameters", "pred", "ipred", "dv", "weights") %in% 
 #>         names(fit))) {
 #>         cli::cli_warn("Fit error, please investigate. Continuing but using population estimates.")
@@ -87,7 +87,7 @@ create_regimen_update_design(
 #>     list(regimen = regimen, dose_update = dose_update, new_dose = new_dose, 
 #>         new_interval = NA, additional_info = est_par, gof = gof)
 #> }
-#> <bytecode: 0x559ef26baea0>
+#> <bytecode: 0x55e0dc5955b8>
 #> <environment: namespace:mipdtrial>
 #> 
 #> $scheme
@@ -134,7 +134,7 @@ create_regimen_update_design(
 #>         new_interval = new_interval, additional_info = est_par, 
 #>         gof = gof)
 #> }
-#> <bytecode: 0x559ef2767b70>
+#> <bytecode: 0x55e0da069ab0>
 #> <environment: namespace:mipdtrial>
 #> 
 #> $scheme
