@@ -74,19 +74,6 @@ dose_grid_search <- function(
   if(nrow(target_design$scheme) > 1) {
     cli::cli_abort("Please provide only single non-time-varying target designs to `dose_grid_search()`")
   }
-  
-  if(target_design$type %in% target_types_time) { #
-    if(min(target_design$range) >= 100) {
-      target_design$variable <- ifelse(
-        grepl("_free", target_design$type),
-        "CONCF",
-        "CONC"
-      )
-      target_design$type <- "cmin"
-      target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
-      target_design$range <- rep(target_design$value, 2)
-    }
-  }
 
   if(target_design$type %in% c(target_types_conc, target_types_time)) {
     obs <- "obs"
@@ -120,7 +107,11 @@ dose_grid_search <- function(
     # is non-linear
     refine <- target_design$type %in% target_types_time || refine
   }
-
+  
+  if (target_design$type %in% target_types_time) {
+    grid <- seq(1, 10000, by = 100)
+  }
+  
   y <- lapply(
     grid,
     simulate_dose_interval,
@@ -138,6 +129,7 @@ dose_grid_search <- function(
     covariates = covariates,
     ...
   )
+
 
   if(grid_type == "interval") {
     tab <- data.frame(interval = grid, y = unlist(y))
@@ -157,7 +149,7 @@ dose_grid_search <- function(
   if (target_design$type %in% target_types_time) {
     tab <- filter_rows_0_100(tab)
   }
-
+  
   # Get two closest doses above and below target if possible, otherwise get
   # two closest doses (even if both are above or below)
   if (any(tab$y < target_design$value) && any(tab$y >= target_design$value)) {
@@ -167,9 +159,10 @@ dose_grid_search <- function(
   } else {
     tmp <- tab[order(abs(tab$y - target_design$value)),][1:2,]
   }
+
   fit <- lm(dose ~ y, data.frame(tmp))
   dose <- as.numeric(predict(fit, list(y=target_design$value)))
-
+  
   if(check_boundaries) { # if at upper or lower boundary, then take a different range
     if(dose == grid[1] && dose > min_dose) {
       grid <- grid / 4
@@ -285,13 +278,8 @@ simulate_dose_interval <- function(
     scheme = target_design$scheme,
     regimen = reg
   )
-  if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_time)) {
+ if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_auc, target_types_time)) {
     t_obs <- t_obs[1]
-  }
-  if(target_design$type %in% c("auc", target_types_time)) {
-    if(length(t_obs) != 2) {
-      stop("Need a vector of length 2 for observation times when target type is `auc`.")
-    }
   }
 
   if (target_design$type %in% target_types_time || target_design$type == "auc") {
@@ -303,6 +291,15 @@ simulate_dose_interval <- function(
   } else if (target_design$type == "auc12") {
     # need 12 hours of dosing
     t_obs <- c(t_obs - 12, t_obs)
+  }
+
+  if(target_design$type %in% c(target_types_auc, target_types_time)) {                                   
+    if(length(t_obs) < 2) {
+      stop(                                                                                              
+        "Expected at least 2 observation times for AUC/time-based target after expansion, got: ",        
+        length(t_obs), ". Check your target_design scheme."
+      )
+    }
   }
 
   tmp <- PKPDsim::sim(
@@ -324,18 +321,13 @@ simulate_dose_interval <- function(
         return(diff(tmp[tmp$comp == obs, ]$y))
       }
     } else if (target_design$type %in% target_types_time) {
-      return(
-        tail(
-          get_quantity_from_variable(
-            var = target_design$type,
-            sim = tmp,
-            md = md,
-            times = t_obs,
-            comp = "obs"
-          ),
-          1
-        )
+      var_map <- c(
+        "t_gt_4mic_free" = "FTGT4MIC",
+        "t_gt_mic_free" = "FTGTMIC", 
+        "t_gt_4mic" = "TGT4MIC",
+        "t_gt_mic" = "TGTMIC"
       )
+      return(100*diff(tmp[[var_map[target_design$type]]][tmp$comp == obs])/regimen$interval)
     } else {
       if(!is.null(target_design$variable)) {
         return(tmp[[target_design$variable]][tmp$comp == obs])

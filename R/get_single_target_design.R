@@ -19,7 +19,7 @@ get_single_target_design <- function(
   if(nrow(target_design$scheme) == 1) { ## most common case, just a single target
     return(target_design)
   }
-  if(idx > nrow(target_design$scheme)) {
+  if(idx > nrow(target_design$scheme) | idx > length(target_design$value) ) {
     cli::cli_abort("Not enough target values specified to support regimen updates. Please check target and regimen update designs.")
   }
   tmp <- target_design
@@ -28,4 +28,5 @@ get_single_target_design <- function(
   tmp$min <- tmp$min[idx]
   tmp$max <- tmp$max[idx]
   tmp
+  
 }

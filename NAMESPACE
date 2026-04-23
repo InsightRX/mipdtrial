@@ -3,6 +3,7 @@
 export(calc_auc_from_regimen)
 export(calc_auc_from_sim)
 export(calc_concentration_from_regimen)
+export(calc_tgt_from_regimen)
 export(calc_time_to_target)
 export(collect_tdms)
 export(create_cov_object)

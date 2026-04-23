@@ -75,3 +75,17 @@ is_valid_numeric_vector <- function(x) {
     all(!is.na(x)) &&
     all(is.finite(x))
 }
+
+#'
+#' Safe way to read YAML
+#'
+#' Workaround to avoid issue with "n" entries
+#' https://github.com/vubiostat/r-yaml/issues/122)
+#'
+#' @param filename YAML file to parse
+#'
+read_yaml_safe <- function(filename) {
+  txt <- readLines(filename)
+  yaml_raw <- stringr::str_replace_all(txt, "[\\s\\t]n\\:", ' "n":')
+  yaml::read_yaml(text = yaml_raw)
+}

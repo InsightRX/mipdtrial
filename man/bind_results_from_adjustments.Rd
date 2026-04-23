@@ -11,7 +11,8 @@ bind_results_from_adjustments(
   adjust_at_dose,
   dose_before_update,
   auc_final,
-  trough_final
+  trough_final,
+  tgt_final
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ bind_results_from_adjustments(
 \item{auc_final}{final AUC}
 
 \item{trough_final}{final Ctrough}
+
+\item{tgt_final}{final time target percentage}
 }
 \value{
 a data.frame with results

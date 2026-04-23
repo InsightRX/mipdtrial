@@ -8,3 +8,4 @@ suppressMessages({ ## avoid message "the following objects are masked from ..."
     loadNamespace("pkbusulfanmccune")
   }
 })
+
