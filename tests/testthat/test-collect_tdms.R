@@ -72,4 +72,45 @@ test_that("handles LLOQ correctly", {
   )
 })
 
+test_that("collect_tdms uses different iov bins for sim vs est model", {
+  # Here we will mock the models and `PKPDsim::sim` since all we care about
+  # are the IOV (mis)specification. `sim_model` has 2 IOV bins and `est_model`
+  # does not have IOV bins.
+  sim_model <- structure(list(), class = "PKPDsim")
+  attr(sim_model, "iov") <- list(
+    cv = list(CL = 0.1),
+    n_bins = 2,
+    bins = c(0, 24, 9999)
+  )
+  est_model <- structure(list(), class = "PKPDsim")
+  attr(est_model, "iov") <- list(n_bins = 1) # no IOV -- bins must stay NULL
+
+  # `sim()` is called once per model. Each call must receive that model's
+  # *own* IOV bins (via `PKPDsim::get_model_iov()`), not the other model's.
+  testthat::local_mocked_bindings(
+    sim = function(ode, t_obs, iov_bins = NULL, ...) {
+      expected_bins <- attr(ode, "iov")$bins
+      # this is the check we use in PKPDsim for mismatch:
+      if (!identical(iov_bins, expected_bins)) {
+        stop("iov_bins passed to sim() do not match the model's own IOV spec")
+      }
+      # return dummy data:
+      data.frame(t = t_obs, obs_type = 1, y = seq_along(t_obs))
+    },
+    .package = "PKPDsim"
+  )
+
+  expect_no_error(
+    result <- collect_tdms(
+      sim_model = sim_model,
+      t_obs = c(1, 2),
+      res_var = data.frame(prop = c(0.1, 0.1), add = c(1, 1)),
+      pars_i = list(CL = 1),
+      est_model = est_model,
+      est_pars_i = list(CL = 1)
+    )
+  )
+  expect_true(all(!is.na(result$predictive_ipred)))
+})
+
 

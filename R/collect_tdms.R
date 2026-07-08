@@ -48,6 +48,7 @@ collect_tdms <- function(
     parameters = pars_i,
     t_obs = t_obs,
     only_obs = TRUE,
+    iov_bins = PKPDsim::get_model_iov(sim_model)$bins,
     ...
   )
   # rename output for clarity/ease (PKPDmap uses `y` column for estimation)
@@ -69,6 +70,7 @@ collect_tdms <- function(
         parameters = est_pars_i,
         t_obs = t_obs,
         only_obs = TRUE,
+        iov_bins = PKPDsim::get_model_iov(est_model)$bins,
         ...
       )
       true_tdm$predictive_ipred <- true_tdm_est$y
