@@ -7,6 +7,7 @@ In this vignette, we will demonstrate the following tools:
 - writing a custom function to handle initial dosing.
 
 ``` r
+
 library(mipdtrial)
 library(PKPDsim) # for working with models
 if (!requireNamespace("pkpegasparaginasemodifiedwurthwein", quietly = TRUE)) {
@@ -36,6 +37,7 @@ our nomogram, we only need the information stored in `covariates`. Let’s
 define this function:
 
 ``` r
+
 asp_nomogram <- function(covariates, ...) {
   if (covariates$AGE$value >= 22) {
     dose <- 2500 * covariates$BSA$value
@@ -66,6 +68,7 @@ steady state asparaginase activity level of of 300 IU/L (0.3 IU/mL)
 (goal: 0.1 - 0.5 IU/mL)
 
 ``` r
+
 tdm_design <- create_sampling_design(
   time = c(13.9*24,  27.9*24,  41.9*24)
 )
@@ -112,6 +115,7 @@ collected by the US National Center for Health Statistics from a general
 sampling of the US population, and is available in the NHANES R package.
 
 ``` r
+
 dat <- data.frame(
   ID = 1:20,
   Sex = rep(c(0, 1), c(7L, 13L)),
@@ -138,6 +142,7 @@ expected in the model:
   [`PKPDsim::get_model_covariates()`](https://insightrx.github.io/PKPDsim/reference/get_model_info.html):
 
   ``` r
+
   get_model_covariates(model_design$model)
   #> [1] "AGE" "SEX" "HT"  "WT"
   ```
@@ -146,6 +151,7 @@ expected in the model:
   [`colnames()`](https://rdrr.io/r/base/colnames.html):
 
   ``` r
+
   colnames(dat)
   #> [1] "ID"     "Sex"    "Age"    "Weight" "Height" "BSA"
   ```
@@ -156,6 +162,7 @@ values. Because our initial dosing nomogram relies on BSA, we also need
 to include BSA in this mapping object.
 
 ``` r
+
 cov_map <- c(
   AGE = "Age", 
   WT = "Weight", 
@@ -184,6 +191,7 @@ simulated concentration to produced a measured therapeutic drug
 monitoring sample.
 
 ``` r
+
 res <- run_trial(
   data = dat,
   design = design,
@@ -196,6 +204,7 @@ res <- run_trial(
 Here are the first few rows of our simulation results:
 
 ``` r
+
 head(res$final_exposure)
 #>   id conc_true conc_est tta target_index
 #> 1  1  335.4693      300 673            1
@@ -211,6 +220,7 @@ head(res$final_exposure)
 How well did our patients get to target?
 
 ``` r
+
 res$final_exposure |> 
   pivot_longer(-id, names_to = "conc_type", values_to = "conc") |> 
   ggplot(aes(x = conc_type, y = conc)) +
@@ -234,6 +244,7 @@ res$final_exposure |>
 We can also check how well our patients did across days 14, 28, and 42.
 
 ``` r
+
 res$eval_exposure |> 
   dplyr::filter(type == "conc") |> 
   dplyr::mutate(time = time/24) |> 

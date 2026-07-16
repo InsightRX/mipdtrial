@@ -16,6 +16,7 @@ which we compared non-compartmental analysis (NCA) with MAP Bayesian
 estimation for AUC-guided busulfan dosing.
 
 ``` r
+
 library(mipdtrial)
 if(!requireNamespace("pkbusulfanmccune", quietly = TRUE)) {
   PKPDsim::install_default_literature_model("pk_busulfan_mccune")
@@ -40,6 +41,7 @@ will adjust doses 2, 3, and 4 to achieve a target cumulative AUC of 90
 by t = 192 hours.
 
 ``` r
+
 tdm_design <- create_sampling_design(
   offset = rep(c(3.5, 4, 6, 8), 4),
   at = rep(1:4, each = 4),
@@ -87,6 +89,7 @@ collected by the US National Center for Health Statistics from a general
 sampling of the US population, and is available in the NHANES R package.
 
 ``` r
+
 dat <- data.frame(
   ID = 1:10,
   Gender = c(1, 1, 0, 1, 1, 0, 1, 1, 1, 0),
@@ -114,6 +117,7 @@ You may also need to convert between units (height in m to cm, for
 example.)
 
 ``` r
+
 dat$T_CL_EFF <- 0
 dat$REGI <- 0
 ```
@@ -121,6 +125,7 @@ dat$REGI <- 0
 Here are the first few rows of our data set:
 
 ``` r
+
 head(dat)
 #>   ID Gender Age Weight Height T_CL_EFF REGI
 #> 1  1      1  34   87.4  164.7        0    0
@@ -138,6 +143,7 @@ expected in the model:
   [`PKPDsim::get_model_covariates()`](https://insightrx.github.io/PKPDsim/reference/get_model_info.html):
 
   ``` r
+
   unique(
     c(
       PKPDsim::get_model_covariates(sim_mod_design$model),
@@ -151,11 +157,13 @@ expected in the model:
   [`colnames()`](https://rdrr.io/r/base/colnames.html):
 
   ``` r
+
   colnames(dat)
   #> [1] "ID"       "Gender"   "Age"      "Weight"   "Height"   "T_CL_EFF" "REGI"
   ```
 
 ``` r
+
 cov_map <- c(
   AGE = "Age", 
   WT = "Weight", 
@@ -187,6 +195,7 @@ therapeutic drug monitoring sample.
 Here are the first few rows of our simulation results:
 
 ``` r
+
 head(res$final_exposure)
 #>   id  auc_true auc_est tta target_index
 #> 1  1  93148.57   90000  NA            1
@@ -205,6 +214,7 @@ close to 90 mg\*h/L), but “true” AUC was higher than that due to some
 model misspecification!
 
 ``` r
+
 res$final_exposure %>%
   pivot_longer(
     c(auc_true, auc_est),
@@ -229,6 +239,7 @@ Even with some model misspecification, target attainment (within 20% of
 target AUC) was still high:
 
 ``` r
+
 target_attainment <- res$final_exposure %>%
   mutate(
     ontarget = is_on_target(auc_true, target_design)) %>%

@@ -20,6 +20,7 @@ sample at 5 hours post-dose.
 Here is how we could answer that problem using simulation!
 
 ``` r
+
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
@@ -42,6 +43,7 @@ and for simplicity, we will assume all patients are receiving vancomycin
 twice daily, infused over 2 hours.
 
 ``` r
+
 tdm_design1 <- create_sampling_design(
   offset = c(1, 9),
   at = c(4, 4), 
@@ -59,6 +61,7 @@ AUC of 400-600 mg\*h/L by day 6. We will use the Thomson (2009) model
 for simulating patient pharmacokinetics.
 
 ``` r
+
 update_design <- create_regimen_update_design(
   at = 5,
   anchor = "dose",
@@ -82,6 +85,7 @@ with dose size calculated to reach the specified target for a dosing
 interval of 12 hours.
 
 ``` r
+
 initial_method <- create_initial_regimen_design(
   method = model_based_starting_dose,
   regimen = list(
@@ -100,6 +104,7 @@ initial_method <- create_initial_regimen_design(
 Now we can combine all these design choices together:
 
 ``` r
+
 design1 <- create_trial_design(
   sampling_design = tdm_design1, # arm 1
   target_design = target_design,
@@ -123,6 +128,7 @@ For this example, we will randomly generate a set of weights and
 creatinine clearances (CRCLs) for our synthetic data set.
 
 ``` r
+
 set.seed(15)
 dat <- data.frame(
   ID = 1:30,
@@ -140,12 +146,14 @@ This would be a good time to do that sort of processing on your data
 set!
 
 ``` r
+
 dat$CL_HEMO <- 0
 ```
 
 Here are the first few rows of our data set:
 
 ``` r
+
 head(dat)
 #>   ID    weight      crcl CL_HEMO
 #> 1  1  96.47057  4.827349       0
@@ -163,6 +171,7 @@ expected in the model:
   [`PKPDsim::get_model_covariates()`](https://insightrx.github.io/PKPDsim/reference/get_model_info.html):
 
   ``` r
+
   PKPDsim::get_model_covariates(model_design$model)
   #> [1] "WT"      "CRCL"    "CL_HEMO"
   ```
@@ -171,11 +180,13 @@ expected in the model:
   [`colnames()`](https://rdrr.io/r/base/colnames.html):
 
   ``` r
+
   colnames(dat)
   #> [1] "ID"      "weight"  "crcl"    "CL_HEMO"
   ```
 
 ``` r
+
 cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
@@ -195,6 +206,7 @@ variability will be added to each sample collected using the error model
 described in the model.
 
 ``` r
+
 res1 <- run_trial(
   data = dat,
   design = design1,
@@ -235,6 +247,7 @@ res2 <- run_trial(
 We can look at final exposure estimates for each arm:
 
 ``` r
+
 final_exp1 <- res1$final_exposure %>%
   mutate(arm = "peak-trough")
 final_exp2 <- res2$final_exposure %>%
@@ -256,6 +269,7 @@ We are interested in AUC target attainment. How did target attainment
 compare between the two arms of the trial?
 
 ``` r
+
 target_attainment <- results %>%
   mutate(ontarget = ifelse(auc_true >= 400 & auc_true <= 600, 1, 0)) %>%
   group_by(arm) %>%
@@ -284,6 +298,7 @@ Because we are simulating each sampling strategy in each patient, we can
 also look at how each patient responded to each sampling strategy.
 
 ``` r
+
 results %>%
   select(id, auc_true, arm) %>%
   pivot_wider(names_from = arm, values_from = auc_true) %>%

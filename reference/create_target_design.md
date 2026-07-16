@@ -96,6 +96,7 @@ create_target_design(
 ## Examples
 
 ``` r
+
 ## Target cumulative AUC, always exactly at 72 hours:
 create_target_design(
   targettype = "cum_auc",

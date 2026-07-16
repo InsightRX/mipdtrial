@@ -15,6 +15,7 @@ can also reduce or increase the dosing interval length. This can also be
 studied using the `mipdtrial` package.
 
 ``` r
+
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 #> 
@@ -35,6 +36,7 @@ This simulated trial will have two samples, with a peak and trough
 collected in dose 1 and 3.
 
 ``` r
+
 tdm_design <- create_sampling_design(
   offset = c(1, -1, 1, -1), # sample 1-hour before true trough, and at peak+1hr
   when = c("peak", "trough", "peak", "trough"),
@@ -49,6 +51,7 @@ different regimen update designs for dose-optimization and interval-
 optimization.
 
 ``` r
+
 target_design <- create_target_design(
   targettype = "auc24", 
   targetmin = 400,
@@ -74,6 +77,7 @@ interval_update_design <- create_regimen_update_design(
 We will be using the Thomson (2009) model for simulation and estimation:
 
 ``` r
+
 model_design <- create_model_design(lib = "pkvancothomson")
 ```
 
@@ -84,6 +88,7 @@ fixed at 12 hours, while for the other arm, we will allow the interval
 to vary.
 
 ``` r
+
 initial_method <- create_initial_regimen_design(
   method = model_based_starting_dose,
   regimen = list(
@@ -103,6 +108,7 @@ initial_method <- create_initial_regimen_design(
 Now we can combine these design choices into two trial arm designs:
 
 ``` r
+
 design1 <- create_trial_design(
   sampling_design = tdm_design, 
   target_design = target_design,
@@ -127,6 +133,7 @@ creatinine clearances (CRCLs) for our synthetic data set. See
 `sampling_timing()` vignette for a longer description.
 
 ``` r
+
 set.seed(15)
 dat <- data.frame(
   ID = 1:30,
@@ -143,6 +150,7 @@ expected in the model:
   [`PKPDsim::get_model_covariates()`](https://insightrx.github.io/PKPDsim/reference/get_model_info.html):
 
   ``` r
+
   PKPDsim::get_model_covariates(model_design$model)
   #> [1] "WT"      "CRCL"    "CL_HEMO"
   ```
@@ -151,11 +159,13 @@ expected in the model:
   [`colnames()`](https://rdrr.io/r/base/colnames.html):
 
   ``` r
+
   colnames(dat)
   #> [1] "ID"      "weight"  "crcl"    "CL_HEMO"
   ```
 
 ``` r
+
 cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
@@ -175,6 +185,7 @@ variability will be added to each sample collected using the error model
 described in the model.
 
 ``` r
+
 res1 <- run_trial(
   data = dat,
   design = design1,
@@ -205,6 +216,7 @@ to optimize the dose. Since we’re keeping the interval fixed, each
 patient will have the same dose update times on the x-axis.
 
 ``` r
+
 ggplot(res1$dose_updates) +
   aes(x = t, y = auc_before_update, group = id) +
   geom_rect(
@@ -222,6 +234,7 @@ ggplot(res1$dose_updates) +
 We can do the same for the intervan update algorithm:
 
 ``` r
+
 ggplot(res2$dose_updates) +
   aes(x = t, y = auc_before_update, group = id) +
   geom_rect(
@@ -247,6 +260,7 @@ patients stayed on an interval of 12 hours throughout the treatment
 course, while for other patients, interval changed 1 or more times.
 
 ``` r
+
 res2$dose_updates %>%
   ggplot() +
     geom_bar(aes(x = as.factor(interval_before_update))) +

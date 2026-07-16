@@ -25,6 +25,7 @@ You can install the development version of mipdtrial from
 [GitHub](https://github.com/) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("InsightRX/mipdtrial")
 ```
@@ -58,6 +59,7 @@ number. They can also be offset from the dosing time to e.g. sample at
 for a simulated MIPD trial:
 
 ``` r
+
 ## sample at peak (at 1-hour infusion end), and at true trough
 ## do this at dose #1 and #3
 tdm_design <- create_sampling_design(

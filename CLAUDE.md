@@ -6,6 +6,7 @@ with code in this repository.
 ## Commands
 
 ``` r
+
 # Load package during development
 devtools::load_all()
 
@@ -51,14 +52,14 @@ Everything is configured via a **trial design** object (built by
 [`create_trial_design()`](reference/create_trial_design.md)), which
 holds six sub-designs:
 
-| Sub-design        | Key function                                                                    | Controls                                                                           |
-|-------------------|---------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| `sim` / `est`     | [`create_model_design()`](reference/create_model_design.md)                     | PKPDsim models and parameters for simulation (“truth”) and estimation              |
-| `sampling`        | [`create_sampling_design()`](reference/create_sampling_design.md)               | When TDMs are collected; adaptive (peak/trough/dose-relative) or fixed times; LLOQ |
-| `target`          | [`create_target_design()`](reference/create_target_design.md)                   | PK/PD target (AUC, trough, `%T>MIC`, …); can be time-varying across updates        |
-| `regimen_update`  | [`create_regimen_update_design()`](reference/create_regimen_update_design.md)   | Which doses trigger updates; which optimisation function to use and its arguments  |
-| `initial_regimen` | [`create_initial_regimen_design()`](reference/create_initial_regimen_design.md) | Starting dose method                                                               |
-| `evaluation`      | [`create_eval_design()`](reference/create_eval_design.md)                       | Non-target metrics computed post-hoc                                               |
+| Sub-design | Key function | Controls |
+|----|----|----|
+| `sim` / `est` | [`create_model_design()`](reference/create_model_design.md) | PKPDsim models and parameters for simulation (“truth”) and estimation |
+| `sampling` | [`create_sampling_design()`](reference/create_sampling_design.md) | When TDMs are collected; adaptive (peak/trough/dose-relative) or fixed times; LLOQ |
+| `target` | [`create_target_design()`](reference/create_target_design.md) | PK/PD target (AUC, trough, `%T>MIC`, …); can be time-varying across updates |
+| `regimen_update` | [`create_regimen_update_design()`](reference/create_regimen_update_design.md) | Which doses trigger updates; which optimisation function to use and its arguments |
+| `initial_regimen` | [`create_initial_regimen_design()`](reference/create_initial_regimen_design.md) | Starting dose method |
+| `evaluation` | [`create_eval_design()`](reference/create_eval_design.md) | Non-target metrics computed post-hoc |
 
 Trial designs can also be loaded from a YAML file via
 `create_trial_design(file = "spec.yaml")`.

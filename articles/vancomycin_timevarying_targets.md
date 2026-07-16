@@ -9,6 +9,7 @@ In this vignette, we will demonstrate the following tools:
   example drug.
 
 ``` r
+
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 #> 
@@ -29,6 +30,7 @@ This simulated trial will have two samples, with a peak and trough
 collected in dose 1 and 3.
 
 ``` r
+
 tdm_design <- create_sampling_design(
   offset = c(1, -1, 1, -1), # sample 1-hour before true trough, and at peak+1hr
   when = c("peak", "trough", "peak", "trough"),
@@ -41,6 +43,7 @@ We assume that we can update the dose amount at dose 3 and 7, and aim
 for an AUC24 of 500 mg\*h/L and 300 by dose 5 and 10, respectively.  
 
 ``` r
+
 target_design <- create_target_design(
   targettype = "auc24", 
   targetvalue = c(500, 300),
@@ -58,6 +61,7 @@ dose_update_design <- create_regimen_update_design(
 We will be using the Thomson (2009) model for simulation and estimation:
 
 ``` r
+
 model_design <- create_model_design(lib = "pkvancothomson")
 ```
 
@@ -65,6 +69,7 @@ We will start with a dose estimated to attain the target exposure
 metrics based on population PK parameters, assuming a 12-hour interval.
 
 ``` r
+
 initial_method <- create_initial_regimen_design(
   method = model_based_starting_dose,
   regimen = list(
@@ -84,6 +89,7 @@ initial_method <- create_initial_regimen_design(
 Now we can combine these design choices into a single trial design:
 
 ``` r
+
 design <- create_trial_design(
   sampling_design = tdm_design, 
   target_design = target_design,
@@ -100,6 +106,7 @@ creatinine clearances (CRCLs) for our synthetic data set. See
 `sampling_timing()` vignette for a longer description.
 
 ``` r
+
 set.seed(15)
 dat <- data.frame(
   ID = 1:30,
@@ -116,6 +123,7 @@ expected in the model:
   [`PKPDsim::get_model_covariates()`](https://insightrx.github.io/PKPDsim/reference/get_model_info.html):
 
   ``` r
+
   PKPDsim::get_model_covariates(model_design$model)
   #> [1] "WT"      "CRCL"    "CL_HEMO"
   ```
@@ -124,11 +132,13 @@ expected in the model:
   [`colnames()`](https://rdrr.io/r/base/colnames.html):
 
   ``` r
+
   colnames(dat)
   #> [1] "ID"      "weight"  "crcl"    "CL_HEMO"
   ```
 
 ``` r
+
 cov_map <- c(
   WT = "weight", 
   CRCL = "crcl",
@@ -149,6 +159,7 @@ variability will be added to each sample collected using the error model
 described in the model.
 
 ``` r
+
 covs <- create_cov_object(
   dat,
   mapping = cov_map
@@ -190,6 +201,7 @@ to optimize the dose. Since we’re keeping the interval fixed, each
 patient will have the same dose update times on the x-axis.
 
 ``` r
+
 ggplot(res$dose_updates) +
   aes(x = t, y = auc_before_update, group = id) +
   geom_hline(yintercept = c(300, 500), linetype = "dotted") +

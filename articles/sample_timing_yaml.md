@@ -24,6 +24,7 @@ sample at 5 hours post-dose.
 Here is how we could answer that problem using simulation!
 
 ``` r
+
 library(mipdtrial)
 library(dplyr)   # for easier data manipulation 
 library(tidyr)
@@ -86,6 +87,7 @@ We can read this spec into R using
 [`create_trial_design()`](../reference/create_trial_design.md):
 
 ``` r
+
 arm1 <- create_trial_design(
   file = system.file(package = "mipdtrial", "md/sample_timing1.yaml")
 )
@@ -100,6 +102,7 @@ For this example, we will randomly generate a set of weights and
 creatinine clearances (CRCLs) for our synthetic data set.
 
 ``` r
+
 set.seed(15)
 dat <- data.frame(
   ID = 1:30,
@@ -117,12 +120,14 @@ This would be a good time to do that sort of processing on your data
 set!
 
 ``` r
+
 dat$CL_HEMO <- 0
 ```
 
 Here are the first few rows of our data set:
 
 ``` r
+
 head(dat)
 #>   ID    weight      crcl CL_HEMO
 #> 1  1  96.47057  4.827349       0
@@ -137,6 +142,7 @@ We need to link the covariates in our data set to the covariates
 expected in the model.
 
 ``` r
+
 cov_mapping <- c(
   WT = "weight", 
   CRCL = "crcl",
@@ -156,6 +162,7 @@ variability will be added to each sample collected using the error model
 described in the model.
 
 ``` r
+
 res1 <- run_trial(
   design = arm1,
   data = dat,
@@ -182,6 +189,7 @@ We are interested in AUC target attainment. How did target attainment
 compare between the two arms of the trial?
 
 ``` r
+
 results <- bind_rows(
   res1$final_exposure %>% mutate(sampling_design = "peak-trough"),
   res2$final_exposure %>% mutate(sampling_design = "mid-interval"),
@@ -214,6 +222,7 @@ Because we are simulating each sampling strategy in each patient, we can
 also look at how each patient responded to each sampling strategy.
 
 ``` r
+
 data.frame(
   peak_trough = res1$final_exposure$auc_true,
   random = res2$final_exposure$auc_true

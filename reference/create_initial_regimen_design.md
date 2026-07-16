@@ -63,7 +63,7 @@ create_initial_regimen_design(
 #>     reg_def$amt <- weight_for_dosing * design$initial_regimen$mgkg
 #>     do.call(PKPDsim::new_regimen, reg_def)
 #> }
-#> <bytecode: 0x55e0d6152028>
+#> <bytecode: 0x561817fcc380>
 #> <environment: namespace:mipdtrial>
 #> 
 #> $mgkg
