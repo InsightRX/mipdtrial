@@ -87,7 +87,7 @@ create_regimen_update_design(
 #>     list(regimen = regimen, dose_update = dose_update, new_dose = new_dose, 
 #>         new_interval = NA, additional_info = est_par, gof = gof)
 #> }
-#> <bytecode: 0x561811570790>
+#> <bytecode: 0x55837d8e0068>
 #> <environment: namespace:mipdtrial>
 #> 
 #> $scheme
@@ -134,7 +134,7 @@ create_regimen_update_design(
 #>         new_interval = new_interval, additional_info = est_par, 
 #>         gof = gof)
 #> }
-#> <bytecode: 0x5618112047a8>
+#> <bytecode: 0x55837d4090a8>
 #> <environment: namespace:mipdtrial>
 #> 
 #> $scheme
