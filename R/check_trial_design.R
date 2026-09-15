@@ -30,7 +30,7 @@ check_trial_design <- function(design) {
     }
   }
   if(!is.null(design$regimen_update$settings)) {
-    accepted <- c("dose_resolution")
+    accepted <- c("dose_resolution", "min_dose", "max_dose")
     df <- setdiff(names(design$regimen_update$settings), accepted)
     if(length(df) > 0) {
       cli::cli_abort(
