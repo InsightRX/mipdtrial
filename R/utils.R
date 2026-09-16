@@ -1,3 +1,21 @@
+#' Map time-based target type to model variable name
+#'
+#' @param target_type character, one of the time-based target types
+#'   (`"t_gt_mic"`, `"t_gt_4mic"`, `"t_gt_mic_free"`, `"t_gt_4mic_free"`)
+#' @returns A character string with the corresponding model variable name,
+#'   or `NULL` if the target type is not recognized.
+#' @export
+time_target_to_variable <- function(target_type) {
+  var_map <- c(
+    "t_gt_mic" = "TGTMIC",
+    "t_gt_4mic" = "TGT4MIC",
+    "t_gt_mic_free" = "FTGTMIC",
+    "t_gt_4mic_free" = "FTGT4MIC"
+  )
+  if (!target_type %in% names(var_map)) return(NULL)
+  var_map[[target_type]]
+}
+
 #' Round to a multiple of any number (e.g. round to the nearest 5, 10, 100)
 #' @param x value to be rounded
 #' @param multiple accuracy to round to. If NULL, x will be returned unrounded.
@@ -86,6 +104,6 @@ is_valid_numeric_vector <- function(x) {
 #'
 read_yaml_safe <- function(filename) {
   txt <- readLines(filename)
-  yaml_raw <- stringr::str_replace_all(txt, "[\\s\\t]n\\:", ' "n":')
-  yaml::read_yaml(text = yaml_raw)
+  yaml_raw <- gsub("[[:space:]\t]n:", ' "n":', txt)
+  yaml::yaml.load(paste(yaml_raw, collapse = "\n"))
 }

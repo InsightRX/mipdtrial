@@ -203,7 +203,9 @@ sim_subject <- function(
   if(nrow(res$tdms) > 0) {
     res$tdms$id <- id
   }
-  res$dose_updates$id <- id
+  if(nrow(res$dose_updates) > 0) {
+    res$dose_updates$id <- id
+  }
   res$additional_info$id <- id
   if(nrow(res$gof) > 0) {
     res$gof$id <-  id

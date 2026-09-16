@@ -4,7 +4,7 @@
 \alias{simulate_fit}
 \title{Get MAP Bayesian parameters}
 \usage{
-simulate_fit(est_model, parameters, omega, ruv, tdms, covariates, regimen, ...)
+simulate_fit(est_model, parameters, omega, ruv, tdms, covariates, regimen)
 }
 \arguments{
 \item{est_model}{model used for estimation}
@@ -21,8 +21,6 @@ elements for \code{prop} (proportional) and \code{add} (additive).}
 \item{covariates}{named list of PKPDsim covariates}
 
 \item{regimen}{PKPDsim regimen object}
-
-\item{...}{arguments passed on to PKPDmap::get_map_estimates}
 }
 \value{
 named list of individual PK parameter estimates

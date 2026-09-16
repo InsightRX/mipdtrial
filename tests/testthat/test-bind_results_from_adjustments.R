@@ -6,14 +6,14 @@ test_that("bind_results_from_adjustments works correctly", {
   j <- 1
   auc_final <- 100
   trough_final <- 5
-  dose_before_update <- 500
-  
+
   # Test case 1: out has new_dose and new_interval
   out1 <- list(new_dose = 600, new_interval = 12)
-  
+
+  tgt_final <- NA
   result1 <- bind_results_from_adjustments(
-    out1, j, regimen, adjust_at_dose, 
-    dose_before_update, auc_final, trough_final
+    out1, j, regimen, adjust_at_dose,
+    auc_final, trough_final, tgt_final
   )
   
   expect_equal(result1$t, 24)
@@ -21,15 +21,16 @@ test_that("bind_results_from_adjustments works correctly", {
   expect_equal(result1$interval_before_update, 12)
   expect_equal(result1$auc_before_update, 100)
   expect_equal(result1$trough_before_update, 5)
+  expect_true(is.na(result1$tgt_before_update))
   expect_true(is.na(result1$dose_update))
   expect_true(is.na(result1$t_adjust))
-  
+
   # Test case 2: out has NULL new_dose and new_interval
   out2 <- list(new_dose = NULL, new_interval = NULL)
-  
+
   result2 <- bind_results_from_adjustments(
-    out2, j, regimen, adjust_at_dose, 
-    dose_before_update, auc_final, trough_final
+    out2, j, regimen, adjust_at_dose,
+    auc_final, trough_final, tgt_final
   )
   
   expect_equal(result2$t, 24)
@@ -41,10 +42,10 @@ test_that("bind_results_from_adjustments works correctly", {
   # Test case 3: empty adjust_at_dose
   adjust_at_dose_empty <- c()
   auc_final_vec <- c(100, 110)
-  
+
   result3 <- bind_results_from_adjustments(
-    out1, j, regimen, adjust_at_dose_empty, 
-    dose_before_update, auc_final_vec, trough_final
+    out1, j, regimen, adjust_at_dose_empty,
+    auc_final_vec, trough_final, tgt_final
   )
   
   expect_equal(length(result3$t), 2)
@@ -54,7 +55,8 @@ test_that("bind_results_from_adjustments works correctly", {
   
   # Test case 4: verify data.frame structure
   expect_s3_class(result1, "data.frame")
-  expected_cols <- c("t", "dose_update", "t_adjust", "dose_before_update", 
-                     "interval_before_update", "auc_before_update", "trough_before_update")
+  expected_cols <- c("t", "dose_update", "t_adjust", "dose_before_update",
+                     "interval_before_update", "auc_before_update",
+                     "trough_before_update", "tgt_before_update")
   expect_equal(names(result1), expected_cols)
 })

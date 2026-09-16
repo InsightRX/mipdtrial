@@ -9,7 +9,6 @@ bind_results_from_adjustments(
   j,
   regimen,
   adjust_at_dose,
-  dose_before_update,
   auc_final,
   trough_final,
   tgt_final
@@ -23,8 +22,6 @@ bind_results_from_adjustments(
 \item{regimen}{regimen}
 
 \item{adjust_at_dose}{adjust at dose number}
-
-\item{dose_before_update}{dose before update}
 
 \item{auc_final}{final AUC}
 

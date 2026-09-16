@@ -170,7 +170,7 @@ sample_and_adjust_by_dose <- function(
       target_design = tmp_target_design,
       covariates = covariates
     )
-    tgt_current_regimen <- NULL
+    tgt_current_regimen <- NA
     if (tmp_target_design$type %in% target_types_time) {
       tgt_current_regimen <- calc_tgt_from_regimen(
         regimen = regimen,
@@ -264,19 +264,20 @@ sample_and_adjust_by_dose <- function(
     )
   }
 
-  dose_updates <- rbind(
-    dose_updates,
-    bind_results_from_adjustments(
-      out,
-      j,
-      regimen,
-      adjust_at_dose,
-      dose_before_update,
-      auc_final,
-      trough_final,
-      tgt_final
+  if (length(adjust_at_dose) > 0) {
+    dose_updates <- rbind(
+      dose_updates,
+      bind_results_from_adjustments(
+        out,
+        j,
+        regimen,
+        adjust_at_dose,
+        auc_final,
+        trough_final,
+        tgt_final
+      )
     )
-  )
+  }
 
   list(
     final_regimen = regimen,
@@ -295,7 +296,6 @@ sample_and_adjust_by_dose <- function(
 #' @param j index number
 #' @param regimen regimen
 #' @param adjust_at_dose adjust at dose number
-#' @param dose_before_update dose before update
 #' @param auc_final final AUC
 #' @param trough_final final Ctrough
 #' @param tgt_final final time target percentage
@@ -308,7 +308,6 @@ bind_results_from_adjustments <- function(
   j,
   regimen,
   adjust_at_dose,
-  dose_before_update,
   auc_final,
   trough_final,
   tgt_final

@@ -103,15 +103,11 @@ dose_grid_search <- function(
   if (is.null(refine)){
     # unless specified otherwise, do not refine if model is linear.
     refine <- !isTRUE(attr(est_model, "misc")$linearity == "linear")
-    # time-based target methods also need to be refined since this target
-    # is non-linear
+    # time-based target methods also need to be refined since the
+    # relationship between dose and %time>MIC is non-linear
     refine <- target_design$type %in% target_types_time || refine
   }
-  
-  if (target_design$type %in% target_types_time) {
-    grid <- seq(1, 10000, by = 100)
-  }
-  
+
   y <- lapply(
     grid,
     simulate_dose_interval,
@@ -278,13 +274,13 @@ simulate_dose_interval <- function(
     scheme = target_design$scheme,
     regimen = reg
   )
- if(length(t_obs) > 1 && !target_design$type %in% c("auc", target_types_auc, target_types_time)) {
+ if(length(t_obs) > 1 && !target_design$type %in% c(target_types_auc, target_types_time)) {
     t_obs <- t_obs[1]
   }
 
   if (target_design$type %in% target_types_time || target_design$type == "auc") {
     # need two time points for time-based targets
-    t_obs <- c(t_obs - regimen$interval, t_obs)
+    t_obs <- c(t_obs - reg$interval, t_obs)
   } else if (target_design$type == "auc24") {
     # need 24 hours of dosing
     t_obs <- c(t_obs - 24, t_obs)
@@ -293,10 +289,10 @@ simulate_dose_interval <- function(
     t_obs <- c(t_obs - 12, t_obs)
   }
 
-  if(target_design$type %in% c(target_types_auc, target_types_time)) {                                   
+  if(target_design$type %in% c("auc", "auc24", "auc12", target_types_time)) {
     if(length(t_obs) < 2) {
-      stop(                                                                                              
-        "Expected at least 2 observation times for AUC/time-based target after expansion, got: ",        
+      stop(
+        "Expected at least 2 observation times for AUC/time-based target after expansion, got: ",
         length(t_obs), ". Check your target_design scheme."
       )
     }
@@ -321,13 +317,8 @@ simulate_dose_interval <- function(
         return(diff(tmp[tmp$comp == obs, ]$y))
       }
     } else if (target_design$type %in% target_types_time) {
-      var_map <- c(
-        "t_gt_4mic_free" = "FTGT4MIC",
-        "t_gt_mic_free" = "FTGTMIC", 
-        "t_gt_4mic" = "TGT4MIC",
-        "t_gt_mic" = "TGTMIC"
-      )
-      return(100*diff(tmp[[var_map[target_design$type]]][tmp$comp == obs])/regimen$interval)
+      variable <- time_target_to_variable(target_design$type)
+      return(100*diff(tmp[[variable]][tmp$comp == obs])/reg$interval)
     } else {
       if(!is.null(target_design$variable)) {
         return(tmp[[target_design$variable]][tmp$comp == obs])
