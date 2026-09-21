@@ -14,8 +14,11 @@ devtools::test()
 # Run a single test file
 devtools::load_all(); testthat::test_file("tests/testthat/test-collect_tdms.R")
 
-# Run a specific test by name
-devtools::load_all(); testthat::test_file("tests/testthat/test-collect_tdms.R", filter = "LLOQ")
+# Run a single test by its description (`desc`, not `filter`)
+devtools::load_all(); testthat::test_file("tests/testthat/test-collect_tdms.R", desc = "handles LLOQ correctly")
+
+# Run the test files whose names match a pattern
+devtools::test(filter = "collect_tdms")
 
 # Check the package (includes R CMD check)
 devtools::check()
@@ -33,8 +36,9 @@ those files directly. The same applies to `README.md`, which is knit from
 `README.Rmd`.
 
 CI (`.github/workflows/R-CMD-check.yaml`) runs `R CMD check` on ubuntu-latest and
-windows-latest against R release on pushes and PRs to `main`. Vignettes are built
-during check, so a broken vignette fails CI.
+windows-latest against R release, on pushes and PRs to `main` or `master`, and on
+`workflow_dispatch`. Vignettes are built during check, so a broken vignette fails
+CI.
 
 ## Architecture
 
@@ -50,14 +54,14 @@ run_trial()                          # user entry point; parallelises over subje
    └─ sample_and_adjust_by_dose()    # main dose-adjustment loop
       ├─ collect_tdms()              # simulate drug levels + residual error
       ├─ map_adjust_dose() / map_adjust_interval()
-      │  ├─ map_fit()                # MAP Bayesian estimation via PKPDmap
+      │  ├─ simulate_fit()           # MAP Bayesian estimation via PKPDmap (in R/map_fit.R)
       │  └─ dose_grid_search()       # find optimal dose/interval
       └─ update_regimen()            # apply new dose to PKPDsim regimen
 ```
 
 ### The design system
 
-Everything is configured via a **trial design** object (built by `create_trial_design()`), which holds six sub-designs:
+Everything is configured via a **trial design** object (built by `create_trial_design()`), which holds seven named sub-designs (`sim` and `est` are separate list elements):
 
 | Sub-design | Key function | Controls |
 |---|---|---|
@@ -91,7 +95,10 @@ functions.
 
 **`design$est` / `design$sim`** both have: `model` (PKPDsim ODE object), `parameters` (named list), `omega_matrix`, `ruv` (list with `prop`/`add`).
 
-**`run_trial()` return value** (class `mipdtrial_results`): a list of data frames — `tdms`, `dose_updates`, `final_reg`, `additional_info` (MAP estimates per update), `gof`, `final_exposure`, `eval_exposure`.
+**`run_trial()` return value** (class `mipdtrial_results`): a mixed list — `tdms`,
+`dose_updates`, `final_reg`, `gof`, `final_exposure` and `eval_exposure` are
+row-bound data frames; `additional_info` (MAP estimates per update) is not a data
+frame, so it stays a list with one element per subject.
 
 The shape of that list is not hard-coded: `bind_sim_output()` walks the names of
 whatever `sim_subject()` returned for the first subject, row-binding elements that
@@ -116,7 +123,8 @@ an interval or infusion-length change during the trial invalidates them.
 IOV bins come from the model, not the design: call sites obtain them with
 `PKPDsim::get_model_iov(model)$bins` and pass them into the `PKPDsim::sim()` /
 `PKPDmap` calls. `get_iov_specification()` expands the parameter and omega
-specifications accordingly for `map_fit()` and `generate_variability_terms()`.
+specifications accordingly, and is called from `simulate_fit()` and
+`generate_iiv()`.
 Any new code path that simulates or fits must forward `iov_bins` the same way, or
 IOV is silently dropped for that path.
 
@@ -125,8 +133,12 @@ IOV is silently dropped for that path.
 `run_trial()` parallelises over subjects and takes a `threads` argument (default
 `1`, i.e. sequential via `purrr::map()`). When `threads > 1` it sets up
 `future::plan(future::multisession, workers = threads)` itself and uses
-`furrr::future_map()` — the caller does not set a `future` plan. `threads` is
-capped at `parallel::detectCores() - 1`, with a warning when it is reduced.
+`furrr::future_map()` — the caller does not set a `future` plan. The cap in
+`R/run_trial.R` is off by one relative to its own warning message: it computes
+`n_cores <- max(1, parallel::detectCores() - 1)` and then reduces `threads` to
+`n_cores - 1`, so the effective maximum is `detectCores() - 2` and a two-core host
+ends up with `threads = 0`. Treat that as a bug to fix rather than behaviour to
+preserve.
 
 Reproducibility is per-subject, not per-run: the main loop calls
 `set.seed(seed + i)` for subject `i`, so results are identical regardless of the
@@ -143,15 +155,26 @@ a clean machine reaches the network and is slow.
 
 ## Dependencies
 
-- **PKPDsim**: ODE-based PK/PD simulation (all models, regimens, covariates)
-- **PKPDmap**: MAP Bayesian estimation (`simulate_fit`, underlying estimation engine)
-- **yaml**: YAML-based design spec loading
-- Literature model packages (e.g. `pkbusulfanmccune`) are auto-installed by tests via `PKPDsim::install_default_literature_model()` if absent
+`Imports` holds exactly three packages:
 
-PKPDsim and PKPDmap are `Imports` pinned to GitHub via `Remotes:` — they track
+- **PKPDsim**: ODE-based PK/PD simulation (all models, regimens, covariates)
+- **PKPDmap**: MAP Bayesian estimation (underlying estimation engine, wrapped by `simulate_fit()`)
+- **yaml**: YAML-based design spec loading
+
+PKPDsim and PKPDmap are pinned to GitHub via `Remotes:` — they track
 `InsightRX/PKPDsim` and `InsightRX/PKPDmap` rather than CRAN, so an unexplained
 failure after a dependency update usually means an upstream change on `main` of
-those repos. Everything else (dplyr, ggplot2, purrr, furrr, future, progressr,
-cli, tidyr, knitr) is in `Suggests`, so package code must not assume those are
-installed — guard optional use with `requireNamespace()` and refer to them with
-`::`.
+those repos.
+
+Everything else (cli, dplyr, ggplot2, purrr, furrr, future, progressr, tidyr,
+knitr, rmarkdown, testthat) is in `Suggests`, but the code does not treat it that
+way: `run_trial()` and other core functions call `cli::`, `dplyr::`, `purrr::`,
+`furrr::`, `future::` and `progressr::` unconditionally, and there is no
+`requireNamespace()` guard anywhere in `R/`. Those six are de facto hard
+requirements declared as optional. Follow the existing unguarded `::` pattern or
+move the package to `Imports` — do not guard one call site while the rest stay
+unguarded. `parallel` is used in `run_trial()` but declared nowhere; it ships with
+R, so it works.
+
+Literature model packages (e.g. `pkbusulfanmccune`) are not declared at all; tests
+install them via `PKPDsim::install_default_literature_model()` when absent.
