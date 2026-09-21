@@ -37,8 +37,7 @@ map_adjust_dose <- function(
     ruv = ruv,
     tdms = tdms,
     covariates = covariates,
-    regimen = regimen,
-    ...
+    regimen = regimen
   )
   if(! all(c("parameters", "pred", "ipred", "dv", "weights") %in% names(fit))) {
     cli::cli_warn("Fit error, please investigate. Continuing but using population estimates.")

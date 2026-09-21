@@ -221,3 +221,24 @@ test_that("create_eval_design: handles multiple metrics", {
   expect_equal(eval_design3, eval3)
 })
 
+test_that("time-based target types create valid target designs", {
+  time_types <- c("t_gt_mic", "t_gt_4mic", "t_gt_mic_free", "t_gt_4mic_free")
+  for (tt in time_types) {
+    result <- create_target_design(
+      targettype = tt,
+      targetmin = 60,
+      targetmax = 80,
+      when = "dose",
+      at = 5,
+      anchor = "dose"
+    )
+    expect_equal(result$type, tt)
+    expect_equal(result$value, 70)
+    expect_equal(result$min, 60)
+    expect_equal(result$max, 80)
+    expect_null(result$range)
+    expect_null(result$variable)
+    expect_true(is.data.frame(result$scheme))
+  }
+})
+

@@ -169,11 +169,13 @@ calc_tgt_from_regimen <- function(
     ...
   )
   
-  tgt_use <- case_when(target_design$type == "t_gt_4mic_free" ~ "FTGT4MIC",
-                       target_design$type == "t_gt_mic_free" ~ "FTGTMIC",
-                       target_design$type == "t_gt_4mic" ~ "TGT4MIC",
-                       target_design$type == "t_gt_mic" ~ "TGTMIC")
-  100*diff(sim_output[sim_output$comp == "obs",][[tgt_use]])/regimen$interval
+  tgt_use <- time_target_to_variable(target_design$type)
+  obs_data <- sim_output[sim_output$comp == "obs", ]
+  vapply(seq_along(target_time), function(i) {
+    val_start <- obs_data[[tgt_use]][obs_data$t == target_start[i]][1]
+    val_end <- obs_data[[tgt_use]][obs_data$t == target_time[i]][1]
+    100 * (val_end - val_start) / regimen$interval
+  }, numeric(1))
 }
 
 #' Calculate time to target attainment

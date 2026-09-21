@@ -293,6 +293,38 @@ test_that('nonlinear models have refining activated rather than defaulting to li
   expect_equal(refine, 15.1)
 })
 
+test_that("user-provided grid is respected for time-based targets", {
+  # mock simulate_dose_interval to return a known value based on dose
+  local_mocked_bindings(
+    simulate_dose_interval = function(value, ...) value / 100
+  )
+
+  model <- list()
+  attr(model, "misc") <- list(linearity = "linear")
+
+  user_grid <- seq(100, 500, by = 50)
+  target <- create_target_design(
+    targettype = "t_gt_mic",
+    targetvalue = 3,
+    when = "dose",
+    at = 5,
+    anchor = "dose"
+  )
+
+  dose <- dose_grid_search(
+    est_model = model,
+    grid = user_grid,
+    parameters = par,
+    regimen = reg,
+    refine = FALSE,
+    check_boundaries = FALSE,
+    target_design = target
+  )
+
+  # dose/100 = 3, so dose = 300
+  expect_equal(dose, 300)
+})
+
 test_that("user-friendly error if no dose_grid", {
   dose_grid_error <- "Must supply grid search space in `grid`"
   target <- create_target_design(

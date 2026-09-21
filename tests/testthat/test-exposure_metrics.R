@@ -198,6 +198,96 @@ test_that("calc_tgt_from_regimen correct", {
   )
 })
 
+test_that("calc_tgt_from_regimen works for t_gt_mic", {
+  target <- create_target_design(
+    targettype = "t_gt_mic",
+    targetmin = 60,
+    targetmax = 100,
+    when = "dose",
+    at = 7,
+    anchor = "dose"
+  )
+
+  reg <- PKPDsim::new_regimen(
+    amt = 1000,
+    n = 7,
+    interval = 12,
+    type = "infusion"
+  )
+
+  if (!requireNamespace("pkcefepimean", quietly = TRUE)) {
+    PKPDsim::install_default_literature_model("pk_cefepime_an")
+    loadNamespace("pkcefepimean")
+  }
+  library(pkcefepimean)
+
+  out <- calc_tgt_from_regimen(
+    regimen = reg,
+    parameters = pkcefepimean::parameters(),
+    model = pkcefepimean::model(),
+    target_design = target,
+    covariates = list(
+      "WT" = 70,
+      "CR" = 1.0,
+      "CL_HEMO" = 0,
+      "MIC" = 8,
+      "SEX" = 1,
+      "AGE" = 60,
+      "HT" = 165,
+      "FU" = 0.8
+    )
+  )
+
+  expect_equal(length(out), length(target$scheme$at))
+  expect_true(is.numeric(out))
+  expect_true(out >= 0 && out <= 100)
+})
+
+test_that("calc_tgt_from_regimen works for t_gt_4mic", {
+  target <- create_target_design(
+    targettype = "t_gt_4mic",
+    targetmin = 30,
+    targetmax = 80,
+    when = "dose",
+    at = 7,
+    anchor = "dose"
+  )
+
+  reg <- PKPDsim::new_regimen(
+    amt = 1000,
+    n = 7,
+    interval = 12,
+    type = "infusion"
+  )
+
+  if (!requireNamespace("pkcefepimean", quietly = TRUE)) {
+    PKPDsim::install_default_literature_model("pk_cefepime_an")
+    loadNamespace("pkcefepimean")
+  }
+  library(pkcefepimean)
+
+  out <- calc_tgt_from_regimen(
+    regimen = reg,
+    parameters = pkcefepimean::parameters(),
+    model = pkcefepimean::model(),
+    target_design = target,
+    covariates = list(
+      "WT" = 70,
+      "CR" = 1.0,
+      "CL_HEMO" = 0,
+      "MIC" = 8,
+      "SEX" = 1,
+      "AGE" = 60,
+      "HT" = 165,
+      "FU" = 0.8
+    )
+  )
+
+  expect_equal(length(out), length(target$scheme$at))
+  expect_true(is.numeric(out))
+  expect_true(out >= 0 && out <= 100)
+})
+
 test_that("handles IOV correctly", {
   regimen <- PKPDsim::new_regimen(
     amt = 200,

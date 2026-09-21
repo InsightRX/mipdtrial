@@ -153,22 +153,6 @@ create_target_design <- function(
     max = upperbound,
     scheme = scheme
   )
-  if(target_design$type %in% target_types_time) { 
-    if(is.null(target_design$range)) {
-      target_design$range <- c(target_design$min,target_design$max)
-    } else {
-      if(min(target_design$range) >= 100) {
-        target_design$variable <- ifelse(
-          grepl("_free", target_design$type),
-          "CONCF",
-          "CONC"
-        )
-        target_design$type <- "cmin"
-        target_design$value <- min(target_design$range)/100 * tail(covariates$MIC$value, 1)
-        target_design$range <- rep(target_design$value, 2)
-      }
-    }
-  }
   return(target_design)
 }
 

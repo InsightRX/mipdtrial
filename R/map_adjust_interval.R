@@ -33,8 +33,7 @@ map_adjust_interval <- function(
     ruv = ruv,
     tdms = tdms,
     covariates = covariates,
-    regimen = regimen,
-    ...
+    regimen = regimen
   )
   if("error" %in% class(fit)) {
     cli::cli_abort("Fit to simulated data failed, please check model and simulation designs.")

@@ -1,3 +1,15 @@
+test_that("time_target_to_variable maps all target types correctly", {
+  expect_equal(time_target_to_variable("t_gt_mic"), "TGTMIC")
+  expect_equal(time_target_to_variable("t_gt_4mic"), "TGT4MIC")
+  expect_equal(time_target_to_variable("t_gt_mic_free"), "FTGTMIC")
+  expect_equal(time_target_to_variable("t_gt_4mic_free"), "FTGT4MIC")
+})
+
+test_that("time_target_to_variable returns NULL for invalid target type", {
+  expect_null(time_target_to_variable("invalid_type"))
+  expect_null(time_target_to_variable("cmin"))
+})
+
 test_that("round_to_multiple function works correctly", {
   # Test with multiple = NULL
   expect_equal(round_to_multiple(5, NULL), 5)
