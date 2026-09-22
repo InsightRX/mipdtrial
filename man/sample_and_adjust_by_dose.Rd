@@ -45,8 +45,7 @@ proportional (\code{prop}) and additive (\code{add}) error.}
 adjustment timepoint. If set to \code{FALSE}, will use only the data since the
 last adjustment timepoint and the current one.}
 
-\item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
-function.}
+\item{...}{arguments passed on to the dose_optimization_method function.}
 }
 \value{
 a named list containing \code{final_regimen} (all doses after

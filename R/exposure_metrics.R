@@ -171,9 +171,10 @@ calc_tgt_from_regimen <- function(
   
   tgt_use <- time_target_to_variable(target_design$type)
   obs_data <- sim_output[sim_output$comp == "obs", ]
+  # Use rounded time matching (solver output times may not compare exactly)
   vapply(seq_along(target_time), function(i) {
-    val_start <- obs_data[[tgt_use]][obs_data$t == target_start[i]][1]
-    val_end <- obs_data[[tgt_use]][obs_data$t == target_time[i]][1]
+    val_start <- obs_data[[tgt_use]][round(obs_data$t, 3) == round(target_start[i], 3)][1]
+    val_end <- obs_data[[tgt_use]][round(obs_data$t, 3) == round(target_time[i], 3)][1]
     100 * (val_end - val_start) / regimen$interval
   }, numeric(1))
 }

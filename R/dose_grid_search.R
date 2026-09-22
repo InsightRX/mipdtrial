@@ -309,21 +309,23 @@ simulate_dose_interval <- function(
     covariates = covariates,
     ...
   )
+  # Filter to requested observation times to avoid extra event rows from solver
+  sim_obs <- tmp[tmp$comp == obs & round(tmp$t, 3) %in% round(t_obs, 3), ]
   if (is.null(pta)) {
     if (target_design$type %in% c("auc", "auc24", "auc12")) {
       if(!is.null(target_design$variable)) {
-        return(diff(tmp[[target_design$variable]][tmp$comp == obs]))
+        return(diff(sim_obs[[target_design$variable]]))
       } else {
-        return(diff(tmp[tmp$comp == obs, ]$y))
+        return(diff(sim_obs$y))
       }
     } else if (target_design$type %in% target_types_time) {
       variable <- time_target_to_variable(target_design$type)
-      return(100*diff(tmp[[variable]][tmp$comp == obs])/reg$interval)
+      return(100 * diff(sim_obs[[variable]]) / reg$interval)
     } else {
       if(!is.null(target_design$variable)) {
-        return(tmp[[target_design$variable]][tmp$comp == obs])
+        return(sim_obs[[target_design$variable]])
       } else {
-        return(tmp[["y"]][tmp$comp == obs])
+        return(sim_obs[["y"]])
       }
     }
   } else {
@@ -341,9 +343,9 @@ simulate_dose_interval <- function(
       pta$type <- "gt"
     }
     if (pta$type == "gt") {
-      conc_bnd <- qnorm(1 - pta$prob, tmp[tmp$comp == obs, ]$y, sd) # target level
+      conc_bnd <- qnorm(1 - pta$prob, sim_obs$y, sd)
     } else {
-      conc_bnd <- qnorm(pta$prob, tmp[tmp$comp == obs, ]$y, sd) # target level
+      conc_bnd <- qnorm(pta$prob, sim_obs$y, sd)
     }
     return(conc_bnd)
   }

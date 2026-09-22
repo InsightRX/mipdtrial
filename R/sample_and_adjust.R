@@ -27,8 +27,7 @@
 #' @param accumulate_data if `TRUE`, will use all available data up until the
 #' adjustment timepoint. If set to `FALSE`, will use only the data since the
 #' last adjustment timepoint and the current one.
-#' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
-#'   function.
+#' @param ... arguments passed on to the dose_optimization_method function.
 #' @param verbose verbose output?
 #' @returns a named list containing `final_regimen` (all doses after
 #' adjustment), `tdms` (all collected levels, both true and measured, that is,

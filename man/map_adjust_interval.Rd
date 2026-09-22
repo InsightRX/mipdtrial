@@ -47,8 +47,7 @@ Example: \code{seq(from = 50, to = 500, by = (500 - 50) / 10)}}
 \item{settings}{list of arguments to be used in dose update, e.g.
 \code{dose_resolution}.}
 
-\item{...}{arguments passed on to PKPDmap::get_map_estimates and/or
-PKPDsim::sim}
+\item{...}{arguments passed on to PKPDsim::sim via dose grid search}
 }
 \value{
 Returns a named list: \code{regimen}: the updated regimen;

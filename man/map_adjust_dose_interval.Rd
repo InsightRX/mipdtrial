@@ -62,8 +62,7 @@ considered equivalent. Default: \code{0.05}.}
 \item{settings}{list of arguments to be used in dose update, e.g.
 \code{dose_resolution}, \code{min_dose}, \code{max_dose}.}
 
-\item{...}{arguments passed on to PKPDmap::get_map_estimates and/or
-PKPDsim::sim}
+\item{...}{arguments passed on to PKPDsim::sim via dose grid search}
 }
 \value{
 Returns a named list: \code{regimen}: the updated regimen;

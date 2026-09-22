@@ -20,8 +20,7 @@ associated column in the provided data set.}
 
 \item{verbose}{verbose output?}
 
-\item{...}{arguments passed on to \code{simulate_fit} or dose_optimization_method
-function.}
+\item{...}{arguments passed on to the dose_optimization_method function.}
 }
 \description{
 Core function to simulate a single subject

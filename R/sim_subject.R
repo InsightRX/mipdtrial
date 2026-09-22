@@ -3,8 +3,7 @@
 #' @inheritParams run_trial
 #' @param data data for subject
 #' @param pars_true_i PK parameters for the individual. See `generate_iiv`.
-#' @param ... arguments passed on to `simulate_fit` or dose_optimization_method
-#'   function.
+#' @param ... arguments passed on to the dose_optimization_method function.
 #'
 sim_subject <- function(
   data,

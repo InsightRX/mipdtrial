@@ -19,8 +19,7 @@
 #'   considered equivalent. Default: `0.05`.
 #' @param settings list of arguments to be used in dose update, e.g.
 #'   `dose_resolution`, `min_dose`, `max_dose`.
-#' @param ... arguments passed on to PKPDmap::get_map_estimates and/or
-#'   PKPDsim::sim
+#' @param ... arguments passed on to PKPDsim::sim via dose grid search
 #' @returns Returns a named list: `regimen`: the updated regimen;
 #'   `dose_update`: the dose number updated; `new_dose`: the selected dose;
 #'   `new_interval`: the selected interval; `additional_info`: the MAP
